@@ -1,6 +1,14 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from app.api import auth, functions, execute, components, execute_component, dashboards
+from app.api import (
+    auth,
+    functions,
+    execute,
+    components,
+    execute_component,
+    dashboards,
+    dashboard_components,
+)
 from app.database import engine, Base
 import logging
 
@@ -37,6 +45,7 @@ app.include_router(execute.router)
 app.include_router(components.router)
 app.include_router(execute_component.router)
 app.include_router(dashboards.router)
+app.include_router(dashboard_components.router)  # Dashboard-scoped component execution
 
 
 @app.get("/")
