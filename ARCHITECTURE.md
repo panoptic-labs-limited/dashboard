@@ -4,6 +4,72 @@
 
 A distributed dashboarding framework similar to Streamlit but with distributed compute capabilities. Users write dashboard definitions in Python, components execute server-side with strong isolation, and results are rendered in a web UI.
 
+## Key Design Decisions
+
+### 1. Dataclass Pattern for Components
+
+**Decision**: Use `ComponentMeta` metaclass to automatically apply `@dataclass(kw_only=True)` to all Component subclasses.
+
+**Rationale**:
+- Provides clean, Pythonic API - users define parameters as class fields without needing `@dataclass` decorator
+- Automatic constructor generation with keyword-only arguments
+- Parameters accessible via `self.param_name` in all methods
+- Type hints preserved for validation and introspection
+
+**Example**:
+```python
+class SalesChart(Component):
+    start_date: str
+    region: str
+
+    def load(self):
+        return fetch_sales(self.start_date, self.region)
+```
+
+### 2. Server-Side Execution Model
+
+**Decision**: All component stages (load/transform/render) execute on the function registry backend.
+
+**Rationale**:
+- Strong process isolation with resource limits (memory, CPU, timeout)
+- Centralized compute resources
+- Better security for untrusted code
+- Easier to scale horizontally
+- Consistent execution environment
+
+### 3. Dashboard-Scoped RESTful API
+
+**Decision**: Use dashboard-scoped endpoints like `/dashboard/{name}/component/{id}/render`.
+
+**Rationale**:
+- More RESTful design - resources properly scoped
+- Clear context for all operations
+- Better permission scoping and multi-tenancy
+- Easier to reason about component execution in dashboard context
+- Supports multiple execution modes (`?mode=raw`, `?mode=transformed`)
+
+### 4. Reactive Parameters
+
+**Decision**: Selectors bound to component parameters with automatic re-execution on changes.
+
+**Rationale**:
+- Declarative parameter binding
+- Automatic dependency tracking
+- Stateless components (functional approach)
+- Similar UX to Streamlit but with explicit dependencies
+
+### 5. Plotly as Primary Visualization Library
+
+**Decision**: Support Plotly figures, Vega-Lite specs, and Altair charts, with Plotly recommended.
+
+**Rationale**:
+- Plotly familiar to data analysts and data scientists
+- Rich interactive visualizations out of the box
+- Easy to use with pandas DataFrames
+- Auto-serialization to JSON for client rendering
+- Vega-Lite support for lightweight declarative specs
+- Altair support (compiles to Vega-Lite)
+
 ## Architecture Decisions
 
 Based on requirements:
@@ -50,22 +116,35 @@ Based on requirements:
 
 ### Base Component Class
 
-Every component has three stages:
+Every component has three stages and uses a clean dataclass pattern:
 
 ```python
-class Component:
-    def load(self, **params) -> Any:
-        """Load/fetch data from source"""
-        pass
+from viz import Component
 
-    def transform(self, data: Any, **params) -> Any:
+class MyComponent(Component):
+    # Parameters as class fields (automatically become constructor params)
+    param1: str
+    param2: int = 10  # Optional with default
+
+    def load(self) -> Any:
+        """Load/fetch data from source - access params via self"""
+        return fetch_data(self.param1, self.param2)
+
+    def transform(self, data: Any) -> Any:
         """Transform/process the loaded data"""
-        pass
+        return process(data)
 
-    def render(self, data: Any, **params) -> Union[dict, 'plotly.graph_objects.Figure']:
+    def render(self, data: Any) -> Union[dict, 'plotly.graph_objects.Figure']:
         """Render data as chart specification or Plotly figure"""
-        pass
+        import plotly.express as px
+        return px.bar(data, x="x", y="y")
 ```
+
+**Key Design Decision**: Components use the `ComponentMeta` metaclass which automatically applies `@dataclass(kw_only=True)` to all Component subclasses. This provides:
+- Clean parameter definition as class fields (no `@dataclass` decorator needed by users)
+- Automatic constructor generation with keyword-only arguments
+- Type hints preserved for validation
+- Access to parameters via `self.param_name` in all methods
 
 ### Execution Stages
 
@@ -241,20 +320,24 @@ The data source function is registered in the function registry and called by th
 
 ### Parameter Binding
 
-Components declare dependencies on selectors:
+Components declare parameters as class fields and access them via `self`:
 
 ```python
 class SalesChart(Component):
-    def load(self, report_date: str, region: str):
-        # Load sales data for given date and region
-        query = f"SELECT * FROM sales WHERE date = '{report_date}' AND region = '{region}'"
+    # Parameters as class fields
+    report_date: str
+    region: str
+
+    def load(self):
+        # Load sales data using self.report_date and self.region
+        query = f"SELECT * FROM sales WHERE date = '{self.report_date}' AND region = '{self.region}'"
         return execute_query(query)
 
-    def transform(self, data, **params):
+    def transform(self, data):
         # Transform data
         return process_sales_data(data)
 
-    def render(self, data, **params):
+    def render(self, data):
         # Return Plotly Express figure (recommended)
         import plotly.express as px
         return px.bar(data, x="product", y="sales")
@@ -277,12 +360,12 @@ region_selector = DropdownSelector(
     default="North"
 )
 
+# Bind selectors to component parameters via constructor
 sales_chart = Widget(
-    component=SalesChart(),
-    params={
-        "report_date": date_selector,
-        "region": region_selector
-    }
+    component=SalesChart(
+        report_date=date_selector,
+        region=region_selector
+    )
 )
 ```
 
@@ -465,17 +548,23 @@ POST /dashboards/{name}/update
 ```python
 from viz import Dashboard, Page, Section, Row, Column, Widget
 from viz import DateSelector, DropdownSelector, NumericInput
-from viz import Component, register
+from viz import Component, RegistryClient, register_component
+import plotly.express as px
 
-# Define a component
+# Define a component using the dataclass pattern
 class SalesChart(Component):
-    def load(self, start_date: str, end_date: str, region: str):
-        # Load data from database
+    # Parameters as class fields
+    start_date: str
+    end_date: str
+    region: str
+
+    def load(self):
+        # Load data from database - access params via self
         return db.query(f"""
             SELECT date, product, sales
             FROM sales
-            WHERE date BETWEEN '{start_date}' AND '{end_date}'
-            AND region = '{region}'
+            WHERE date BETWEEN '{self.start_date}' AND '{self.end_date}'
+            AND region = '{self.region}'
         """)
 
     def transform(self, data):
@@ -483,17 +572,28 @@ class SalesChart(Component):
         return aggregate_by_product(data)
 
     def render(self, data):
-        # Return Vega-Lite spec
-        return {
-            "mark": "bar",
-            "encoding": {
-                "x": {"field": "product", "type": "nominal"},
-                "y": {"field": "sales", "type": "quantitative"}
-            },
-            "data": {"values": data}
-        }
+        # Return Plotly figure (recommended)
+        return px.bar(data, x="product", y="sales")
 
-# Create dashboard
+        # Or return Vega-Lite spec
+        # return {
+        #     "mark": "bar",
+        #     "encoding": {
+        #         "x": {"field": "product", "type": "nominal"},
+        #         "y": {"field": "sales", "type": "quantitative"}
+        #     },
+        #     "data": {"values": data}
+        # }
+
+# Register component with registry
+client = RegistryClient(
+    base_url="http://localhost:8000",
+    username="myuser",
+    password="mypassword"
+)
+register_component(SalesChart, alias="sales_chart", client=client)
+
+# Create dashboard (layout components coming soon)
 dashboard = Dashboard(
     name="sales_dashboard",
     title="Sales Analytics Dashboard"
@@ -528,11 +628,12 @@ overview_page = Page(
                     width="2/3",
                     children=[
                         Widget(
-                            component=SalesChart(),
-                            params={
-                                "report_date": date_selector,
-                                "region": region_selector
-                            }
+                            # Bind selectors via constructor
+                            component=SalesChart(
+                                start_date=date_selector,
+                                end_date=date_selector,
+                                region=region_selector
+                            )
                         )
                     ]
                 )

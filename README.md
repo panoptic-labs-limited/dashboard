@@ -13,19 +13,21 @@ This is a monorepo containing:
 
 ## Features
 
-### Function Registry (Backend)
-- Component and function storage with version control
-- Process pool execution with strong isolation
-- Resource limits (memory, timeout, CPU)
-- JWT authentication
-- Execution history and metrics
-
 ### Viz Client Library
-- Declarative dashboard definitions
-- Component-based architecture (load/transform/render)
-- Reactive selectors and parameter binding
-- Flexible layout system (Dashboard/Page/Section/Row/Column)
-- Automatic registration with function registry
+- **Clean Dataclass Pattern**: Define component parameters as class fields - no `@dataclass` decorator needed
+- **Component-Based Architecture**: Load/transform/render pattern for separation of concerns
+- **Server-Side Execution**: All computation runs in isolated processes on the registry
+- **Multiple Visualization Formats**: Plotly (primary), Vega-Lite, Altair support
+- **Reactive Parameters**: Automatic re-execution when selector values change
+- **Flexible Layout System**: Dashboard/Page/Section/Row/Column hierarchy (in development)
+
+### Function Registry (Backend)
+- **Class-Based Components**: Store and execute Python component classes
+- **Stage-Based Execution**: Execute load, load+transform, or full render pipeline
+- **Process Pool Isolation**: Efficient execution with strong resource limits
+- **Dashboard-Scoped API**: RESTful design with `/dashboard/{name}/component/{id}/render`
+- **JWT Authentication**: Secure user isolation
+- **Execution History**: Track metrics and performance
 
 ## Architecture
 
@@ -77,24 +79,61 @@ cd ../client
 pip install -e .
 ```
 
-### 3. Create Your First Dashboard
+### 3. Create Your First Component
+
+```python
+from viz import Component, RegistryClient, register_component
+import plotly.express as px
+
+# Define component using dataclass pattern (no @dataclass decorator needed!)
+class SalesChart(Component):
+    # Parameters as class fields - automatically become constructor params
+    date: str
+    region: str
+
+    def load(self):
+        # Access params via self.param_name
+        return fetch_sales(self.date, self.region)
+
+    def transform(self, data):
+        return aggregate_data(data)
+
+    def render(self, data):
+        # Return Plotly figure (recommended)
+        return px.bar(data, x="product", y="sales")
+
+        # Or return Vega-Lite spec
+        # return {"mark": "bar", "encoding": {...}, "data": {"values": data}}
+
+# Register with the registry
+client = RegistryClient(
+    base_url="http://localhost:8000",
+    username="testuser",
+    password="testpassword123"
+)
+register_component(SalesChart, alias="sales_chart", client=client)
+```
+
+### 4. Build Dashboards (Coming Soon)
 
 ```python
 from viz import Dashboard, Page, Section, Row, Column, Widget
-from viz import DateSelector, Component
+from viz import DateSelector, DropdownSelector
 
-class SalesChart(Component):
-    def load(self, date: str):
-        return {"sales": 1000, "date": date}
-
-    def transform(self, data):
-        return data
-
-    def render(self, data):
-        return {"mark": "bar", "data": {"values": [data]}}
-
+# Layout components are in development
 dashboard = Dashboard(name="sales", title="Sales Dashboard")
-# ... add components
+
+date_selector = DateSelector(name="date", default="2024-01-01")
+region_selector = DropdownSelector(name="region", options=["North", "South"])
+
+# Bind selectors to component parameters
+dashboard.add_widget(
+    Widget(component=SalesChart(
+        date=date_selector,
+        region=region_selector
+    ))
+)
+
 dashboard.register()
 ```
 

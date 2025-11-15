@@ -1,22 +1,41 @@
-# Function Execution Service - Project Context
+# Viz - Distributed Dashboarding Framework - Project Context
 
 ## Project Summary
 
-Built a Python Function Execution Service that allows users to:
-- Store Python functions with aliases and metadata
-- Execute functions via REST API with strong isolation
-- Track execution metrics and history
-- Enforce resource limits (memory, timeout)
+Building a distributed dashboarding framework (like Streamlit but with distributed compute) that allows users to:
+- Define reactive dashboards with Python components
+- Execute components server-side with strong isolation
+- Create interactive visualizations with Plotly/Vega-Lite
+- Build reusable component libraries
+- Deploy dashboards with automatic parameter binding
 
 ## Current State
 
-✅ **Fully Functional MVP** - Production-ready with process pool optimization
+✅ **Backend Complete** - Function registry with component execution
+✅ **Client Library Core Complete** - Component base class with dataclass pattern
+🚧 **In Progress** - Layout components (Dashboard, Page, Section, Row, Column)
 
-### Performance Metrics
-- **Throughput**: 300 requests/second
-- **Response Time**: 164ms mean, 135ms median
-- **Success Rate**: 100%
-- **Execution Time**: <0.01ms (pure Python execution)
+### Key Design Decisions
+
+1. **Dataclass Pattern for Components**
+   - Components use class fields for parameters (no @dataclass needed)
+   - ComponentMeta metaclass auto-applies dataclass conversion
+   - Cleaner, more Pythonic API
+
+2. **Server-Side Execution**
+   - All component stages (load/transform/render) execute on server
+   - Returns serialized output (Plotly JSON, Vega-Lite specs)
+   - Strong process isolation with resource limits
+
+3. **Dashboard-Scoped API**
+   - RESTful design: `/dashboard/{name}/component/{id}/render`
+   - Clear context for all operations
+   - Better permission scoping
+
+4. **Reactive Parameters**
+   - Selectors bound to component parameters
+   - Automatic re-execution on selector changes
+   - Stateless components (functional approach)
 
 ## Architecture
 
@@ -177,23 +196,46 @@ MAX_TIMEOUT_SECONDS=60
 - 164ms mean response time (**83% faster**)
 - 100% success rate (no failures)
 
-## Recent Changes
+## Recent Changes (Session: 2025-11-15)
 
-1. **Switched to Process Pool** (`app/executor.py`)
-   - Replaced `multiprocessing.Process` with `ProcessPoolExecutor`
-   - Reuses worker processes instead of spawning new ones
-   - Massive performance improvement
+### Phase 1: Project Restructuring
+1. **Monorepo Structure**
+   - Created subprojects: registry/, client/, shared/, examples/
+   - Configured PyCharm source roots
+   - Set up proper .gitignore
 
-2. **Fixed Login Endpoint** (`app/api/auth.py`)
-   - Changed from HTTP Basic Auth to JSON body
-   - Added `LoginRequest` schema
+2. **Shared Package** (`viz_shared`)
+   - Complete type system (ExecutionStage, SelectorType, etc.)
+   - Comprehensive Pydantic schemas
+   - Utility functions for serialization
 
-3. **Fixed bcrypt Compatibility**
-   - Pinned `bcrypt==4.1.3` for Python 3.13 compatibility
+### Phase 2: Registry Enhancement
+3. **Enhanced Database Models**
+   - Component model with class-based components
+   - ComponentExecution model with stage tracking
+   - Dashboard model with JSON structure storage
 
-4. **Created PyCharm Run Configurations**
-   - Easy debugging with breakpoints
-   - One-click server start/stop
+4. **Enhanced Executor** (`executor.py`)
+   - Support for class-based components
+   - Stage-based execution (load, load_transform, load_transform_render)
+   - Auto-serialization of Plotly/Altair/Vega-Lite
+
+5. **Complete API Endpoints**
+   - Component CRUD: `/components/`
+   - Dashboard CRUD: `/dashboards/`
+   - Dashboard-scoped execution: `/dashboard/{name}/component/{id}/...`
+   - Selector data: `/dashboard/{name}/input/{selector}/data`
+
+### Phase 3: Client Library
+6. **Component Base Class** (`viz/core/component.py`)
+   - Dataclass pattern with ComponentMeta metaclass
+   - No @dataclass decorator needed for users
+   - Clean parameter definition via class fields
+
+7. **API Client** (`viz/api/client.py`)
+   - RegistryClient for authentication and CRUD
+   - Context manager support
+   - Auto-registration helpers
 
 ## Known Issues
 
