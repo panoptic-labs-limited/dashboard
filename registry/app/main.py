@@ -1,6 +1,6 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from app.api import auth, functions, execute
+from app.api import auth, functions, execute, components, execute_component, dashboards
 from app.database import engine, Base
 import logging
 
@@ -16,9 +16,9 @@ Base.metadata.create_all(bind=engine)
 
 # Create FastAPI app
 app = FastAPI(
-    title="Function Execution Service",
-    description="Execute Python functions via REST API with isolation and resource limits",
-    version="1.0.0"
+    title="Viz Function Registry",
+    description="Distributed dashboarding framework - Function and Component Registry with execution engine",
+    version="2.0.0"
 )
 
 # CORS middleware
@@ -34,14 +34,25 @@ app.add_middleware(
 app.include_router(auth.router)
 app.include_router(functions.router)
 app.include_router(execute.router)
+app.include_router(components.router)
+app.include_router(execute_component.router)
+app.include_router(dashboards.router)
 
 
 @app.get("/")
 def root():
     return {
-        "message": "Function Execution Service",
-        "version": "1.0.0",
-        "docs": "/docs"
+        "message": "Viz Function Registry",
+        "version": "2.0.0",
+        "description": "Distributed dashboarding framework with component execution",
+        "endpoints": {
+            "docs": "/docs",
+            "health": "/health",
+            "auth": "/auth",
+            "functions": "/functions",
+            "components": "/components",
+            "dashboards": "/dashboards"
+        }
     }
 
 
