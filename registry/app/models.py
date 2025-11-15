@@ -14,6 +14,8 @@ class User(Base):
     created_at = Column(DateTime, default=datetime.utcnow)
 
     functions = relationship("Function", back_populates="owner")
+    components = relationship("Component", back_populates="owner")
+    dashboards = relationship("Dashboard", back_populates="owner")
 
 
 class Function(Base):
@@ -57,3 +59,71 @@ class Execution(Base):
     completed_at = Column(DateTime)
 
     function = relationship("Function", back_populates="executions")
+
+
+class Component(Base):
+    __tablename__ = "components"
+
+    id = Column(Integer, primary_key=True, index=True)
+    alias = Column(String, unique=True, index=True, nullable=False)
+    class_name = Column(String, nullable=False)
+    source_code = Column(Text, nullable=False)
+    description = Column(Text)
+    owner_id = Column(Integer, ForeignKey("users.id"), nullable=False)
+
+    # Component metadata stored as JSON
+    parameters = Column(JSON, default=list)  # List of parameter definitions
+    metadata = Column(JSON, default=dict)  # Additional metadata
+
+    # Resource configuration
+    memory_limit_mb = Column(Integer, default=200)
+    timeout_seconds = Column(Integer, default=30)
+
+    # Timestamps
+    created_at = Column(DateTime, default=datetime.utcnow)
+    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+
+    owner = relationship("User", back_populates="components")
+    component_executions = relationship("ComponentExecution", back_populates="component")
+
+
+class ComponentExecution(Base):
+    __tablename__ = "component_executions"
+
+    id = Column(Integer, primary_key=True, index=True)
+    component_id = Column(Integer, ForeignKey("components.id"), nullable=False)
+
+    # Execution details
+    stage = Column(String, nullable=False)  # load, load_transform, load_transform_render
+    input_params = Column(JSON)
+    output = Column(JSON)
+    status = Column(String, nullable=False)  # success, error, timeout
+    error_message = Column(Text)
+
+    # Metrics
+    execution_time_ms = Column(Float)
+    memory_used_mb = Column(Float)
+
+    started_at = Column(DateTime, default=datetime.utcnow)
+    completed_at = Column(DateTime)
+
+    component = relationship("Component", back_populates="component_executions")
+
+
+class Dashboard(Base):
+    __tablename__ = "dashboards"
+
+    id = Column(Integer, primary_key=True, index=True)
+    name = Column(String, unique=True, index=True, nullable=False)
+    title = Column(String, nullable=False)
+    description = Column(Text)
+    owner_id = Column(Integer, ForeignKey("users.id"), nullable=False)
+
+    # Dashboard structure stored as JSON
+    structure = Column(JSON, nullable=False)
+
+    # Timestamps
+    created_at = Column(DateTime, default=datetime.utcnow)
+    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+
+    owner = relationship("User", back_populates="dashboards")
