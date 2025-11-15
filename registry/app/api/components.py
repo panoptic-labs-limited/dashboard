@@ -59,7 +59,7 @@ def create_component(
         source_code=component_data.source_code,
         description=component_data.description,
         parameters=[p.model_dump() for p in parameters],
-        metadata=component_data.metadata.model_dump() if component_data.metadata else {},
+        component_metadata=component_data.metadata.model_dump() if component_data.metadata else {},
         memory_limit_mb=component_data.memory_limit_mb,
         timeout_seconds=component_data.timeout_seconds,
         owner_id=current_user.id
@@ -137,7 +137,8 @@ def update_component(
     if "parameters" in update_data and update_data["parameters"]:
         update_data["parameters"] = [p.model_dump() for p in component_data.parameters]
     if "metadata" in update_data and update_data["metadata"]:
-        update_data["metadata"] = component_data.metadata.model_dump()
+        update_data["component_metadata"] = component_data.metadata.model_dump()
+        del update_data["metadata"]  # Remove the old key
 
     for field, value in update_data.items():
         setattr(component, field, value)

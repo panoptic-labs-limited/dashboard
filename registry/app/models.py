@@ -73,7 +73,7 @@ class Component(Base):
 
     # Component metadata stored as JSON
     parameters = Column(JSON, default=list)  # List of parameter definitions
-    metadata = Column(JSON, default=dict)  # Additional metadata
+    component_metadata = Column(JSON, default=dict)  # Additional metadata (renamed from 'metadata' to avoid SQLAlchemy conflict)
 
     # Resource configuration
     memory_limit_mb = Column(Integer, default=200)
