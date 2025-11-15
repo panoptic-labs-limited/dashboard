@@ -8,7 +8,7 @@ A distributed dashboarding framework similar to Streamlit but with distributed c
 
 Based on requirements:
 - **Execution Model**: Server-side (all stages in function registry)
-- **Render Output**: JSON/dict with chart spec (e.g., Vega-Lite)
+- **Render Output**: Flexible - Plotly figures (primary), Vega-Lite specs, or custom JSON/dict
 - **Data Flow**: Reactive parameters (automatic re-execution)
 - **State Model**: Stateless (functional)
 
@@ -62,8 +62,8 @@ class Component:
         """Transform/process the loaded data"""
         pass
 
-    def render(self, data: Any, **params) -> dict:
-        """Render data as JSON chart spec (Vega-Lite, etc.)"""
+    def render(self, data: Any, **params) -> Union[dict, 'plotly.graph_objects.Figure']:
+        """Render data as chart specification or Plotly figure"""
         pass
 ```
 
@@ -73,6 +73,58 @@ Callers can specify which stages to execute:
 - `"load"` - Only execute load, return raw data
 - `"load_transform"` - Execute load + transform, return processed data
 - `"load_transform_render"` - Execute all stages, return chart spec (default)
+
+### Render Output Formats
+
+The `render()` method can return multiple formats:
+
+1. **Plotly Figures** (Recommended for data analysts)
+   ```python
+   import plotly.express as px
+   import plotly.graph_objects as go
+
+   # Using Plotly Express
+   return px.bar(df, x="category", y="value")
+
+   # Using Graph Objects
+   return go.Figure(data=[go.Bar(x=["A", "B"], y=[1, 2])])
+   ```
+   - Automatically serialized to JSON using `plotly.io.to_json()`
+   - Supports all Plotly chart types
+   - Interactive by default
+
+2. **Vega-Lite Specs** (Lightweight, declarative)
+   ```python
+   return {
+       "mark": "bar",
+       "encoding": {
+           "x": {"field": "category", "type": "nominal"},
+           "y": {"field": "value", "type": "quantitative"}
+       },
+       "data": {"values": [...]}
+   }
+   ```
+
+3. **Altair Charts** (Compiles to Vega-Lite)
+   ```python
+   import altair as alt
+   return alt.Chart(df).mark_bar().encode(x="category", y="value")
+   ```
+   - Automatically converted to Vega-Lite JSON using `.to_dict()`
+
+4. **Custom JSON/Dict** (For custom visualizations)
+   ```python
+   return {
+       "type": "custom",
+       "data": [...],
+       "config": {...}
+   }
+   ```
+
+The executor will automatically detect the output type and serialize accordingly:
+- Plotly figures → `plotly.io.to_json(fig)`
+- Altair charts → `chart.to_dict()`
+- Dict → Already serializable
 
 ### Component Registration
 
@@ -203,15 +255,19 @@ class SalesChart(Component):
         return process_sales_data(data)
 
     def render(self, data, **params):
-        # Return Vega-Lite spec
-        return {
-            "mark": "bar",
-            "encoding": {
-                "x": {"field": "product", "type": "nominal"},
-                "y": {"field": "sales", "type": "quantitative"}
-            },
-            "data": {"values": data}
-        }
+        # Return Plotly Express figure (recommended)
+        import plotly.express as px
+        return px.bar(data, x="product", y="sales")
+
+        # Alternative: Return Vega-Lite spec
+        # return {
+        #     "mark": "bar",
+        #     "encoding": {
+        #         "x": {"field": "product", "type": "nominal"},
+        #         "y": {"field": "sales", "type": "quantitative"}
+        #     },
+        #     "data": {"values": data}
+        # }
 
 # Usage in dashboard
 date_selector = DateSelector(name="report_date", default="2024-01-01")
@@ -549,12 +605,15 @@ dashboard.register()  # Registers all components and dashboard structure
 ### Client Library
 - Pure Python
 - Minimal dependencies
+- Visualization: Plotly (primary), Altair (optional), Vega-Lite (optional)
 - Serialization: JSON
 - HTTP client: httpx
 
 ### UI Service (Future)
 - Frontend: React/Svelte
-- Chart rendering: Vega-Lite + react-vega
+- Chart rendering:
+  - Plotly.js (for Plotly figures)
+  - Vega-Lite + react-vega (for Vega-Lite specs)
 - State management: React Context / Zustand
 - WebSocket: socket.io
 

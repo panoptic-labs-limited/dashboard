@@ -9,6 +9,12 @@ setup(
     install_requires=[
         "httpx>=0.28.0",
         "pydantic>=2.0.0",
+        "plotly>=5.18.0",
+        "pandas>=2.0.0",
         "viz-shared>=0.1.0",
     ],
+    extras_require={
+        "altair": ["altair>=5.0.0"],
+        "dev": ["pytest>=7.0.0", "black>=23.0.0", "mypy>=1.0.0"],
+    },
 )
