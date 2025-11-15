@@ -2,7 +2,7 @@
 
 from datetime import datetime
 from typing import Any, Dict, List, Optional, Union
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, field_validator
 
 from .types import ExecutionStage, SelectorType, LayoutType, RenderOutputType
 
@@ -61,15 +61,24 @@ class ComponentResponse(BaseModel):
     source_code: str
     description: Optional[str] = None
     parameters: List[ComponentParameter]
-    metadata: Optional[ComponentMetadata] = None
+    metadata: Optional[ComponentMetadata] = Field(None, validation_alias="component_metadata")
     owner_id: int
     memory_limit_mb: int
     timeout_seconds: int
     created_at: datetime
     updated_at: datetime
 
+    @field_validator('metadata', mode='before')
+    @classmethod
+    def validate_metadata(cls, v):
+        """Convert empty dict to None for metadata field."""
+        if v == {} or v is None:
+            return None
+        return v
+
     class Config:
         from_attributes = True
+        populate_by_name = True  # Allow populating by field name or alias
 
 
 # ============================================================================
