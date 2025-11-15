@@ -1,5 +1,6 @@
 """Page layout component."""
 
+import uuid
 from typing import List, Optional
 from dataclasses import dataclass, field
 
@@ -24,10 +25,12 @@ class Page:
     title: str
     sections: List = field(default_factory=list)
     description: Optional[str] = None
+    id: str = field(default_factory=lambda: f"page_{uuid.uuid4().hex[:8]}")
 
     def to_dict(self) -> dict:
         """Serialize to dictionary for dashboard structure."""
         return {
+            "id": self.id,
             "type": "page",
             "title": self.title,
             "description": self.description,

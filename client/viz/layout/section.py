@@ -1,7 +1,8 @@
 """Section layout component."""
 
+import uuid
 from typing import Optional, Union, List
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 
 
 @dataclass
@@ -22,6 +23,7 @@ class Section:
     layout: Union['Row', 'Column', List]
     title: Optional[str] = None
     collapsible: bool = False
+    id: str = field(default_factory=lambda: f"section_{uuid.uuid4().hex[:8]}")
 
     def to_dict(self) -> dict:
         """Serialize to dictionary for dashboard structure."""
@@ -41,6 +43,7 @@ class Section:
             layout_dict = self.layout
 
         return {
+            "id": self.id,
             "type": "section",
             "title": self.title,
             "collapsible": self.collapsible,
