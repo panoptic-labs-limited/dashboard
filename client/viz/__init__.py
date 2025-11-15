@@ -6,16 +6,28 @@ __version__ = "0.1.0"
 from .core import Component, DataSourceComponent, register_component, auto_register_components
 from .api import RegistryClient
 
-# Layout components (to be added)
-# from .layout import Dashboard, Page, Section, Row, Column, Widget
+# Layout components
+from .layout import Dashboard, Page, Section, Row, Column, Widget, WidthSpec
 
-# Selectors (to be added)
-# from .selectors import DateSelector, DropdownSelector, TextInput, NumericInput
+# Selectors
+from .selectors import DateSelector, DropdownSelector
 
 __all__ = [
+    # Core
     "Component",
     "DataSourceComponent",
     "register_component",
     "auto_register_components",
     "RegistryClient",
+    # Layout
+    "Dashboard",
+    "Page",
+    "Section",
+    "Row",
+    "Column",
+    "Widget",
+    "WidthSpec",
+    # Selectors
+    "DateSelector",
+    "DropdownSelector",
 ]
