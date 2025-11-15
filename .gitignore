@@ -1,0 +1,38 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+venv/
+env/
+ENV/
+.env
+.venv
+*.egg-info/
+dist/
+build/
+
+# Databases
+*.db
+*.sqlite3
+
+# IDEs
+.DS_Store
+.idea/
+.vscode/
+
+# Logs
+*.log
+
+# Alembic
+alembic/versions/*.py
+!alembic/versions/__init__.py
+
+# Node (for future UI service)
+node_modules/
+.next/
+out/
+
+# Docker
+.dockerignore

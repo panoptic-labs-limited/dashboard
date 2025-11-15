@@ -1,0 +1,5 @@
+{
+  "alias": "add_numbers",
+  "code": "def add_numbers(a, b):\n    return a + b",
+  "description": "Adds two numbers"
+}
