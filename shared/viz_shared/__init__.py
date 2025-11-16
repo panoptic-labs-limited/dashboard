@@ -53,6 +53,7 @@ from .schemas import (
     DashboardResponse,
     SelectorValueUpdate,
     DashboardRenderRequest,
+    WidgetRenderRequest,
     WidgetRenderResult,
     DashboardRenderResponse,
 )
@@ -112,6 +113,7 @@ __all__ = [
     "DashboardResponse",
     "SelectorValueUpdate",
     "DashboardRenderRequest",
+    "WidgetRenderRequest",
     "WidgetRenderResult",
     "DashboardRenderResponse",
     # Utilities

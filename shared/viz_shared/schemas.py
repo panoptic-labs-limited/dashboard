@@ -311,6 +311,11 @@ class DashboardRenderRequest(BaseModel):
     selector_values: Dict[str, Any] = Field(default_factory=dict)
 
 
+class WidgetRenderRequest(BaseModel):
+    """Request to render a single widget."""
+    selector_values: Dict[str, Any] = Field(default_factory=dict)
+
+
 class WidgetRenderResult(BaseModel):
     """Result of rendering a single widget."""
     widget_id: str

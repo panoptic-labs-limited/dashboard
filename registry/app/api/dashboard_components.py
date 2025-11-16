@@ -8,6 +8,7 @@ from app.database import get_db
 from app.models import User, Dashboard, Component
 from app.auth import get_current_user
 from app.executor import executor
+from viz_shared import WidgetRenderRequest
 
 router = APIRouter(prefix="/dashboard", tags=["dashboard-components"])
 
@@ -74,12 +75,17 @@ def _find_selector_in_dashboard(dashboard_structure: dict, selector_name: str) -
 def render_component(
     dashboard_name: str,
     widget_id: str,
-    params: Dict[str, Any] = {},
+    request: WidgetRenderRequest,
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db)
 ):
     """
     Render a component (full execution: load → transform → render).
+
+    Args:
+        dashboard_name: Name of the dashboard
+        widget_id: ID of the widget to render
+        request: Widget render request containing selector values
 
     Returns the final rendered output (Plotly figure, Vega-Lite spec, etc.)
     """
@@ -116,16 +122,30 @@ def render_component(
             detail=f"Component '{component_alias}' not found"
         )
 
-    # Merge widget params with provided params
+    # Resolve parameter bindings from widget params
     widget_params = widget.get("params", {})
-    final_params = {**widget_params, **params}
+    resolved_params = {}
+
+    for param_name, param_value in widget_params.items():
+        if isinstance(param_value, dict) and param_value.get("type") == "selector":
+            # Parameter is bound to a selector
+            selector_name = param_value.get("name")
+            if selector_name in request.selector_values:
+                resolved_params[param_name] = request.selector_values[selector_name]
+            # If selector value not provided, skip (don't include in params)
+        elif isinstance(param_value, dict) and param_value.get("type") == "literal":
+            # Literal value wrapped in binding structure
+            resolved_params[param_name] = param_value.get("value")
+        else:
+            # Regular parameter value (backward compatibility)
+            resolved_params[param_name] = param_value
 
     # Execute component (full render)
     status_result, result_data = executor.execute_component(
         code=component.source_code,
         class_name=component.class_name,
         stage="load_transform_render",
-        params=final_params,
+        params=resolved_params,
         timeout_seconds=component.timeout_seconds,
         memory_limit_mb=component.memory_limit_mb
     )

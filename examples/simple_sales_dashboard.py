@@ -27,12 +27,21 @@ class SalesChart(Component):
 
     def load(self):
         """Load mock sales data."""
-        # Mock data - in real scenario this would query a database
+        # Mock data - varies by region to demonstrate reactivity
+        # In real scenario this would query a database
+        region_multipliers = {
+            "North": 1.0,
+            "South": 1.3,
+            "East": 0.8,
+            "West": 1.1
+        }
+        multiplier = region_multipliers.get(self.region, 1.0)
+
         return [
-            {"product": "Widget A", "sales": 1000, "region": self.region, "date": self.date},
-            {"product": "Widget B", "sales": 1500, "region": self.region, "date": self.date},
-            {"product": "Widget C", "sales": 800, "region": self.region, "date": self.date},
-            {"product": "Widget D", "sales": 1200, "region": self.region, "date": self.date},
+            {"product": "Widget A", "sales": int(1000 * multiplier), "region": self.region, "date": self.date},
+            {"product": "Widget B", "sales": int(1500 * multiplier), "region": self.region, "date": self.date},
+            {"product": "Widget C", "sales": int(800 * multiplier), "region": self.region, "date": self.date},
+            {"product": "Widget D", "sales": int(1200 * multiplier), "region": self.region, "date": self.date},
         ]
 
     def transform(self, data):
@@ -63,10 +72,20 @@ class SalesMetrics(Component):
 
     def load(self):
         """Load mock metrics."""
+        # Vary totals by region
+        region_multipliers = {
+            "North": 1.0,
+            "South": 1.3,
+            "East": 0.8,
+            "West": 1.1
+        }
+        multiplier = region_multipliers.get(self.region, 1.0)
+        total = int(4500 * multiplier)
+
         return {
-            "total_sales": 4500,
+            "total_sales": total,
             "num_products": 4,
-            "avg_sale": 1125,
+            "avg_sale": int(total / 4),
             "region": self.region,
             "date": self.date
         }
