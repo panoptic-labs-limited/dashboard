@@ -1,5 +1,6 @@
 """Row layout component."""
 
+import uuid
 from typing import List
 from dataclasses import dataclass, field
 
@@ -19,14 +20,17 @@ class Row:
         ])
     """
     columns: List = field(default_factory=list)
+    id: str = field(default_factory=lambda: f"row_{uuid.uuid4().hex[:8]}")
 
-    def __init__(self, columns: List = None):
+    def __init__(self, columns: List = None, id: str = None):
         """Initialize with list of columns."""
         self.columns = columns or []
+        self.id = id or f"row_{uuid.uuid4().hex[:8]}"
 
     def to_dict(self) -> dict:
         """Serialize to dictionary for dashboard structure."""
         return {
+            "id": self.id,
             "type": "row",
             "children": [
                 col.to_dict() if hasattr(col, 'to_dict') else col

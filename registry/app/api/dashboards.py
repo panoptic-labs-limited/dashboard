@@ -245,14 +245,17 @@ def _execute_widget(
         for param_name, param_value in params.items():
             if isinstance(param_value, dict) and param_value.get("type") == "selector":
                 # Parameter is bound to a selector
-                selector_name = param_value.get("selector_name")
+                selector_name = param_value.get("name")  # Changed from "selector_name" to "name"
                 if selector_name in selector_values:
                     resolved_params[param_name] = selector_values[selector_name]
                 else:
                     # Selector value not provided, skip or use default
                     pass
+            elif isinstance(param_value, dict) and param_value.get("type") == "literal":
+                # Literal value wrapped in binding structure
+                resolved_params[param_name] = param_value.get("value")
             else:
-                # Regular parameter value
+                # Regular parameter value (backward compatibility)
                 resolved_params[param_name] = param_value
 
         # Execute component (full render)

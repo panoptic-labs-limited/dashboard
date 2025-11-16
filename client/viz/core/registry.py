@@ -67,7 +67,7 @@ def register_component(
     ]
 
     # Register with the registry
-    return client.create_component(
+    result = client.create_component(
         alias=alias,
         class_name=class_name,
         source_code=source_code,
@@ -77,6 +77,11 @@ def register_component(
         memory_limit_mb=memory_limit_mb,
         timeout_seconds=timeout_seconds
     )
+
+    # Store the registry alias on the class for later reference
+    component_class._registry_alias = alias
+
+    return result
 
 
 def auto_register_components(

@@ -1,5 +1,6 @@
 """Widget wrapper for components."""
 
+import uuid
 from typing import TYPE_CHECKING, Optional
 
 if TYPE_CHECKING:
@@ -23,16 +24,18 @@ class Widget:
         )
     """
 
-    def __init__(self, component: 'Component', title: Optional[str] = None):
+    def __init__(self, component: 'Component', title: Optional[str] = None, id: Optional[str] = None):
         """
         Initialize widget with a component instance.
 
         Args:
             component: Component instance with parameters bound
             title: Optional title to display above the widget
+            id: Optional unique ID for the widget
         """
         self.component = component
         self.title = title or component.__class__.__name__
+        self.id = id or f"widget_{uuid.uuid4().hex[:8]}"
 
     def to_dict(self) -> dict:
         """Serialize to dictionary for dashboard structure."""
@@ -61,6 +64,7 @@ class Widget:
                     }
 
         return {
+            "id": self.id,
             "type": "widget",
             "title": self.title,
             "component_alias": component_alias,

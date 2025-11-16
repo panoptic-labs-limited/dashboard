@@ -90,10 +90,27 @@ def _execute_component(
         stdout_capture = io.StringIO()
         stderr_capture = io.StringIO()
 
+        # Create a minimal Component base class for the execution context
+        from abc import ABC, abstractmethod
+        class Component(ABC):
+            """Minimal Component base class for execution context."""
+            @abstractmethod
+            def load(self):
+                pass
+
+            @abstractmethod
+            def transform(self, data):
+                pass
+
+            @abstractmethod
+            def render(self, data):
+                pass
+
         # Create restricted globals with common modules
         restricted_globals = {
             "__builtins__": __builtins__,
             "json": json,
+            "Component": Component,  # Provide Component base class
         }
 
         # Try to import common data/viz libraries if available
@@ -121,26 +138,31 @@ def _execute_component(
             if component_class is None:
                 raise ValueError(f"Component class '{class_name}' not found in code")
 
-            # Instantiate the component
-            component = component_class()
+            # Apply dataclass if the class has annotations (field definitions)
+            if hasattr(component_class, '__annotations__') and component_class.__annotations__:
+                from dataclasses import dataclass
+                component_class = dataclass(component_class)
+
+            # Instantiate the component with parameters
+            component = component_class(**params)
 
             # Execute based on stage
             start_time = time.time()
 
             if stage == "load":
                 # Only execute load
-                output = component.load(**params)
+                output = component.load()
 
             elif stage == "load_transform":
                 # Execute load and transform
-                loaded_data = component.load(**params)
-                output = component.transform(loaded_data, **params)
+                loaded_data = component.load()
+                output = component.transform(loaded_data)
 
             else:  # load_transform_render
                 # Execute all three stages
-                loaded_data = component.load(**params)
-                transformed_data = component.transform(loaded_data, **params)
-                output = component.render(transformed_data, **params)
+                loaded_data = component.load()
+                transformed_data = component.transform(loaded_data)
+                output = component.render(transformed_data)
 
                 # Serialize render output
                 output = _serialize_render_output(output)

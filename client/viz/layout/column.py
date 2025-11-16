@@ -1,5 +1,6 @@
 """Column layout component."""
 
+import uuid
 from typing import List, Union, Optional, Literal
 from dataclasses import dataclass, field
 
@@ -25,10 +26,12 @@ class Column:
     """
     children: List = field(default_factory=list)
     width: WidthSpec = "1/1"
+    id: str = field(default_factory=lambda: f"column_{uuid.uuid4().hex[:8]}")
 
     def to_dict(self) -> dict:
         """Serialize to dictionary for dashboard structure."""
         return {
+            "id": self.id,
             "type": "column",
             "width": self.width,
             "children": [

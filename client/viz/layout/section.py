@@ -27,25 +27,24 @@ class Section:
 
     def to_dict(self) -> dict:
         """Serialize to dictionary for dashboard structure."""
-        # Handle layout
+        # Convert layout to children array
+        children = []
+
         if hasattr(self.layout, 'to_dict'):
-            layout_dict = self.layout.to_dict()
+            # Single Row or Column
+            children = [self.layout.to_dict()]
         elif isinstance(self.layout, list):
-            # List of children
-            layout_dict = {
-                "type": "container",
-                "children": [
-                    child.to_dict() if hasattr(child, 'to_dict') else child
-                    for child in self.layout
-                ]
-            }
-        else:
-            layout_dict = self.layout
+            # List of Row/Column objects
+            children = [
+                child.to_dict() if hasattr(child, 'to_dict') else child
+                for child in self.layout
+            ]
 
         return {
             "id": self.id,
             "type": "section",
             "title": self.title,
             "collapsible": self.collapsible,
-            "layout": layout_dict
+            "collapsed": False,
+            "children": children
         }

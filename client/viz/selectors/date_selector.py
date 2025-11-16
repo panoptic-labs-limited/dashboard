@@ -1,7 +1,8 @@
 """Date selector component."""
 
+import uuid
 from typing import Optional, Callable
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 
 
 @dataclass
@@ -26,6 +27,7 @@ class DateSelector:
     label: Optional[str] = None
     default: Optional[str] = None
     data_source: Optional[Callable] = None
+    id: str = field(default_factory=lambda: f"selector_{uuid.uuid4().hex[:8]}")
 
     def __post_init__(self):
         """Set label to name if not provided."""
@@ -34,21 +36,24 @@ class DateSelector:
 
     def to_dict(self) -> dict:
         """Serialize to dictionary for dashboard structure."""
-        result = {
-            "type": "selector",
-            "selector_type": "date",
+        selector_config = {
             "name": self.name,
             "label": self.label,
-            "default": self.default
+            "selector_type": "date",
+            "default": self.default,
+            "required": True
         }
 
         if self.data_source:
             # If there's a data source function, include reference
             # (the function itself should be registered separately)
-            result["data_source"] = getattr(
-                self.data_source,
-                '_registry_alias',
-                self.data_source.__name__
-            )
+            selector_config["data_source"] = {
+                "alias": getattr(self.data_source, '_registry_alias', self.data_source.__name__),
+                "params": {}
+            }
 
-        return result
+        return {
+            "id": self.id,
+            "type": "selector",
+            "selector": selector_config
+        }

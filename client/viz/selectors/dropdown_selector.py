@@ -1,7 +1,8 @@
 """Dropdown selector component."""
 
+import uuid
 from typing import Optional, List, Callable, Union
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 
 
 @dataclass
@@ -44,6 +45,7 @@ class DropdownSelector:
     data_source: Optional[Callable] = None
     default: Optional[Union[str, List[str]]] = None
     multi: bool = False
+    id: str = field(default_factory=lambda: f"selector_{uuid.uuid4().hex[:8]}")
 
     def __post_init__(self):
         """Validate and set defaults."""
@@ -58,23 +60,28 @@ class DropdownSelector:
 
     def to_dict(self) -> dict:
         """Serialize to dictionary for dashboard structure."""
-        result = {
-            "type": "selector",
-            "selector_type": "dropdown",
+        # Determine selector type based on multi flag
+        selector_type = "multi_select" if self.multi else "dropdown"
+
+        selector_config = {
             "name": self.name,
             "label": self.label,
-            "multi": self.multi,
-            "default": self.default
+            "selector_type": selector_type,
+            "default": self.default,
+            "required": True
         }
 
         if self.options:
-            result["options"] = self.options
+            selector_config["options"] = self.options
         elif self.data_source:
             # If there's a data source function, include reference
-            result["data_source"] = getattr(
-                self.data_source,
-                '_registry_alias',
-                self.data_source.__name__
-            )
+            selector_config["data_source"] = {
+                "alias": getattr(self.data_source, '_registry_alias', self.data_source.__name__),
+                "params": {}
+            }
 
-        return result
+        return {
+            "id": self.id,
+            "type": "selector",
+            "selector": selector_config
+        }
