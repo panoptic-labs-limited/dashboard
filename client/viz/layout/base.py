@@ -16,7 +16,6 @@ from pydantic import (
     BaseModel, Field, ConfigDict,
     field_validator
 )
-from abc import ABC, abstractmethod
 from enum import Enum
 import uuid
 
@@ -25,7 +24,7 @@ import uuid
 # Base Classes
 # ============================================================================
 
-class LayoutNode(BaseModel, ABC):
+class LayoutNode(BaseModel):
     """Base class for all layout nodes."""
 
     model_config = ConfigDict(
@@ -36,11 +35,6 @@ class LayoutNode(BaseModel, ABC):
 
     id: str = Field(default_factory=lambda: f"layout_{uuid.uuid4().hex[:8]}")
     type: str = Field(..., description="Discriminator for union types")
-
-    @abstractmethod
-    def accept(self, visitor: 'LayoutVisitor') -> Any:
-        """Visitor pattern for traversal."""
-        pass
 
 
 T = TypeVar('T', bound=LayoutNode)
@@ -156,9 +150,6 @@ class Widget(LayoutNode):
     # Widget-specific configuration
     config: dict[str, Any] = Field(default_factory=dict)
 
-    def accept(self, visitor: 'LayoutVisitor') -> Any:
-        return visitor.visit_widget(self)
-
 
 class Selector(LayoutNode):
     """
@@ -176,9 +167,6 @@ class Selector(LayoutNode):
 
     # Selector-specific configuration
     config: dict[str, Any] = Field(default_factory=dict)
-
-    def accept(self, visitor: 'LayoutVisitor') -> Any:
-        return visitor.visit_selector(self)
 
 
 # ============================================================================
@@ -205,9 +193,6 @@ class Row(Container[RowChild]):
     gap: Optional[str] = Field(None, description="Gap between children (CSS)")
     align: Optional[Literal["start", "center", "end", "stretch"]] = None
 
-    def accept(self, visitor: 'LayoutVisitor') -> Any:
-        return visitor.visit_row(self)
-
 
 class Column(Container[ColumnChild]):
     """
@@ -221,9 +206,6 @@ class Column(Container[ColumnChild]):
     width: ColumnWidth = ColumnWidth.FULL
     gap: Optional[str] = Field(None, description="Gap between children (CSS)")
 
-    def accept(self, visitor: 'LayoutVisitor') -> Any:
-        return visitor.visit_column(self)
-
 
 class Tab(Container[TabChild]):
     """
@@ -236,9 +218,6 @@ class Tab(Container[TabChild]):
     title: str
     icon: Optional[str] = None
     disabled: bool = False
-
-    def accept(self, visitor: 'LayoutVisitor') -> Any:
-        return visitor.visit_tab(self)
 
 
 class Tabs(Container[Tab]):
@@ -254,9 +233,6 @@ class Tabs(Container[Tab]):
         description="ID of default active tab"
     )
 
-    def accept(self, visitor: 'LayoutVisitor') -> Any:
-        return visitor.visit_tabs(self)
-
 
 class Section(Container[SectionChild]):
     """
@@ -270,9 +246,6 @@ class Section(Container[SectionChild]):
     collapsible: bool = False
     collapsed: bool = False
 
-    def accept(self, visitor: 'LayoutVisitor') -> Any:
-        return visitor.visit_section(self)
-
 
 class Page(Container[PageChild]):
     """
@@ -285,9 +258,6 @@ class Page(Container[PageChild]):
     title: str
     description: Optional[str] = None
     icon: Optional[str] = None
-
-    def accept(self, visitor: 'LayoutVisitor') -> Any:
-        return visitor.visit_page(self)
 
 
 class Dashboard(Container[Page]):
@@ -309,9 +279,6 @@ class Dashboard(Container[Page]):
         if not v:
             raise ValueError("Dashboard must have at least one page")
         return v
-
-    def accept(self, visitor: 'LayoutVisitor') -> Any:
-        return visitor.visit_dashboard(self)
 
 
 # ============================================================================
@@ -337,47 +304,3 @@ Column.model_rebuild()
 Tab.model_rebuild()
 Section.model_rebuild()
 Page.model_rebuild()
-
-
-# ============================================================================
-# Visitor Pattern for Traversal
-# ============================================================================
-
-class LayoutVisitor(ABC):
-    """Visitor interface for traversing layout tree."""
-
-    @abstractmethod
-    def visit_dashboard(self, node: Dashboard) -> Any:
-        pass
-
-    @abstractmethod
-    def visit_page(self, node: Page) -> Any:
-        pass
-
-    @abstractmethod
-    def visit_section(self, node: Section) -> Any:
-        pass
-
-    @abstractmethod
-    def visit_tabs(self, node: Tabs) -> Any:
-        pass
-
-    @abstractmethod
-    def visit_tab(self, node: Tab) -> Any:
-        pass
-
-    @abstractmethod
-    def visit_row(self, node: Row) -> Any:
-        pass
-
-    @abstractmethod
-    def visit_column(self, node: Column) -> Any:
-        pass
-
-    @abstractmethod
-    def visit_widget(self, node: Widget) -> Any:
-        pass
-
-    @abstractmethod
-    def visit_selector(self, node: Selector) -> Any:
-        pass
