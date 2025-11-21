@@ -7,7 +7,10 @@ from .core import Component, DataSourceComponent, register_component, auto_regis
 from .api import RegistryClient
 
 # Layout components
-from .layout import Dashboard, Page, Section, Row, Column, Widget, WidthSpec
+from .layout import (
+    Dashboard, Page, Section, Row, Column, Widget, Selector,
+    Tabs, Tab, LayoutBuilder as L, ColumnWidth, WidgetType, SelectorType
+)
 
 # Selectors
 from .selectors import DateSelector, DropdownSelector
@@ -26,7 +29,13 @@ __all__ = [
     "Row",
     "Column",
     "Widget",
-    "WidthSpec",
+    "Selector",
+    "Tabs",
+    "Tab",
+    "L",
+    "ColumnWidth",
+    "WidgetType",
+    "SelectorType",
     # Selectors
     "DateSelector",
     "DropdownSelector",
