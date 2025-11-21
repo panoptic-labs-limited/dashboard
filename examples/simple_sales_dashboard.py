@@ -3,15 +3,16 @@ Simple Sales Dashboard Example
 
 Demonstrates:
 - Component definition with dataclass pattern
-- Dashboard structure with layout components
-- Selector binding to component parameters
+- Dashboard structure with new Pydantic layout system
+- Fluent builder API with LayoutBuilder (L)
+- Type-safe layout construction with enums
 - Registration with the function registry
 """
 
 from viz import (
     Component,
-    Dashboard, Page, Section, Row, Column, Widget,
-    DateSelector, DropdownSelector,
+    L,  # LayoutBuilder fluent API
+    WidgetType, SelectorType, ColumnWidth,
     RegistryClient, register_component
 )
 import plotly.express as px
@@ -130,104 +131,119 @@ def main():
     register_component(SalesMetrics, alias="sales_metrics", client=client)
     print("✓ Registered SalesMetrics component")
 
-    # Create selectors
-    print("\nCreating selectors...")
-    date_selector = DateSelector(
-        name="report_date",
-        label="Report Date",
-        default="2024-01-01"
-    )
-
-    region_selector = DropdownSelector(
-        name="region",
-        label="Region",
-        options=["North", "South", "East", "West"],
-        default="North"
-    )
-    print("✓ Created selectors")
-
-    # Create dashboard structure
+    # Create dashboard structure using fluent builder API
     print("\nBuilding dashboard structure...")
-    dashboard = Dashboard(
-        name="sales_dashboard",
-        title="Sales Analytics Dashboard",
-        description="Simple sales dashboard demonstrating Viz framework"
-    )
-
-    # Create page with layout
-    overview_page = Page(
-        title="Overview",
-        description="Sales overview and metrics",
-        sections=[
-            Section(
-                title="Controls",
-                layout=Row([
-                    Column(
-                        width="1/2",
-                        children=[date_selector]
-                    ),
-                    Column(
-                        width="1/2",
-                        children=[region_selector]
-                    )
-                ])
-            ),
-            Section(
-                title="Metrics",
-                layout=Row([
-                    Column(
-                        width="1/1",
-                        children=[
-                            Widget(
-                                component=SalesMetrics(
-                                    region=region_selector,
-                                    date=date_selector
-                                ),
-                                title="Sales Summary"
-                            )
-                        ]
-                    )
-                ])
-            ),
-            Section(
-                title="Sales Chart",
-                layout=Row([
-                    Column(
-                        width="1/1",
-                        children=[
-                            Widget(
-                                component=SalesChart(
-                                    region=region_selector,
-                                    date=date_selector
-                                ),
-                                title="Sales by Product"
-                            )
-                        ]
-                    )
-                ])
+    dashboard = (
+        L.dashboard(
+            title="Sales Analytics Dashboard",
+            description="Simple sales dashboard demonstrating new Viz Pydantic layout system"
+        )
+        .add(
+            L.page(
+                title="Overview",
+                description="Sales overview and metrics"
             )
-        ]
+            .add(
+                # Controls Section
+                L.section(title="Controls")
+                .add(
+                    L.row(gap="16px")
+                    .add(
+                        L.column(width=ColumnWidth.HALF)
+                        .add(
+                            L.selector(
+                                selector_type=SelectorType.DATE,
+                                name="date",
+                                label="Report Date",
+                                default="2024-01-01"
+                            )
+                        )
+                    )
+                    .add(
+                        L.column(width=ColumnWidth.HALF)
+                        .add(
+                            L.selector(
+                                selector_type=SelectorType.DROPDOWN,
+                                name="region",
+                                label="Region",
+                                options=["North", "South", "East", "West"],
+                                default="North"
+                            )
+                        )
+                    )
+                )
+            )
+            .add(
+                # Metrics Section
+                L.section(title="Metrics")
+                .add(
+                    L.row()
+                    .add(
+                        L.column(width=ColumnWidth.FULL)
+                        .add(
+                            L.widget(
+                                widget_type=WidgetType.METRIC,
+                                title="Sales Summary",
+                                component_alias="sales_metrics",
+                                params={
+                                    "region": "region",  # Binds to region selector
+                                    "date": "date"       # Binds to date selector
+                                }
+                            )
+                        )
+                    )
+                )
+            )
+            .add(
+                # Sales Chart Section
+                L.section(title="Sales Chart")
+                .add(
+                    L.row()
+                    .add(
+                        L.column(width=ColumnWidth.FULL)
+                        .add(
+                            L.widget(
+                                widget_type=WidgetType.CHART,
+                                title="Sales by Product",
+                                component_alias="sales_chart",
+                                params={
+                                    "region": "region",  # Binds to region selector
+                                    "date": "date"       # Binds to date selector
+                                }
+                            )
+                        )
+                    )
+                )
+            )
+        )
     )
-
-    dashboard.add_page(overview_page)
     print("✓ Built dashboard structure")
 
-    # Register dashboard
-    print("\nRegistering dashboard...")
-    result = dashboard.register(client)
-    print(f"✓ Dashboard registered successfully!")
-    print(f"  ID: {result.get('id')}")
-    print(f"  Name: {result.get('name')}")
-    print(f"  Title: {result.get('title')}")
+    # Display dashboard structure
+    print("\nDashboard structure created:")
+    print(f"  Title: {dashboard.title}")
+    print(f"  Pages: {len(dashboard.children)}")
+    print(f"  Dashboard ID: {dashboard.id}")
+
+    # Serialize to JSON for inspection
+    dashboard_json = dashboard.model_dump_json(indent=2)
+    print(f"\nDashboard JSON structure preview (first 500 chars):")
+    print(dashboard_json[:500] + "...")
 
     print("\n" + "="*60)
-    print("SUCCESS! Dashboard created and registered.")
+    print("SUCCESS! Dashboard structure created with new Pydantic system.")
     print("="*60)
-    print(f"\nDashboard '{dashboard.name}' is ready!")
-    print(f"API Base: http://localhost:8000")
-    print(f"\nNext steps:")
-    print(f"- View dashboard: GET /dashboards/{dashboard.name}")
-    print(f"- Execute component: POST /dashboard/{dashboard.name}/component/{{widget_id}}/render")
+    print(f"\nDashboard '{dashboard.title}' is ready!")
+    print(f"\nNew features demonstrated:")
+    print(f"- ✓ Fluent builder API with L (LayoutBuilder)")
+    print(f"- ✓ Type-safe enums (WidgetType, SelectorType, ColumnWidth)")
+    print(f"- ✓ Component binding via aliases and params")
+    print(f"- ✓ Pydantic validation and JSON serialization")
+
+    # Note: Registration with backend would need to be updated
+    # to work with the new schema structure
+    print("\nNote: Backend integration for .register() needs updating")
+    print("to work with new DashboardStructure schema.")
 
 
 if __name__ == "__main__":
