@@ -4,7 +4,10 @@ from datetime import datetime
 from typing import Any, Dict, List, Optional, Union
 from pydantic import BaseModel, Field, field_validator
 
-from .types import ExecutionStage, SelectorType, LayoutType, RenderOutputType
+from .types import (
+    ExecutionStage, SelectorType, LayoutType, RenderOutputType,
+    WidgetType, ColumnWidth
+)
 
 
 # ============================================================================
@@ -214,29 +217,55 @@ class ParameterBinding(BaseModel):
 class WidgetSchema(LayoutNodeBase):
     """Widget containing a component instance."""
     type: LayoutType = LayoutType.WIDGET
-    component_alias: str
+    widget_type: WidgetType
+    component_alias: Optional[str] = None
     params: Dict[str, Union[Any, ParameterBinding]] = Field(default_factory=dict)
     title: Optional[str] = None
     description: Optional[str] = None
+    config: Dict[str, Any] = Field(default_factory=dict)
 
 
 class SelectorLayoutSchema(LayoutNodeBase):
     """Selector in the layout."""
     type: LayoutType = LayoutType.SELECTOR
-    selector: SelectorSchema
+    selector_type: SelectorType
+    name: str = Field(..., description="Parameter name")
+    label: str
+    default: Any = None
+    options: Optional[List[Any]] = None
+    config: Dict[str, Any] = Field(default_factory=dict)
 
 
 class ColumnSchema(LayoutNodeBase):
     """Column layout container."""
     type: LayoutType = LayoutType.COLUMN
-    width: Optional[str] = None  # e.g., "1/2", "1/3", "2/3", "1/4"
-    children: List[Union['RowSchema', 'WidgetSchema', 'SelectorLayoutSchema']] = Field(default_factory=list)
+    width: ColumnWidth = ColumnWidth.FULL
+    gap: Optional[str] = Field(None, description="Gap between children (CSS)")
+    children: List[Union['RowSchema', 'ColumnSchema', 'WidgetSchema', 'SelectorLayoutSchema']] = Field(default_factory=list)
 
 
 class RowSchema(LayoutNodeBase):
     """Row layout container."""
     type: LayoutType = LayoutType.ROW
-    children: List[ColumnSchema] = Field(default_factory=list)
+    gap: Optional[str] = Field(None, description="Gap between children (CSS)")
+    align: Optional[str] = None  # "start", "center", "end", "stretch"
+    children: List[Union['RowSchema', ColumnSchema, WidgetSchema, SelectorLayoutSchema]] = Field(default_factory=list)
+
+
+class TabSchema(LayoutNodeBase):
+    """Individual tab within a Tabs container."""
+    type: LayoutType = LayoutType.TAB
+    title: str
+    icon: Optional[str] = None
+    disabled: bool = False
+    children: List[Union[RowSchema, ColumnSchema, WidgetSchema, SelectorLayoutSchema]] = Field(default_factory=list)
+
+
+class TabsSchema(LayoutNodeBase):
+    """Tabs container holding multiple Tab components."""
+    type: LayoutType = LayoutType.TABS
+    default_tab: Optional[str] = Field(None, description="ID of default active tab")
+    children: List[TabSchema] = Field(default_factory=list)
 
 
 class SectionSchema(LayoutNodeBase):
@@ -245,7 +274,7 @@ class SectionSchema(LayoutNodeBase):
     title: Optional[str] = None
     collapsible: bool = False
     collapsed: bool = False
-    children: List[Union[RowSchema, ColumnSchema]] = Field(default_factory=list)
+    children: List[Union[RowSchema, ColumnSchema, TabsSchema, WidgetSchema, SelectorLayoutSchema]] = Field(default_factory=list)
 
 
 class PageSchema(LayoutNodeBase):
@@ -254,16 +283,17 @@ class PageSchema(LayoutNodeBase):
     title: str
     description: Optional[str] = None
     icon: Optional[str] = None
-    sections: List[SectionSchema] = Field(default_factory=list)
+    children: List[Union[SectionSchema, RowSchema, ColumnSchema, TabsSchema, WidgetSchema, SelectorLayoutSchema]] = Field(default_factory=list)
 
 
 class DashboardStructure(BaseModel):
     """Complete dashboard structure."""
-    name: str
+    id: str = Field(..., description="Unique ID for dashboard")
+    type: LayoutType = LayoutType.DASHBOARD
     title: str
     description: Optional[str] = None
-    theme: Optional[str] = "light"
-    pages: List[PageSchema] = Field(default_factory=list)
+    version: str = "1.0.0"
+    children: List[PageSchema] = Field(default_factory=list)
 
 
 # ============================================================================
@@ -337,4 +367,7 @@ class DashboardRenderResponse(BaseModel):
 # Enable forward references
 ColumnSchema.model_rebuild()
 RowSchema.model_rebuild()
+TabSchema.model_rebuild()
+TabsSchema.model_rebuild()
 SectionSchema.model_rebuild()
+PageSchema.model_rebuild()

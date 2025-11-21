@@ -13,14 +13,36 @@ class ExecutionStage(str, Enum):
 
 class SelectorType(str, Enum):
     """Types of selectors available."""
-    DATE = "date"
-    DATE_RANGE = "date_range"
     DROPDOWN = "dropdown"
     MULTI_SELECT = "multi_select"
-    TEXT_INPUT = "text_input"
-    NUMERIC_INPUT = "numeric_input"
+    DATE = "date"
+    DATE_RANGE = "date_range"
     SLIDER = "slider"
-    RANGE_SLIDER = "range_slider"
+    TEXT_INPUT = "text_input"
+    CHECKBOX = "checkbox"
+    NUMERIC_INPUT = "numeric_input"
+
+
+class WidgetType(str, Enum):
+    """Types of widgets available."""
+    CHART = "chart"
+    TABLE = "table"
+    METRIC = "metric"
+    TEXT = "text"
+    IMAGE = "image"
+    CUSTOM = "custom"
+
+
+class ColumnWidth(str, Enum):
+    """Standard column widths."""
+    FULL = "1/1"
+    HALF = "1/2"
+    THIRD = "1/3"
+    TWO_THIRDS = "2/3"
+    QUARTER = "1/4"
+    THREE_QUARTERS = "3/4"
+    SIXTH = "1/6"
+    FIVE_SIXTHS = "5/6"
 
 
 class RenderOutputType(str, Enum):
@@ -36,6 +58,8 @@ class LayoutType(str, Enum):
     DASHBOARD = "dashboard"
     PAGE = "page"
     SECTION = "section"
+    TABS = "tabs"
+    TAB = "tab"
     ROW = "row"
     COLUMN = "column"
     WIDGET = "widget"
