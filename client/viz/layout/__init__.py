@@ -4,30 +4,38 @@ Dashboard Layout Framework
 Type-safe, hierarchical layout system using Pydantic.
 """
 
-# Core classes
+# Base classes
 from .base import (
-    # Base classes
     LayoutNode,
     Container,
+)
 
-    # Enums
+# Enums
+from .enums import (
     WidgetType,
     SelectorType,
     ColumnWidth,
+)
 
-    # Layout components
-    Dashboard,
-    Page,
-    Section,
-    Tabs,
-    Tab,
-    Row,
-    Column,
+# Components (leaf nodes)
+from .components import (
     Widget,
     Selector,
+)
 
-    # Type unions
-    LayoutComponent,
+# Containers
+from .containers import (
+    Row,
+    Column,
+    Tab,
+    Tabs,
+    Section,
+)
+
+# Dashboard and Page
+from .dashboard import (
+    Page,
+    Dashboard,
 )
 
 # Builder utilities
@@ -46,19 +54,20 @@ __all__ = [
     "SelectorType",
     "ColumnWidth",
 
-    # Layout components
-    "Dashboard",
-    "Page",
-    "Section",
-    "Tabs",
-    "Tab",
-    "Row",
-    "Column",
+    # Components
     "Widget",
     "Selector",
 
-    # Type unions
-    "LayoutComponent",
+    # Containers
+    "Row",
+    "Column",
+    "Tab",
+    "Tabs",
+    "Section",
+
+    # Dashboard
+    "Page",
+    "Dashboard",
 
     # Builder
     "LayoutBuilder",

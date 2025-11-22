@@ -6,11 +6,12 @@ for building dashboard layouts.
 """
 
 from typing import Optional, List, Any
-from .base import (
-    Dashboard, Page, Section, Tabs, Tab,
-    Row, Column, Widget, Selector,
-    WidgetType, SelectorType, ColumnWidth
-)
+
+from .base import Container
+from .enums import WidgetType, SelectorType, ColumnWidth
+from .components import Widget, Selector
+from .containers import Row, Column, Tab, Tabs, Section
+from .dashboard import Page
 
 
 class LayoutBuilder:

@@ -1,0 +1,91 @@
+"""
+Container components (Row, Column, Tab, Tabs, Section).
+
+These components can contain children and form the structure of layouts.
+"""
+
+from __future__ import annotations
+from typing import Union, Literal, Optional
+from pydantic import Field
+
+from .base import Container
+from .enums import ColumnWidth
+from .components import Widget, Selector
+
+
+class Row(Container):
+    """
+    Horizontal layout container.
+
+    Children are arranged left-to-right.
+    Can contain: Rows, Columns, Widgets, Selectors
+    """
+
+    type: Literal["row"] = "row"
+    children: list[Union[Row, Column, Widget, Selector]] = Field(default_factory=list)
+    gap: Optional[str] = Field(None, description="Gap between children (CSS)")
+    align: Optional[Literal["start", "center", "end", "stretch"]] = None
+
+
+class Column(Container):
+    """
+    Vertical layout container.
+
+    Children are arranged top-to-bottom.
+    Can contain: Rows, Columns, Widgets, Selectors
+    """
+
+    type: Literal["column"] = "column"
+    children: list[Union[Row, Column, Widget, Selector]] = Field(default_factory=list)
+    width: ColumnWidth = ColumnWidth.FULL
+    gap: Optional[str] = Field(None, description="Gap between children (CSS)")
+
+
+class Tab(Container):
+    """
+    Individual tab within a Tabs container.
+
+    Can contain: Rows, Columns, Widgets, Selectors
+    """
+
+    type: Literal["tab"] = "tab"
+    children: list[Union[Row, Column, Widget, Selector]] = Field(default_factory=list)
+    title: str
+    icon: Optional[str] = None
+    disabled: bool = False
+
+
+class Tabs(Container):
+    """
+    Tab container holding multiple Tab components.
+
+    Can only contain: Tab objects
+    """
+
+    type: Literal["tabs"] = "tabs"
+    children: list[Tab] = Field(default_factory=list)
+    default_tab: Optional[str] = Field(
+        None,
+        description="ID of default active tab"
+    )
+
+
+class Section(Container):
+    """
+    Section for organizing content within a Page.
+
+    Can contain: Rows, Columns, Tabs, Widgets, Selectors
+    """
+
+    type: Literal["section"] = "section"
+    children: list[Union[Row, Column, Tabs, Widget, Selector]] = Field(default_factory=list)
+    title: Optional[str] = None
+    collapsible: bool = False
+    collapsed: bool = False
+
+
+# Resolve forward references
+Row.model_rebuild()
+Column.model_rebuild()
+Tab.model_rebuild()
+Section.model_rebuild()

@@ -1,73 +1,74 @@
-"""Dashboard - top-level container."""
+"""
+Top-level dashboard components (Page and Dashboard).
 
-from typing import List, Optional
-from dataclasses import dataclass, field
+These are the main entry points for building dashboards.
+"""
+
+from __future__ import annotations
+from typing import Union, Literal, Optional, List
+from pydantic import Field, field_validator
+
+from .base import Container
+from .components import Widget, Selector
+from .containers import Section, Row, Column, Tabs
 
 
-@dataclass
-class Dashboard:
+class Page(Container):
+    """
+    Page container representing a dashboard page/view.
+
+    Can contain: Sections, Rows, Columns, Tabs, Widgets, Selectors
+    """
+
+    type: Literal["page"] = "page"
+    children: list[Union[Section, Row, Column, Tabs, Widget, Selector]] = Field(default_factory=list)
+    title: str
+    description: Optional[str] = None
+    icon: Optional[str] = None
+
+
+class Dashboard(Container):
     """
     Top-level dashboard container.
 
-    Contains multiple pages (tabs) and manages the overall
-    dashboard structure and registration.
-
-    Example:
-        dashboard = Dashboard(
-            name="sales_dashboard",
-            title="Sales Analytics",
-            description="Monthly sales metrics and trends"
-        )
-        dashboard.add_page(overview_page)
-        dashboard.add_page(details_page)
-        dashboard.register(client)
+    Can only contain: Page objects
     """
-    name: str
+
+    type: Literal["dashboard"] = "dashboard"
+    children: list[Page] = Field(default_factory=list)
     title: str
     description: Optional[str] = None
-    pages: List = field(default_factory=list)
+    version: str = "1.0.0"
 
-    def add_page(self, page) -> None:
-        """Add a page to the dashboard."""
-        self.pages.append(page)
+    @field_validator('children')
+    @classmethod
+    def validate_has_pages(cls, v: List[Page]) -> List[Page]:
+        """Ensure dashboard has at least one page."""
+        if not v:
+            raise ValueError("Dashboard must have at least one page")
+        return v
 
-    def to_dict(self) -> dict:
-        """Serialize to dictionary for storage in registry."""
-        return {
-            "name": self.name,
-            "title": self.title,
-            "description": self.description,
-            "pages": [
-                page.to_dict() if hasattr(page, 'to_dict') else page
-                for page in self.pages
-            ]
-        }
-
-    def register(self, client) -> dict:
+    def page(self, title: str, description: Optional[str] = None, **kwargs) -> Page:
         """
-        Register dashboard with the function registry.
+        Create and add a page to this dashboard.
 
         Args:
-            client: RegistryClient instance
+            title: Page title
+            description: Optional description
+            **kwargs: Additional page fields
 
         Returns:
-            Dashboard registration response from registry (as dict)
+            The created Page instance
+
+        Example:
+            >>> dashboard = Dashboard(title='My Dashboard')
+            >>> with dashboard.page(title='Overview'):
+            ...     L.widget(...)
         """
-        from viz.api.client import RegistryClient
+        page = Page(title=title, description=description, **kwargs)
+        self.add(page)
+        return page
 
-        if not isinstance(client, RegistryClient):
-            raise TypeError("client must be a RegistryClient instance")
 
-        # Serialize dashboard structure
-        structure = self.to_dict()
-
-        # Register with the registry
-        response = client.create_dashboard(
-            name=self.name,
-            title=self.title,
-            description=self.description,
-            structure=structure
-        )
-
-        # Convert Pydantic model to dict
-        return response.model_dump()
+# Resolve forward references
+Page.model_rebuild()
