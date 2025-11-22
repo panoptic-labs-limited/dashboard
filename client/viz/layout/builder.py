@@ -16,29 +16,33 @@ from .base import (
 class LayoutBuilder:
     """Fluent builder for creating layouts."""
 
-    @staticmethod
-    def dashboard(title: str, description: Optional[str] = None, **kwargs) -> Dashboard:
-        """
-        Create a new dashboard.
+    # Context stack for automatic parent tracking
+    _context_stack: List['Container'] = []
 
-        Args:
-            title: Dashboard title
-            description: Optional description
-            **kwargs: Additional fields (version, etc.)
+    @classmethod
+    def _current_context(cls) -> Optional['Container']:
+        """Get the current context container."""
+        return cls._context_stack[-1] if cls._context_stack else None
 
-        Returns:
-            Dashboard instance
+    @classmethod
+    def _push_context(cls, container: 'Container'):
+        """Push a container onto the context stack."""
+        cls._context_stack.append(container)
 
-        Example:
-            >>> dashboard = LayoutBuilder.dashboard(
-            ...     title="Sales Dashboard",
-            ...     description="Q1 2024 sales analytics"
-            ... )
-        """
-        return Dashboard(title=title, description=description, **kwargs)
+    @classmethod
+    def _pop_context(cls) -> Optional['Container']:
+        """Pop a container from the context stack."""
+        return cls._context_stack.pop() if cls._context_stack else None
 
-    @staticmethod
-    def page(title: str, description: Optional[str] = None, **kwargs) -> Page:
+    @classmethod
+    def _add_to_context(cls, child):
+        """Add a child to the current context container if one exists."""
+        parent = cls._current_context()
+        if parent is not None:
+            parent.add(child)
+
+    @classmethod
+    def page(cls, title: str, description: Optional[str] = None, **kwargs) -> Page:
         """
         Create a new page.
 
@@ -49,11 +53,17 @@ class LayoutBuilder:
 
         Returns:
             Page instance
-        """
-        return Page(title=title, description=description, **kwargs)
 
-    @staticmethod
+        Note:
+            If called within a context manager, automatically adds to parent.
+        """
+        page = Page(title=title, description=description, **kwargs)
+        cls._add_to_context(page)
+        return page
+
+    @classmethod
     def section(
+        cls,
         title: Optional[str] = None,
         collapsible: bool = False,
         **kwargs
@@ -68,11 +78,16 @@ class LayoutBuilder:
 
         Returns:
             Section instance
-        """
-        return Section(title=title, collapsible=collapsible, **kwargs)
 
-    @staticmethod
-    def tabs(default_tab: Optional[str] = None, **kwargs) -> Tabs:
+        Note:
+            If called within a context manager, automatically adds to parent.
+        """
+        section = Section(title=title, collapsible=collapsible, **kwargs)
+        cls._add_to_context(section)
+        return section
+
+    @classmethod
+    def tabs(cls, default_tab: Optional[str] = None, **kwargs) -> Tabs:
         """
         Create a tabs container.
 
@@ -82,11 +97,16 @@ class LayoutBuilder:
 
         Returns:
             Tabs instance
-        """
-        return Tabs(default_tab=default_tab, **kwargs)
 
-    @staticmethod
-    def tab(title: str, icon: Optional[str] = None, **kwargs) -> Tab:
+        Note:
+            If called within a context manager, automatically adds to parent.
+        """
+        tabs = Tabs(default_tab=default_tab, **kwargs)
+        cls._add_to_context(tabs)
+        return tabs
+
+    @classmethod
+    def tab(cls, title: str, icon: Optional[str] = None, **kwargs) -> Tab:
         """
         Create a tab.
 
@@ -97,11 +117,16 @@ class LayoutBuilder:
 
         Returns:
             Tab instance
-        """
-        return Tab(title=title, icon=icon, **kwargs)
 
-    @staticmethod
-    def row(gap: Optional[str] = None, **kwargs) -> Row:
+        Note:
+            If called within a context manager, automatically adds to parent.
+        """
+        tab = Tab(title=title, icon=icon, **kwargs)
+        cls._add_to_context(tab)
+        return tab
+
+    @classmethod
+    def row(cls, gap: Optional[str] = None, **kwargs) -> Row:
         """
         Create a row.
 
@@ -114,11 +139,17 @@ class LayoutBuilder:
 
         Example:
             >>> row = LayoutBuilder.row(gap="20px", align="center")
-        """
-        return Row(gap=gap, **kwargs)
 
-    @staticmethod
+        Note:
+            If called within a context manager, automatically adds to parent.
+        """
+        row = Row(gap=gap, **kwargs)
+        cls._add_to_context(row)
+        return row
+
+    @classmethod
     def column(
+        cls,
         width: ColumnWidth = ColumnWidth.FULL,
         gap: Optional[str] = None,
         **kwargs
@@ -136,11 +167,17 @@ class LayoutBuilder:
 
         Example:
             >>> col = LayoutBuilder.column(width=ColumnWidth.HALF)
-        """
-        return Column(width=width, gap=gap, **kwargs)
 
-    @staticmethod
+        Note:
+            If called within a context manager, automatically adds to parent.
+        """
+        column = Column(width=width, gap=gap, **kwargs)
+        cls._add_to_context(column)
+        return column
+
+    @classmethod
     def widget(
+        cls,
         widget_type: WidgetType,
         title: Optional[str] = None,
         component_alias: Optional[str] = None,
@@ -167,17 +204,25 @@ class LayoutBuilder:
             ...     component_alias="sales_chart",
             ...     params={"region": "North"}
             ... )
+
+        Note:
+            If called within a context manager, automatically adds to parent.
         """
-        return Widget(
+        widget = Widget(
             widget_type=widget_type,
             title=title,
             component_alias=component_alias,
             params=params or {},
             **kwargs
         )
+        parent = cls._current_context()
+        if parent is not None:
+            parent.add(widget)
+        return widget
 
-    @staticmethod
+    @classmethod
     def selector(
+        cls,
         selector_type: SelectorType,
         name: str,
         label: str,
@@ -207,8 +252,11 @@ class LayoutBuilder:
             ...     options=["North", "South", "East", "West"],
             ...     default="North"
             ... )
+
+        Note:
+            If called within a context manager, automatically adds to parent.
         """
-        return Selector(
+        selector = Selector(
             selector_type=selector_type,
             name=name,
             label=label,
@@ -216,6 +264,10 @@ class LayoutBuilder:
             options=options,
             **kwargs
         )
+        parent = cls._current_context()
+        if parent is not None:
+            parent.add(selector)
+        return selector
 
 
 # Convenience alias

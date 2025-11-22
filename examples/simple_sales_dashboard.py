@@ -4,7 +4,7 @@ Simple Sales Dashboard Example
 Demonstrates:
 - Component definition with dataclass pattern
 - Dashboard structure with new Pydantic layout system
-- Fluent builder API with LayoutBuilder (L)
+- Context manager API for intuitive layout building (Streamlit-style)
 - Type-safe layout construction with enums
 - Registration with the function registry
 """
@@ -131,92 +131,64 @@ def main():
     register_component(SalesMetrics, alias="sales_metrics", client=client)
     print("✓ Registered SalesMetrics component")
 
-    # Create dashboard structure using fluent builder API
+    # Create dashboard structure using context manager API
     print("\nBuilding dashboard structure...")
-    dashboard = (
-        L.dashboard(
-            title="Sales Analytics Dashboard",
-            description="Simple sales dashboard demonstrating new Viz Pydantic layout system"
-        )
-        .add(
-            L.page(
-                title="Overview",
-                description="Sales overview and metrics"
-            )
-            .add(
-                # Controls Section
-                L.section(title="Controls")
-                .add(
-                    L.row(gap="16px")
-                    .add(
-                        L.column(width=ColumnWidth.HALF)
-                        .add(
-                            L.selector(
-                                selector_type=SelectorType.DATE,
-                                name="date",
-                                label="Report Date",
-                                default="2024-01-01"
-                            )
-                        )
-                    )
-                    .add(
-                        L.column(width=ColumnWidth.HALF)
-                        .add(
-                            L.selector(
-                                selector_type=SelectorType.DROPDOWN,
-                                name="region",
-                                label="Region",
-                                options=["North", "South", "East", "West"],
-                                default="North"
-                            )
-                        )
-                    )
-                )
-            )
-            .add(
-                # Metrics Section
-                L.section(title="Metrics")
-                .add(
-                    L.row()
-                    .add(
-                        L.column(width=ColumnWidth.FULL)
-                        .add(
-                            L.widget(
-                                widget_type=WidgetType.METRIC,
-                                title="Sales Summary",
-                                component_alias="sales_metrics",
-                                params={
-                                    "region": "region",  # Binds to region selector
-                                    "date": "date"       # Binds to date selector
-                                }
-                            )
-                        )
-                    )
-                )
-            )
-            .add(
-                # Sales Chart Section
-                L.section(title="Sales Chart")
-                .add(
-                    L.row()
-                    .add(
-                        L.column(width=ColumnWidth.FULL)
-                        .add(
-                            L.widget(
-                                widget_type=WidgetType.CHART,
-                                title="Sales by Product",
-                                component_alias="sales_chart",
-                                params={
-                                    "region": "region",  # Binds to region selector
-                                    "date": "date"       # Binds to date selector
-                                }
-                            )
-                        )
-                    )
-                )
-            )
-        )
+    from viz.layout import Dashboard
+
+    dashboard = Dashboard(
+        title="Sales Analytics Dashboard",
+        description="Simple sales dashboard demonstrating new Viz Pydantic layout system"
     )
+
+    with dashboard.page(title="Overview", description="Sales overview and metrics"):
+        # Controls Section
+        with L.section(title="Controls"):
+            with L.row(gap="16px"):
+                with L.column(width=ColumnWidth.HALF):
+                    L.selector(
+                        selector_type=SelectorType.DATE,
+                        name="date",
+                        label="Report Date",
+                        default="2024-01-01"
+                    )
+
+                with L.column(width=ColumnWidth.HALF):
+                    L.selector(
+                        selector_type=SelectorType.DROPDOWN,
+                        name="region",
+                        label="Region",
+                        options=["North", "South", "East", "West"],
+                        default="North"
+                    )
+
+        # Metrics Section
+        with L.section(title="Metrics"):
+            with L.row():
+                with L.column(width=ColumnWidth.FULL):
+                    L.widget(
+                        widget_type=WidgetType.METRIC,
+                        title="Sales Summary",
+                        component_alias="sales_metrics",
+                        params={
+                            "region": "region",  # Binds to region selector
+                            "date": "date"       # Binds to date selector
+                        }
+                    )
+
+        # Sales Chart Section
+        with L.section(title="Sales Chart"):
+            with L.row():
+                with L.column(width=ColumnWidth.FULL):
+                    L.widget(
+                        widget_type=WidgetType.CHART,
+                        title="Sales by Product",
+                        component_alias="sales_chart",
+                        params={
+                            "region": "region",  # Binds to region selector
+                            "date": "date"       # Binds to date selector
+                        }
+                    )
+
     print("✓ Built dashboard structure")
 
     # Display dashboard structure
@@ -235,7 +207,7 @@ def main():
     print("="*60)
     print(f"\nDashboard '{dashboard.title}' is ready!")
     print(f"\nNew features demonstrated:")
-    print(f"- ✓ Fluent builder API with L (LayoutBuilder)")
+    print(f"- ✓ Context manager API with automatic parent tracking (Streamlit-style)")
     print(f"- ✓ Type-safe enums (WidgetType, SelectorType, ColumnWidth)")
     print(f"- ✓ Component binding via aliases and params")
     print(f"- ✓ Pydantic validation and JSON serialization")

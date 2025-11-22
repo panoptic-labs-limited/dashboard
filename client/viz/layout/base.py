@@ -80,13 +80,26 @@ class Container(LayoutNode, Generic[T]):
         """Get child by index."""
         return self.children[index]
 
-    def __enter__(self) -> Container[T]:
-        """Context manager entry."""
+    def __enter__(self) -> 'Container[T]':
+        """
+        Context manager entry.
+
+        Pushes this container onto the context stack so children
+        created within the context are automatically added.
+        """
+        # Import here to avoid circular dependency
+        from .builder import LayoutBuilder
+        LayoutBuilder._push_context(self)
         return self
 
     def __exit__(self, *args):
-        """Context manager exit."""
-        pass
+        """
+        Context manager exit.
+
+        Pops this container from the context stack.
+        """
+        from .builder import LayoutBuilder
+        LayoutBuilder._pop_context()
 
 
 # ============================================================================
@@ -279,6 +292,27 @@ class Dashboard(Container[Page]):
         if not v:
             raise ValueError("Dashboard must have at least one page")
         return v
+
+    def page(self, title: str, description: Optional[str] = None, **kwargs) -> Page:
+        """
+        Create and add a page to this dashboard.
+
+        Args:
+            title: Page title
+            description: Optional description
+            **kwargs: Additional page fields
+
+        Returns:
+            The created Page instance
+
+        Example:
+            >>> dashboard = Dashboard(title='My Dashboard')
+            >>> with dashboard.page(title='Overview'):
+            ...     L.widget(...)
+        """
+        page = Page(title=title, description=description, **kwargs)
+        self.add(page)
+        return page
 
 
 # ============================================================================
