@@ -3,52 +3,71 @@
 from typing import Literal, Optional, List, Any
 from pydantic import Field, field_validator
 
-from .base import ChoiceInput, BaseInput
+from .base import BaseInput, Option
+from .config import (
+    SelectConfig,
+    MultiSelectConfig,
+    RadioGroupConfig,
+    CheckboxConfig,
+    CheckboxGroupConfig,
+    ToggleConfig
+)
+from .sources import FunctionSource
 
 
-class Select(ChoiceInput):
+class Select(BaseInput[SelectConfig]):
     """
     Single-selection dropdown/select input.
 
     Examples:
-        # Static options
+        # Static options (top-level fields)
         region = Select(
             name="region",
             label="Select Region",
-            options=["North", "South", "East", "West"],
-            default="North"
-        )
-
-        # With custom labels
-        status = Select(
-            name="status",
             options=[
-                {"value": "active", "label": "Active"},
-                {"value": "inactive", "label": "Inactive"}
+                Option(value="north", label="North"),
+                Option(value="south", label="South")
             ],
-            default="active"
+            default="north"
         )
 
-        # Dynamic options
-        def get_regions_for_country(country: str):
-            return [...regions...]
-
+        # Dynamic options (FunctionSource)
         region = Select(
             name="region",
-            options=get_regions_for_country,
-            params={"country": "country"}
+            source=FunctionSource(
+                func=get_regions_for_country,
+                params={"country": "country"}
+            )
         )
     """
 
+    __config_class__ = SelectConfig
     input_type: Literal["select"] = "select"
-    default: Optional[Any] = None  # Single value
 
-    # Select-specific options
+    # Config fields (from SelectConfig)
+    options: Optional[List[Option]] = None
+    default: Optional[Any] = None
+
+
+    # Select-specific display options
     searchable: bool = Field(False, description="Enable search/filter in dropdown")
     clear_button: bool = Field(False, description="Show clear button")
 
+    @field_validator('options', mode='before')
+    @classmethod
+    def normalize_options(cls, v):
+        """Convert list items to Option objects."""
+        if v is None:
+            return v
+        if isinstance(v, list):
+            return [
+                opt if isinstance(opt, Option) else Option.model_validate(opt)
+                for opt in v
+            ]
+        return v
 
-class MultiSelect(ChoiceInput):
+
+class MultiSelect(BaseInput[MultiSelectConfig]):
     """
     Multi-selection dropdown input.
 
@@ -56,28 +75,41 @@ class MultiSelect(ChoiceInput):
         # Static options
         categories = MultiSelect(
             name="categories",
-            label="Select Categories",
-            options=["Electronics", "Clothing", "Food"],
-            default=["Electronics"]
+            options=[Option("electronics"), Option("clothing")],
+            default=["electronics"]
         )
 
-        # With pre-selected options
+        # Dynamic
         tags = MultiSelect(
             name="tags",
-            options=[
-                {"value": "python", "label": "Python", "selected": True},
-                {"value": "javascript", "label": "JavaScript"},
-                {"value": "rust", "label": "Rust", "selected": True}
-            ]
+            source=FunctionSource(func=get_available_tags)
         )
     """
 
+    __config_class__ = MultiSelectConfig
     input_type: Literal["multi_select"] = "multi_select"
-    default: Optional[List[Any]] = None  # List of values
 
-    # Multi-select specific options
-    max_selections: Optional[int] = Field(None, description="Maximum number of selections allowed")
+    # Config fields
+    options: Optional[List[Option]] = None
+    default: Optional[List[Any]] = None
+    max_selections: Optional[int] = None
+
+
+    # Display options
     searchable: bool = Field(False, description="Enable search/filter")
+
+    @field_validator('options', mode='before')
+    @classmethod
+    def normalize_options(cls, v):
+        """Convert list items to Option objects."""
+        if v is None:
+            return v
+        if isinstance(v, list):
+            return [
+                opt if isinstance(opt, Option) else Option.model_validate(opt)
+                for opt in v
+            ]
+        return v
 
     @field_validator('default')
     @classmethod
@@ -88,39 +120,47 @@ class MultiSelect(ChoiceInput):
         return v
 
 
-class RadioGroup(ChoiceInput):
+class RadioGroup(BaseInput[RadioGroupConfig]):
     """
     Radio button group input (single selection).
 
     Examples:
         view_mode = RadioGroup(
             name="view_mode",
-            label="View Mode",
-            options=["Grid", "List", "Table"],
-            default="Grid"
-        )
-
-        priority = RadioGroup(
-            name="priority",
-            options=[
-                {"value": "high", "label": "High Priority", "icon": "🔴"},
-                {"value": "medium", "label": "Medium Priority", "icon": "🟡"},
-                {"value": "low", "label": "Low Priority", "icon": "🟢"}
-            ]
+            options=[Option("grid"), Option("list"), Option("table")],
+            default="grid"
         )
     """
 
+    __config_class__ = RadioGroupConfig
     input_type: Literal["radio"] = "radio"
-    default: Optional[Any] = None  # Single value
 
-    # Radio-specific options
+    # Config fields
+    options: Optional[List[Option]] = None
+    default: Optional[Any] = None
+
+
+    # Display options
     layout: Literal["vertical", "horizontal"] = Field(
         "vertical",
         description="Layout direction for radio buttons"
     )
 
+    @field_validator('options', mode='before')
+    @classmethod
+    def normalize_options(cls, v):
+        """Convert list items to Option objects."""
+        if v is None:
+            return v
+        if isinstance(v, list):
+            return [
+                opt if isinstance(opt, Option) else Option.model_validate(opt)
+                for opt in v
+            ]
+        return v
 
-class Checkbox(BaseInput):
+
+class Checkbox(BaseInput[CheckboxConfig]):
     """
     Single boolean checkbox input.
 
@@ -130,17 +170,14 @@ class Checkbox(BaseInput):
             label="Show Legend",
             default=True
         )
-
-        include_archived = Checkbox(
-            name="include_archived",
-            label="Include Archived Items",
-            default=False,
-            help_text="Check to include archived items in results"
-        )
     """
 
+    __config_class__ = CheckboxConfig
     input_type: Literal["checkbox"] = "checkbox"
-    default: Optional[bool] = Field(None, description="Default checked state")
+
+    # Config fields
+    default: Optional[bool] = None
+
 
     @field_validator('default')
     @classmethod
@@ -151,34 +188,48 @@ class Checkbox(BaseInput):
         return v
 
 
-class CheckboxGroup(ChoiceInput):
+class CheckboxGroup(BaseInput[CheckboxGroupConfig]):
     """
     Group of checkboxes for multiple selections.
-
-    Similar to MultiSelect but renders as individual checkboxes.
 
     Examples:
         features = CheckboxGroup(
             name="features",
-            label="Enabled Features",
             options=[
-                {"value": "analytics", "label": "Analytics Dashboard"},
-                {"value": "reports", "label": "Custom Reports"},
-                {"value": "exports", "label": "Data Exports"}
+                Option(value="analytics", label="Analytics Dashboard"),
+                Option(value="reports", label="Custom Reports")
             ],
-            default=["analytics", "reports"]
+            default=["analytics"]
         )
     """
 
+    __config_class__ = CheckboxGroupConfig
     input_type: Literal["checkbox_group"] = "checkbox_group"
-    default: Optional[List[Any]] = None  # List of values
 
-    # Layout options
+    # Config fields
+    options: Optional[List[Option]] = None
+    default: Optional[List[Any]] = None
+
+
+    # Display options
     layout: Literal["vertical", "horizontal", "grid"] = Field(
         "vertical",
         description="Layout direction for checkboxes"
     )
     columns: Optional[int] = Field(None, description="Number of columns for grid layout")
+
+    @field_validator('options', mode='before')
+    @classmethod
+    def normalize_options(cls, v):
+        """Convert list items to Option objects."""
+        if v is None:
+            return v
+        if isinstance(v, list):
+            return [
+                opt if isinstance(opt, Option) else Option.model_validate(opt)
+                for opt in v
+            ]
+        return v
 
     @field_validator('default')
     @classmethod
@@ -189,33 +240,28 @@ class CheckboxGroup(ChoiceInput):
         return v
 
 
-class Toggle(BaseInput):
+class Toggle(BaseInput[ToggleConfig]):
     """
     Visual toggle switch for boolean values.
-
-    Similar to Checkbox but with switch UI.
 
     Examples:
         dark_mode = Toggle(
             name="dark_mode",
             label="Dark Mode",
-            default=False
-        )
-
-        auto_refresh = Toggle(
-            name="auto_refresh",
-            label="Auto Refresh",
-            default=True,
-            help_text="Automatically refresh data every 30 seconds"
+            default=False,
+            on_label="On",
+            off_label="Off"
         )
     """
 
+    __config_class__ = ToggleConfig
     input_type: Literal["toggle"] = "toggle"
-    default: Optional[bool] = Field(None, description="Default toggle state")
 
-    # Toggle-specific options
-    on_label: Optional[str] = Field(None, description="Label for ON state")
-    off_label: Optional[str] = Field(None, description="Label for OFF state")
+    # Config fields
+    default: Optional[bool] = None
+    on_label: Optional[str] = None
+    off_label: Optional[str] = None
+
 
     @field_validator('default')
     @classmethod

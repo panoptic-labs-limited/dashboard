@@ -1,11 +1,11 @@
 """Base classes for inputs."""
 
 from __future__ import annotations
-from typing import Any, Optional, Union, List, Callable
-from pydantic import BaseModel, Field, field_validator, model_validator
+from typing import Any, Optional, TypeVar, Generic, Type, ClassVar, Union
+from pydantic import BaseModel, Field, model_validator
 import uuid
 
-
+from .sources import FunctionSource
 class Option(BaseModel):
     """
     Represents a selectable option.
@@ -46,17 +46,33 @@ class Option(BaseModel):
         return {'value': data, 'label': str(data)}
 
 
-class BaseInput(BaseModel):
+# Generic type variable for config models
+TConfig = TypeVar('TConfig', bound=BaseModel)
+
+
+class BaseInput(BaseModel, Generic[TConfig]):
     """
     Base class for all input types.
 
-    Provides common fields and behavior for all inputs.
+    Generic over TConfig - the configuration model for this input type.
+    Each input type has a corresponding config model (e.g., SelectConfig, DateConfig).
+
+    Configuration can be provided via:
+    1. Top-level fields (static) - fields like options, default, min_value, etc.
+    2. source field (dynamic) - FunctionSource for server-side execution
+
+    Subclasses must:
+    - Set __config_class__ to their config model type
+    - Declare config fields as top-level properties (for type hints)
     """
 
     model_config = {
         'extra': 'forbid',
         'validate_assignment': True,
     }
+
+    # Config class reference (set by subclasses)
+    __config_class__: ClassVar[Type[BaseModel]]
 
     # Core fields
     name: str = Field(..., description="Parameter name (used in component bindings)")
@@ -69,8 +85,13 @@ class BaseInput(BaseModel):
     help_text: Optional[str] = Field(None, description="Help text or tooltip")
     placeholder: Optional[str] = Field(None, description="Placeholder text")
 
-    # Default value (type depends on selector)
-    default: Optional[Any] = Field(None, description="Default value")
+    # Source for dynamic configuration
+    # When None, use top-level fields (static configuration)
+    # When FunctionSource, execute function for dynamic configuration
+    source: Optional[FunctionSource[TConfig]] = Field(
+        None,
+        description="Optional FunctionSource for dynamic configuration"
+    )
 
     @model_validator(mode='after')
     def auto_generate_label(self):
@@ -82,68 +103,3 @@ class BaseInput(BaseModel):
     def to_dict(self) -> dict:
         """Serialize to dictionary for API/dashboard structure."""
         return self.model_dump(exclude_none=True)
-
-
-class ChoiceInput(BaseInput):
-    """
-    Base class for inputs with options (select, multi-select, radio, etc.).
-
-    Supports:
-    - Static options: List of values/dicts/Options
-    - Dynamic options: Callable that returns options (executed server-side)
-    - Parameters: For dynamic options, maps param names to input names or static values
-    """
-
-    options: Union[
-        List[Union[Option, dict[str, Any], Any]],
-        Callable[..., List[Union[Option, dict[str, Any], Any]]]
-    ] = Field(..., description="Static list or callable returning options")
-
-    params: dict[str, Any] = Field(
-        default_factory=dict,
-        description="Parameters for dynamic options (param_name -> input_name or static value)"
-    )
-
-    @field_validator('options', mode='before')
-    @classmethod
-    def normalize_options(cls, v):
-        """
-        Normalize options: convert list items to Options, preserve callables.
-
-        Callables are preserved as-is (not evaluated) for server-side execution.
-        """
-        # Callable = reference to component, don't evaluate!
-        if callable(v):
-            return v
-
-        # Static list - convert each item to Option
-        if isinstance(v, list):
-            return [
-                opt if isinstance(opt, Option) else Option.model_validate(opt)
-                for opt in v
-            ]
-
-        raise ValueError("options must be a list or callable")
-
-    def has_dynamic_options(self) -> bool:
-        """Check if this input uses dynamic options."""
-        return callable(self.options)
-
-    def to_dict(self) -> dict:
-        """Serialize for API/UI, handling static vs dynamic options."""
-        data = super().to_dict()
-
-        if self.has_dynamic_options():
-            # Serialize callable reference
-            # The callable will be registered separately and replaced with alias
-            data['options'] = {
-                'type': 'data_source',
-                'callable': self.options,  # Will be replaced during registration
-            }
-            if self.params:
-                data['params'] = self.params
-        else:
-            # Serialize static options
-            data['options'] = [opt.model_dump() for opt in self.options]
-
-        return data

@@ -17,7 +17,12 @@ from .inputs import (
     # Base
     Option,
     BaseInput,
-    ChoiceInput,
+    # Sources
+    FunctionSource,
+    # Config models
+    SelectConfig,
+    DateConfig,
+    NumericInputConfig,
     # Choice inputs
     Select,
     MultiSelect,
@@ -66,7 +71,12 @@ __all__ = [
     # Inputs - Base
     "Option",
     "BaseInput",
-    "ChoiceInput",
+    # Inputs - Sources
+    "FunctionSource",
+    # Inputs - Config (commonly used)
+    "SelectConfig",
+    "DateConfig",
+    "NumericInputConfig",
     # Inputs - Choice
     "Select",
     "MultiSelect",
