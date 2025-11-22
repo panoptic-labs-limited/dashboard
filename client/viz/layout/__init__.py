@@ -13,7 +13,7 @@ from .base import (
 # Enums
 from .enums import (
     WidgetType,
-    SelectorType,
+    InputType,
     ColumnWidth,
 )
 
@@ -51,7 +51,7 @@ __all__ = [
 
     # Enums
     "WidgetType",
-    "SelectorType",
+    "InputType",
     "ColumnWidth",
 
     # Components

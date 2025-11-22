@@ -9,7 +9,7 @@ from typing import Literal, Optional, List, Any
 from pydantic import Field
 
 from .base import LayoutNode
-from .enums import WidgetType, SelectorType
+from .enums import WidgetType, InputType
 
 
 class Widget(LayoutNode):
@@ -40,7 +40,7 @@ class Selector(LayoutNode):
     """
 
     type: Literal["selector"] = "selector"
-    selector_type: SelectorType
+    input_type: InputType
     name: str = Field(..., description="Parameter name")
     label: str
     default: Any = None

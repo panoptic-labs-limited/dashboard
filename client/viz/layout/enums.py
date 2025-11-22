@@ -17,16 +17,33 @@ class WidgetType(str, Enum):
     CUSTOM = "custom"
 
 
-class SelectorType(str, Enum):
-    """Supported selector types."""
-    DROPDOWN = "dropdown"
+class InputType(str, Enum):
+    """Supported input types."""
+    # Choice-based inputs
+    SELECT = "select"
     MULTI_SELECT = "multi_select"
+    RADIO = "radio"
+    CHECKBOX = "checkbox"
+    CHECKBOX_GROUP = "checkbox_group"
+    TOGGLE = "toggle"
+
+    # Text inputs
+    TEXT_INPUT = "text_input"
+    TEXTAREA = "textarea"
+    SEARCH_INPUT = "search_input"
+
+    # Numeric inputs
+    NUMERIC_INPUT = "numeric_input"
+    SLIDER = "slider"
+    RANGE_SLIDER = "range_slider"
+    NUMERIC_RANGE = "numeric_range"
+
+    # Date/time inputs
     DATE = "date"
     DATE_RANGE = "date_range"
-    SLIDER = "slider"
-    TEXT_INPUT = "text_input"
-    CHECKBOX = "checkbox"
-    NUMERIC_INPUT = "numeric_input"
+    TIME = "time"
+    DATETIME = "datetime"
+    RELATIVE_DATE = "relative_date"
 
 
 class ColumnWidth(str, Enum):

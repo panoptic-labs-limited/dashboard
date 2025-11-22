@@ -8,7 +8,7 @@ for building dashboard layouts.
 from typing import Optional, List, Any
 
 from .base import Container
-from .enums import WidgetType, SelectorType, ColumnWidth
+from .enums import WidgetType, InputType, ColumnWidth
 from .components import Widget, Selector
 from .containers import Row, Column, Tab, Tabs, Section
 from .dashboard import Page
@@ -224,7 +224,7 @@ class LayoutBuilder:
     @classmethod
     def selector(
         cls,
-        selector_type: SelectorType,
+        selector_type: InputType,
         name: str,
         label: str,
         default: Any = None,
@@ -247,7 +247,7 @@ class LayoutBuilder:
 
         Example:
             >>> selector = LayoutBuilder.selector(
-            ...     selector_type=SelectorType.DROPDOWN,
+            ...     selector_type=InputType.DROPDOWN,
             ...     name="region",
             ...     label="Select Region",
             ...     options=["North", "South", "East", "West"],
