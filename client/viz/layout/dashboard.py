@@ -6,9 +6,9 @@ These are the main entry points for building dashboards.
 
 from __future__ import annotations
 
-from typing import Union, Literal, Optional, List
+from typing import Literal, Union
 
-from pydantic import Field, field_validator
+from pydantic import field_validator
 
 from .base import Container
 from .components import Widget
@@ -25,8 +25,8 @@ class Page(Container[Union[Section, Row, Column, Tabs, Widget, Input]]):
 
     type: Literal["page"] = "page"
     title: str
-    description: Optional[str] = None
-    icon: Optional[str] = None
+    description: str | None = None
+    icon: str | None = None
 
 
 class Dashboard(Container['Page']):
@@ -38,18 +38,18 @@ class Dashboard(Container['Page']):
 
     type: Literal["dashboard"] = "dashboard"
     title: str
-    description: Optional[str] = None
+    description: str | None = None
     version: str = "1.0.0"
 
     @field_validator('children')
     @classmethod
-    def validate_has_pages(cls, v: List[Page]) -> List[Page]:
+    def validate_has_pages(cls, v: list[Page]) -> list[Page]:
         """Ensure dashboard has at least one page."""
         if not v:
             raise ValueError("Dashboard must have at least one page")
         return v
 
-    def page(self, title: str, description: Optional[str] = None, **kwargs) -> Page:
+    def page(self, title: str, description: str | None = None, **kwargs) -> Page:
         """
         Create and add a page to this dashboard.
 

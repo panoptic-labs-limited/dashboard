@@ -5,7 +5,7 @@ Provides convenient factory methods and fluent interface
 for building dashboard layouts.
 """
 
-from typing import Optional, List, Any
+from typing import Any, Optional
 
 from viz.layout.base import Container
 from viz.layout.components import Widget
@@ -18,7 +18,7 @@ class LayoutBuilder:
     """Fluent builder for creating layouts."""
 
     # Context stack for automatic parent tracking
-    _context_stack: List['Container'] = []
+    _context_stack: list['Container'] = []
 
     @classmethod
     def _current_context(cls) -> Optional['Container']:
@@ -43,7 +43,7 @@ class LayoutBuilder:
             parent.add(child)
 
     @classmethod
-    def page(cls, title: str, description: Optional[str] = None, **kwargs) -> Page:
+    def page(cls, title: str, description: str | None = None, **kwargs) -> Page:
         """
         Create a new page.
 
@@ -65,7 +65,7 @@ class LayoutBuilder:
     @classmethod
     def section(
         cls,
-        title: Optional[str] = None,
+        title: str | None = None,
         collapsible: bool = False,
         **kwargs
     ) -> Section:
@@ -88,7 +88,7 @@ class LayoutBuilder:
         return section
 
     @classmethod
-    def tabs(cls, default_tab: Optional[str] = None, **kwargs) -> Tabs:
+    def tabs(cls, default_tab: str | None = None, **kwargs) -> Tabs:
         """
         Create a tabs container.
 
@@ -107,7 +107,7 @@ class LayoutBuilder:
         return tabs
 
     @classmethod
-    def tab(cls, title: str, icon: Optional[str] = None, **kwargs) -> Tab:
+    def tab(cls, title: str, icon: str | None = None, **kwargs) -> Tab:
         """
         Create a tab.
 
@@ -127,7 +127,7 @@ class LayoutBuilder:
         return tab
 
     @classmethod
-    def row(cls, gap: Optional[str] = None, **kwargs) -> Row:
+    def row(cls, gap: str | None = None, **kwargs) -> Row:
         """
         Create a row.
 
@@ -152,7 +152,7 @@ class LayoutBuilder:
     def column(
         cls,
         weight: int = 1,
-        gap: Optional[str] = None,
+        gap: str | None = None,
         **kwargs
     ) -> Column:
         """
@@ -249,9 +249,9 @@ class LayoutBuilder:
     def widget(
         cls,
         widget_type: WidgetType,
-        title: Optional[str] = None,
-        component_alias: Optional[str] = None,
-        params: Optional[dict[str, Any]] = None,
+        title: str | None = None,
+        component_alias: str | None = None,
+        params: dict[str, Any | None] = None,
         **kwargs
     ) -> Widget:
         """

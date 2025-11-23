@@ -1,6 +1,6 @@
 """Numeric inputs (number input, slider, range)."""
 
-from typing import Literal, Optional, Tuple, Union
+from typing import Literal
 
 from pydantic import Field, BaseModel
 
@@ -13,34 +13,34 @@ from .base import Input
 
 class NumericInputConfig(BaseModel):
     """Configuration for NumericInput."""
-    min_value: Optional[float] = None
-    max_value: Optional[float] = None
-    step: Optional[float] = None
-    default: Optional[float] = None
+    min_value: float | None = None
+    max_value: float | None = None
+    step: float | None = None
+    default: float | None = None
 
 
 class SliderConfig(BaseModel):
     """Configuration for Slider."""
     min_value: float
     max_value: float
-    step: Optional[float] = None
-    default: Optional[float] = None
+    step: float | None = None
+    default: float | None = None
 
 
 class RangeSliderConfig(BaseModel):
     """Configuration for RangeSlider."""
     min_value: float
     max_value: float
-    step: Optional[float] = None
-    default: Optional[Tuple[float, float]] = None
+    step: float | None = None
+    default: tuple[float, float | None] = None
 
 
 class NumericRangeConfig(BaseModel):
     """Configuration for NumericRange."""
-    min_value: Optional[float] = None
-    max_value: Optional[float] = None
-    step: Optional[float] = None
-    default: Optional[Tuple[float, float]] = None
+    min_value: float | None = None
+    max_value: float | None = None
+    step: float | None = None
+    default: tuple[float, float | None] = None
 
 
 # ==============================================================================
@@ -54,15 +54,15 @@ class NumericInput(Input[NumericInputConfig]):
     input_type: Literal["numeric_input"] = "numeric_input"
 
     # Config fields
-    min_value: Optional[Union[int, float]] = None
-    max_value: Optional[Union[int, float]] = None
-    step: Optional[Union[int, float]] = None
-    default: Optional[Union[int, float]] = None
+    min_value: int | float | None = None
+    max_value: int | float | None = None
+    step: int | float | None = None
+    default: int | float | None = None
 
 
     # Display options
-    prefix: Optional[str] = Field(None, description="Prefix text (e.g., '$')")
-    suffix: Optional[str] = Field(None, description="Suffix text (e.g., '%')")
+    prefix: str | None = Field(None, description="Prefix text (e.g., '$')")
+    suffix: str | None = Field(None, description="Suffix text (e.g., '%')")
 
 
 class Slider(Input[SliderConfig]):
@@ -72,10 +72,10 @@ class Slider(Input[SliderConfig]):
     input_type: Literal["slider"] = "slider"
 
     # Config fields (min/max required for sliders)
-    min_value: Union[int, float] = Field(..., description="Minimum value")
-    max_value: Union[int, float] = Field(..., description="Maximum value")
-    step: Optional[Union[int, float]] = None
-    default: Optional[Union[int, float]] = None
+    min_value: int | float = Field(..., description="Minimum value")
+    max_value: int | float = Field(..., description="Maximum value")
+    step: int | float | None = None
+    default: int | float | None = None
 
 
     # Display options
@@ -90,10 +90,10 @@ class RangeSlider(Input[RangeSliderConfig]):
     input_type: Literal["range_slider"] = "range_slider"
 
     # Config fields
-    min_value: Union[int, float] = Field(..., description="Minimum value")
-    max_value: Union[int, float] = Field(..., description="Maximum value")
-    step: Optional[Union[int, float]] = None
-    default: Optional[Tuple[Union[int, float], Union[int, float]]] = None
+    min_value: int | float = Field(..., description="Minimum value")
+    max_value: int | float = Field(..., description="Maximum value")
+    step: int | float | None = None
+    default: tuple[int | float, int | float] | None = None
 
 
     # Display options
@@ -107,12 +107,12 @@ class NumericRange(Input[NumericRangeConfig]):
     input_type: Literal["numeric_range"] = "numeric_range"
 
     # Config fields
-    min_value: Optional[Union[int, float]] = None
-    max_value: Optional[Union[int, float]] = None
-    step: Optional[Union[int, float]] = None
-    default: Optional[Tuple[Union[int, float], Union[int, float]]] = None
+    min_value: int | float | None = None
+    max_value: int | float | None = None
+    step: int | float | None = None
+    default: tuple[int | float, int | float] | None = None
 
 
     # Display options
-    prefix: Optional[str] = Field(None, description="Prefix text")
-    suffix: Optional[str] = Field(None, description="Suffix text")
+    prefix: str | None = Field(None, description="Prefix text")
+    suffix: str | None = Field(None, description="Suffix text")

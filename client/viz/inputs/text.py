@@ -1,6 +1,6 @@
 """Text-based inputs (text input, textarea, search)."""
 
-from typing import Literal, Optional
+from typing import Literal
 
 from pydantic import Field, BaseModel
 
@@ -13,24 +13,24 @@ from .base import Input
 
 class TextInputConfig(BaseModel):
     """Configuration for TextInput."""
-    default: Optional[str] = None
-    min_length: Optional[int] = None
-    max_length: Optional[int] = None
-    pattern: Optional[str] = None
+    default: str | None = None
+    min_length: int | None = None
+    max_length: int | None = None
+    pattern: str | None = None
 
 
 class TextAreaConfig(BaseModel):
     """Configuration for TextArea."""
-    default: Optional[str] = None
-    min_length: Optional[int] = None
-    max_length: Optional[int] = None
+    default: str | None = None
+    min_length: int | None = None
+    max_length: int | None = None
     rows: int = 3
 
 
 class SearchInputConfig(BaseModel):
     """Configuration for SearchInput."""
-    default: Optional[str] = None
-    min_length: Optional[int] = None
+    default: str | None = None
+    min_length: int | None = None
 
 
 # ==============================================================================
@@ -44,10 +44,10 @@ class TextInput(Input[TextInputConfig]):
     input_type: Literal["text_input"] = "text_input"
 
     # Config fields
-    default: Optional[str] = None
-    min_length: Optional[int] = None
-    max_length: Optional[int] = None
-    pattern: Optional[str] = None
+    default: str | None = None
+    min_length: int | None = None
+    max_length: int | None = None
+    pattern: str | None = None
 
 
     # Display options
@@ -65,9 +65,9 @@ class TextArea(Input[TextAreaConfig]):
     input_type: Literal["textarea"] = "textarea"
 
     # Config fields
-    default: Optional[str] = None
-    min_length: Optional[int] = None
-    max_length: Optional[int] = None
+    default: str | None = None
+    min_length: int | None = None
+    max_length: int | None = None
     rows: int = 3
 
 
@@ -85,8 +85,8 @@ class SearchInput(Input[SearchInputConfig]):
     input_type: Literal["search_input"] = "search_input"
 
     # Config fields
-    default: Optional[str] = None
-    min_length: Optional[int] = None
+    default: str | None = None
+    min_length: int | None = None
 
 
     # Display options

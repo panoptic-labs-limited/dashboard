@@ -1,6 +1,6 @@
 """Date and time inputs."""
 
-from typing import Literal, Optional, Tuple, List
+from typing import Literal
 
 from pydantic import Field, BaseModel
 
@@ -13,37 +13,37 @@ from .base import Input
 
 class DateConfig(BaseModel):
     """Configuration for DateInput."""
-    min_date: Optional[str] = None
-    max_date: Optional[str] = None
-    default: Optional[str] = None
+    min_date: str | None = None
+    max_date: str | None = None
+    default: str | None = None
 
 
 class DateRangeConfig(BaseModel):
     """Configuration for DateRangeInput."""
-    min_date: Optional[str] = None
-    max_date: Optional[str] = None
-    default: Optional[Tuple[str, str]] = None
+    min_date: str | None = None
+    max_date: str | None = None
+    default: tuple[str, str | None] = None
 
 
 class TimeConfig(BaseModel):
     """Configuration for TimeInput."""
-    min_time: Optional[str] = None
-    max_time: Optional[str] = None
+    min_time: str | None = None
+    max_time: str | None = None
     step_minutes: int = 1
-    default: Optional[str] = None
+    default: str | None = None
 
 
 class DateTimeConfig(BaseModel):
     """Configuration for DateTimeInput."""
-    min_datetime: Optional[str] = None
-    max_datetime: Optional[str] = None
-    default: Optional[str] = None
+    min_datetime: str | None = None
+    max_datetime: str | None = None
+    default: str | None = None
 
 
 class RelativeDateConfig(BaseModel):
     """Configuration for RelativeDateInput."""
-    options: List[dict[str, str]]
-    default: Optional[str] = None
+    options: list[dict[str, str]]
+    default: str | None = None
     allow_custom: bool = False
 
 
@@ -58,9 +58,9 @@ class DateInput(Input[DateConfig]):
     input_type: Literal["date"] = "date"
 
     # Config fields
-    min_date: Optional[str] = None
-    max_date: Optional[str] = None
-    default: Optional[str] = None
+    min_date: str | None = None
+    max_date: str | None = None
+    default: str | None = None
 
 
     # Display options
@@ -75,14 +75,14 @@ class DateRangeInput(Input[DateRangeConfig]):
     input_type: Literal["date_range"] = "date_range"
 
     # Config fields
-    min_date: Optional[str] = None
-    max_date: Optional[str] = None
-    default: Optional[Tuple[str, str]] = None
+    min_date: str | None = None
+    max_date: str | None = None
+    default: tuple[str, str | None] = None
 
 
     # Display options
     format: str = Field("YYYY-MM-DD", description="Display format")
-    max_days: Optional[int] = Field(None, description="Maximum days in range")
+    max_days: int | None = Field(None, description="Maximum days in range")
 
 
 class TimeInput(Input[TimeConfig]):
@@ -92,10 +92,10 @@ class TimeInput(Input[TimeConfig]):
     input_type: Literal["time"] = "time"
 
     # Config fields
-    min_time: Optional[str] = None
-    max_time: Optional[str] = None
+    min_time: str | None = None
+    max_time: str | None = None
     step_minutes: int = 1
-    default: Optional[str] = None
+    default: str | None = None
 
 
     # Display options
@@ -109,9 +109,9 @@ class DateTimeInput(Input[DateTimeConfig]):
     input_type: Literal["datetime"] = "datetime"
 
     # Config fields
-    min_datetime: Optional[str] = None
-    max_datetime: Optional[str] = None
-    default: Optional[str] = None
+    min_datetime: str | None = None
+    max_datetime: str | None = None
+    default: str | None = None
 
 
     # Display options
@@ -127,6 +127,6 @@ class RelativeDateInput(Input[RelativeDateConfig]):
 
     # Config fields
     options: list[dict[str, str]] = Field(..., description="Relative date options")
-    default: Optional[str] = None
+    default: str | None = None
     allow_custom: bool = False
 

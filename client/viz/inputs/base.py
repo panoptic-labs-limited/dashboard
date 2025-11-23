@@ -50,18 +50,18 @@ class Input(LayoutNode, Generic[TConfig]):
 
     # Core fields
     name: str = Field(..., description="Parameter name (used in component bindings)")
-    label: Optional[str] = Field(None, description="Display label")
+    label: str | None = Field(None, description="Display label")
 
     # Optional fields
     required: bool = Field(True, description="Whether input is required")
     disabled: bool = Field(False, description="Whether input is disabled")
-    help_text: Optional[str] = Field(None, description="Help text or tooltip")
-    placeholder: Optional[str] = Field(None, description="Placeholder text")
+    help_text: str | None = Field(None, description="Help text or tooltip")
+    placeholder: str | None = Field(None, description="Placeholder text")
 
     # Source for dynamic configuration
     # When None, use top-level fields (static configuration)
     # When FunctionSource, execute function for dynamic configuration
-    source: Optional[FunctionSource[TConfig]] = Field(
+    source: FunctionSource[TConfig | None] = Field(
         None,
         description="Optional FunctionSource for dynamic configuration"
     )

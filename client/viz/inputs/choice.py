@@ -1,6 +1,6 @@
 """Choice-based inputs (select, multi-select, radio, checkbox)."""
 
-from typing import Literal, Optional, List, Any
+from typing import Literal, Any
 
 from pydantic import Field, field_validator, BaseModel, model_validator
 
@@ -24,8 +24,8 @@ class Option(BaseModel):
     label: str = Field(..., description="Display label for the option")
     selected: bool = Field(False, description="Pre-selected state")
     disabled: bool = Field(False, description="Disabled state")
-    icon: Optional[str] = Field(None, description="Optional icon identifier")
-    group: Optional[str] = Field(None, description="Group name for grouped options")
+    icon: str | None = Field(None, description="Optional icon identifier")
+    group: str | None = Field(None, description="Group name for grouped options")
 
     @model_validator(mode='before')
     @classmethod
@@ -53,39 +53,39 @@ class Option(BaseModel):
 
 class SelectConfig(BaseModel):
     """Configuration for Select input."""
-    options: List[Option]
-    default: Optional[Any] = None
+    options: list[Option]
+    default: Any | None = None
 
 
 class MultiSelectConfig(BaseModel):
     """Configuration for MultiSelect input."""
-    options: List[Option]
-    default: Optional[List[Any]] = None
-    max_selections: Optional[int] = None
+    options: list[Option]
+    default: list[Any | None] = None
+    max_selections: int | None = None
 
 
 class RadioGroupConfig(BaseModel):
     """Configuration for RadioGroup input."""
-    options: List[Option]
-    default: Optional[Any] = None
+    options: list[Option]
+    default: Any | None = None
 
 
 class CheckboxConfig(BaseModel):
     """Configuration for Checkbox input."""
-    default: Optional[bool] = None
+    default: bool | None = None
 
 
 class CheckboxGroupConfig(BaseModel):
     """Configuration for CheckboxGroup input."""
-    options: List[Option]
-    default: Optional[List[Any]] = None
+    options: list[Option]
+    default: list[Any | None] = None
 
 
 class ToggleConfig(BaseModel):
     """Configuration for Toggle input."""
-    default: Optional[bool] = None
-    on_label: Optional[str] = None
-    off_label: Optional[str] = None
+    default: bool | None = None
+    on_label: str | None = None
+    off_label: str | None = None
 
 
 # ==============================================================================
@@ -122,8 +122,8 @@ class Select(Input[SelectConfig]):
     input_type: Literal["select"] = "select"
 
     # Config fields (from SelectConfig)
-    options: Optional[List[Option]] = None
-    default: Optional[Any] = None
+    options: list[Option | None] = None
+    default: Any | None = None
 
     # Select-specific display options
     searchable: bool = Field(False, description="Enable search/filter in dropdown")
@@ -166,9 +166,9 @@ class MultiSelect(Input[MultiSelectConfig]):
     input_type: Literal["multi_select"] = "multi_select"
 
     # Config fields
-    options: Optional[List[Option]] = None
-    default: Optional[List[Any]] = None
-    max_selections: Optional[int] = None
+    options: list[Option | None] = None
+    default: list[Any | None] = None
+    max_selections: int | None = None
 
     # Display options
     searchable: bool = Field(False, description="Enable search/filter")
@@ -211,8 +211,8 @@ class RadioGroup(Input[RadioGroupConfig]):
     input_type: Literal["radio"] = "radio"
 
     # Config fields
-    options: Optional[List[Option]] = None
-    default: Optional[Any] = None
+    options: list[Option | None] = None
+    default: Any | None = None
 
     # Display options
     layout: Literal["vertical", "horizontal"] = Field(
@@ -250,7 +250,7 @@ class Checkbox(Input[CheckboxConfig]):
     input_type: Literal["checkbox"] = "checkbox"
 
     # Config fields
-    default: Optional[bool] = None
+    default: bool | None = None
 
     @field_validator('default')
     @classmethod
@@ -280,15 +280,15 @@ class CheckboxGroup(Input[CheckboxGroupConfig]):
     input_type: Literal["checkbox_group"] = "checkbox_group"
 
     # Config fields
-    options: Optional[List[Option]] = None
-    default: Optional[List[Any]] = None
+    options: list[Option | None] = None
+    default: list[Any | None] = None
 
     # Display options
     layout: Literal["vertical", "horizontal", "grid"] = Field(
         "vertical",
         description="Layout direction for checkboxes"
     )
-    columns: Optional[int] = Field(None, description="Number of columns for grid layout")
+    columns: int | None = Field(None, description="Number of columns for grid layout")
 
     @field_validator('options', mode='before')
     @classmethod
@@ -330,9 +330,9 @@ class Toggle(Input[ToggleConfig]):
     input_type: Literal["toggle"] = "toggle"
 
     # Config fields
-    default: Optional[bool] = None
-    on_label: Optional[str] = None
-    off_label: Optional[str] = None
+    default: bool | None = None
+    on_label: str | None = None
+    off_label: str | None = None
 
     @field_validator('default')
     @classmethod

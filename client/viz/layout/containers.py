@@ -6,9 +6,11 @@ These components can contain children and form the structure of layouts.
 
 from __future__ import annotations
 
-from typing import Union, Literal, Optional
+from typing import Literal
 
 from pydantic import Field
+
+from typing import Union
 
 from .base import Container
 from .components import Widget
@@ -27,8 +29,8 @@ class Row(Container[LayoutChild]):
     """
 
     type: Literal["row"] = "row"
-    gap: Optional[str] = Field(None, description="Gap between children (CSS)")
-    align: Optional[Literal["start", "center", "end", "stretch"]] = None
+    gap: str | None = Field(None, description="Gap between children (CSS)")
+    align: Literal["start", "center", "end", "stretch"] | None = None
 
 
 class Column(Container[LayoutChild]):
@@ -44,7 +46,7 @@ class Column(Container[LayoutChild]):
 
     type: Literal["column"] = "column"
     weight: int = Field(1, description="Relative width weight (like CSS flex-grow)", ge=1)
-    gap: Optional[str] = Field(None, description="Gap between children (CSS)")
+    gap: str | None = Field(None, description="Gap between children (CSS)")
 
 
 class Tab(Container[LayoutChild]):
@@ -56,7 +58,7 @@ class Tab(Container[LayoutChild]):
 
     type: Literal["tab"] = "tab"
     title: str
-    icon: Optional[str] = None
+    icon: str | None = None
     disabled: bool = False
 
 
@@ -68,7 +70,7 @@ class Tabs(Container['Tab']):
     """
 
     type: Literal["tabs"] = "tabs"
-    default_tab: Optional[str] = Field(
+    default_tab: str | None = Field(
         None,
         description="ID of default active tab"
     )
@@ -82,7 +84,7 @@ class Section(Container[Union['Row', 'Column', 'Tabs', Widget, Input]]):
     """
 
     type: Literal["section"] = "section"
-    title: Optional[str] = None
+    title: str | None = None
     collapsible: bool = False
     collapsed: bool = False
 
