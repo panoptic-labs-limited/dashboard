@@ -14,7 +14,6 @@ from .base import (
 from .enums import (
     WidgetType,
     InputType,
-    ColumnWidth,
 )
 
 # Components (leaf nodes)
@@ -52,7 +51,6 @@ __all__ = [
     # Enums
     "WidgetType",
     "InputType",
-    "ColumnWidth",
 
     # Components
     "Widget",

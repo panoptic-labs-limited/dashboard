@@ -8,7 +8,7 @@ for building dashboard layouts.
 from typing import Optional, List, Any
 
 from .base import Container
-from .enums import WidgetType, InputType, ColumnWidth
+from .enums import WidgetType, InputType
 from .components import Widget, Selector
 from .containers import Row, Column, Tab, Tabs, Section
 from .dashboard import Page
@@ -151,7 +151,7 @@ class LayoutBuilder:
     @classmethod
     def column(
         cls,
-        width: ColumnWidth = ColumnWidth.FULL,
+        weight: int = 1,
         gap: Optional[str] = None,
         **kwargs
     ) -> Column:
@@ -159,7 +159,7 @@ class LayoutBuilder:
         Create a column.
 
         Args:
-            width: Column width (fraction)
+            weight: Column weight for relative width (like CSS flex-grow)
             gap: Gap between children (CSS value)
             **kwargs: Additional fields
 
@@ -167,14 +167,60 @@ class LayoutBuilder:
             Column instance
 
         Example:
-            >>> col = LayoutBuilder.column(width=ColumnWidth.HALF)
+            >>> col = LayoutBuilder.column(weight=2)
 
         Note:
             If called within a context manager, automatically adds to parent.
         """
-        column = Column(width=width, gap=gap, **kwargs)
+        column = Column(weight=weight, gap=gap, **kwargs)
         cls._add_to_context(column)
         return column
+
+    @classmethod
+    def columns(cls, *weights: int) -> tuple[Column, ...]:
+        """
+        Create a row with columns of specified weights.
+
+        Returns a tuple of Column instances that can be unpacked and used
+        with context managers. The containing Row is automatically added
+        to the current context.
+
+        Args:
+            *weights: Integer weights for each column (like CSS flex-grow).
+                     E.g., columns(1, 2) creates two columns with 1/3 and 2/3 width.
+
+        Returns:
+            Tuple of Column instances
+
+        Examples:
+            # Create two equal columns
+            col1, col2 = L.columns(1, 1)
+            with col1:
+                L.widget(...)
+            with col2:
+                L.widget(...)
+
+            # Create three columns: 1/4, 1/2, 1/4
+            left, center, right = L.columns(1, 2, 1)
+
+        Note:
+            The Row is automatically added to the current context (if any).
+        """
+        if not weights:
+            raise ValueError("Must specify at least one weight")
+        if any(w < 1 for w in weights):
+            raise ValueError("Weights must be >= 1")
+
+        # Create row and add to current context
+        row = Row()
+        cls._add_to_context(row)
+
+        # Create columns with weights and add to row
+        cols = tuple(Column(weight=w) for w in weights)
+        for col in cols:
+            row.add(col)
+
+        return cols
 
     @classmethod
     def widget(

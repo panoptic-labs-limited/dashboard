@@ -9,7 +9,7 @@ from .api import RegistryClient
 # Layout components
 from .layout import (
     Dashboard, Page, Section, Row, Column, Widget, Selector,
-    Tabs, Tab, LayoutBuilder as L, ColumnWidth, WidgetType, InputType
+    Tabs, Tab, LayoutBuilder as L, WidgetType, InputType
 )
 
 # Inputs
@@ -65,7 +65,6 @@ __all__ = [
     "Tabs",
     "Tab",
     "L",
-    "ColumnWidth",
     "WidgetType",
     "InputType",
     # Inputs - Base

@@ -12,7 +12,7 @@ Demonstrates:
 from viz import (
     Component,
     L,  # LayoutBuilder fluent API
-    WidgetType, SelectorType, ColumnWidth,
+    WidgetType, SelectorType,
     RegistryClient, register_component
 )
 import plotly.express as px
@@ -144,7 +144,7 @@ def main():
         # Controls Section
         with L.section(title="Controls"):
             with L.row(gap="16px"):
-                with L.column(width=ColumnWidth.HALF):
+                with L.column(weight=1):
                     L.selector(
                         selector_type=SelectorType.DATE,
                         name="date",
@@ -152,7 +152,7 @@ def main():
                         default="2024-01-01"
                     )
 
-                with L.column(width=ColumnWidth.HALF):
+                with L.column(weight=1):
                     L.selector(
                         selector_type=SelectorType.DROPDOWN,
                         name="region",
@@ -164,7 +164,7 @@ def main():
         # Metrics Section
         with L.section(title="Metrics"):
             with L.row():
-                with L.column(width=ColumnWidth.FULL):
+                with L.column():
                     L.widget(
                         widget_type=WidgetType.METRIC,
                         title="Sales Summary",
@@ -178,7 +178,7 @@ def main():
         # Sales Chart Section
         with L.section(title="Sales Chart"):
             with L.row():
-                with L.column(width=ColumnWidth.FULL):
+                with L.column():
                     L.widget(
                         widget_type=WidgetType.CHART,
                         title="Sales by Product",
@@ -208,7 +208,8 @@ def main():
     print(f"\nDashboard '{dashboard.title}' is ready!")
     print(f"\nNew features demonstrated:")
     print(f"- ✓ Context manager API with automatic parent tracking (Streamlit-style)")
-    print(f"- ✓ Type-safe enums (WidgetType, SelectorType, ColumnWidth)")
+    print(f"- ✓ Type-safe enums (WidgetType, SelectorType)")
+    print(f"- ✓ Flexible column weights (like CSS flexbox)")
     print(f"- ✓ Component binding via aliases and params")
     print(f"- ✓ Pydantic validation and JSON serialization")
 

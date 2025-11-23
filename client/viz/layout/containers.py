@@ -9,7 +9,6 @@ from typing import Union, Literal, Optional
 from pydantic import Field
 
 from .base import Container
-from .enums import ColumnWidth
 from .components import Widget, Selector
 
 
@@ -33,11 +32,14 @@ class Column(Container):
 
     Children are arranged top-to-bottom.
     Can contain: Rows, Columns, Widgets, Selectors
+
+    Weight controls relative width when placed in a Row.
+    E.g., weights [1, 2] → columns take 1/3 and 2/3 of space.
     """
 
     type: Literal["column"] = "column"
     children: list[Union[Row, Column, Widget, Selector]] = Field(default_factory=list)
-    width: ColumnWidth = ColumnWidth.FULL
+    weight: int = Field(1, description="Relative width weight (like CSS flex-grow)", ge=1)
     gap: Optional[str] = Field(None, description="Gap between children (CSS)")
 
 
