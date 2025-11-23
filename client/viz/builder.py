@@ -8,10 +8,10 @@ for building dashboard layouts.
 from typing import Optional, List, Any
 
 from viz.layout.base import Container
-from viz.layout.components import Widget, Selector
+from viz.layout.components import Widget
 from viz.layout.containers import Row, Column, Tab, Tabs, Section
 from viz.layout.dashboard import Page
-from viz.layout.enums import WidgetType, InputType
+from viz.layout.enums import WidgetType
 
 
 class LayoutBuilder:
@@ -223,6 +223,31 @@ class LayoutBuilder:
         return cols
 
     @classmethod
+    def input(cls, input_instance):
+        """
+        Add an input to the current layout context.
+
+        Args:
+            input_instance: An input instance (Select, DateInput, etc.)
+
+        Returns:
+            The input instance (for convenience)
+
+        Example:
+            >>> from viz import Select
+            >>> region = L.input(Select(
+            ...     name="region",
+            ...     options=["North", "South"]
+            ... ))
+
+        Note:
+            The input is automatically added to the current context (if any).
+            Returns the input instance so you can store it in a variable.
+        """
+        cls._add_to_context(input_instance)
+        return input_instance
+
+    @classmethod
     def widget(
         cls,
         widget_type: WidgetType,
@@ -266,55 +291,6 @@ class LayoutBuilder:
         if parent is not None:
             parent.add(widget)
         return widget
-
-    @classmethod
-    def selector(
-        cls,
-        selector_type: InputType,
-        name: str,
-        label: str,
-        default: Any = None,
-        options: Optional[List[Any]] = None,
-        **kwargs
-    ) -> Selector:
-        """
-        Create a selector.
-
-        Args:
-            selector_type: Type of selector
-            name: Parameter name
-            label: Display label
-            default: Default value
-            options: List of options (for dropdown/multi-select)
-            **kwargs: Additional fields (config, etc.)
-
-        Returns:
-            Selector instance
-
-        Example:
-            >>> selector = LayoutBuilder.selector(
-            ...     selector_type=InputType.DROPDOWN,
-            ...     name="region",
-            ...     label="Select Region",
-            ...     options=["North", "South", "East", "West"],
-            ...     default="North"
-            ... )
-
-        Note:
-            If called within a context manager, automatically adds to parent.
-        """
-        selector = Selector(
-            selector_type=selector_type,
-            name=name,
-            label=label,
-            default=default,
-            options=options,
-            **kwargs
-        )
-        parent = cls._current_context()
-        if parent is not None:
-            parent.add(selector)
-        return selector
 
 
 # Convenience alias

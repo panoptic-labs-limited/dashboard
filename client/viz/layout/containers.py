@@ -15,7 +15,7 @@ from .components import Widget
 
 # Import BaseInput for type hints - avoid circular import with lazy import
 try:
-    from viz.inputs.base import BaseInput
+    from viz.inputs.base import Input
 except ImportError:
     # During initial import, viz.inputs might not be available yet
     BaseInput = None  # type: ignore
@@ -30,7 +30,7 @@ class Row(Container):
     """
 
     type: Literal["row"] = "row"
-    children: list[Union['Row', 'Column', Widget, BaseInput]] = Field(default_factory=list)
+    children: list[Union['Row', 'Column', Widget, Input]] = Field(default_factory=list)
     gap: Optional[str] = Field(None, description="Gap between children (CSS)")
     align: Optional[Literal["start", "center", "end", "stretch"]] = None
 
@@ -47,7 +47,7 @@ class Column(Container):
     """
 
     type: Literal["column"] = "column"
-    children: list[Union['Row', 'Column', Widget, BaseInput]] = Field(default_factory=list)
+    children: list[Union['Row', 'Column', Widget, Input]] = Field(default_factory=list)
     weight: int = Field(1, description="Relative width weight (like CSS flex-grow)", ge=1)
     gap: Optional[str] = Field(None, description="Gap between children (CSS)")
 
@@ -60,7 +60,7 @@ class Tab(Container):
     """
 
     type: Literal["tab"] = "tab"
-    children: list[Union['Row', 'Column', Widget, BaseInput]] = Field(default_factory=list)
+    children: list[Union['Row', 'Column', Widget, Input]] = Field(default_factory=list)
     title: str
     icon: Optional[str] = None
     disabled: bool = False
@@ -89,7 +89,7 @@ class Section(Container):
     """
 
     type: Literal["section"] = "section"
-    children: list[Union['Row', 'Column', Tabs, Widget, BaseInput]] = Field(default_factory=list)
+    children: list[Union['Row', 'Column', Tabs, Widget, Input]] = Field(default_factory=list)
     title: Optional[str] = None
     collapsible: bool = False
     collapsed: bool = False

@@ -14,7 +14,7 @@ from .sources import FunctionSource
 TConfig = TypeVar('TConfig', bound=BaseModel)
 
 
-class BaseInput(LayoutNode, Generic[TConfig]):
+class Input(LayoutNode, Generic[TConfig]):
     """
     Base class for all input types.
 

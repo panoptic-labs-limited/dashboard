@@ -4,7 +4,7 @@ from typing import Literal, Optional
 
 from pydantic import Field, BaseModel
 
-from .base import BaseInput
+from .base import Input
 
 
 # ==============================================================================
@@ -37,7 +37,7 @@ class SearchInputConfig(BaseModel):
 # Input Classes
 # ==============================================================================
 
-class TextInput(BaseInput[TextInputConfig]):
+class TextInput(Input[TextInputConfig]):
     """Single-line text input."""
 
     __config_class__ = TextInputConfig
@@ -58,7 +58,7 @@ class TextInput(BaseInput[TextInputConfig]):
     autocomplete: bool = Field(True, description="Enable autocomplete")
 
 
-class TextArea(BaseInput[TextAreaConfig]):
+class TextArea(Input[TextAreaConfig]):
     """Multi-line text area."""
 
     __config_class__ = TextAreaConfig
@@ -78,7 +78,7 @@ class TextArea(BaseInput[TextAreaConfig]):
     )
 
 
-class SearchInput(BaseInput[SearchInputConfig]):
+class SearchInput(Input[SearchInputConfig]):
     """Search input with debounce."""
 
     __config_class__ = SearchInputConfig

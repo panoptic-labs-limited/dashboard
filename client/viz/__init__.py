@@ -11,7 +11,7 @@ from .core import Component, DataSourceComponent, register_component, auto_regis
 from .inputs import (
     # Base
     Option,
-    BaseInput,
+    Input,
     # Sources
     FunctionSource,
     # Config models
@@ -72,7 +72,7 @@ __all__ = [
     "InputType",
     # Inputs - Base
     "Option",
-    "BaseInput",
+    "Input",
     # Inputs - Sources
     "FunctionSource",
     # Inputs - Config (commonly used)

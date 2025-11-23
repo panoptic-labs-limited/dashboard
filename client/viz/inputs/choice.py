@@ -4,7 +4,7 @@ from typing import Literal, Optional, List, Any
 
 from pydantic import Field, field_validator, BaseModel, model_validator
 
-from .base import BaseInput
+from .base import Input
 
 
 class Option(BaseModel):
@@ -92,7 +92,7 @@ class ToggleConfig(BaseModel):
 # Input Classes
 # ==============================================================================
 
-class Select(BaseInput[SelectConfig]):
+class Select(Input[SelectConfig]):
     """
     Single-selection dropdown/select input.
 
@@ -143,7 +143,7 @@ class Select(BaseInput[SelectConfig]):
         return v
 
 
-class MultiSelect(BaseInput[MultiSelectConfig]):
+class MultiSelect(Input[MultiSelectConfig]):
     """
     Multi-selection dropdown input.
 
@@ -195,7 +195,7 @@ class MultiSelect(BaseInput[MultiSelectConfig]):
         return v
 
 
-class RadioGroup(BaseInput[RadioGroupConfig]):
+class RadioGroup(Input[RadioGroupConfig]):
     """
     Radio button group input (single selection).
 
@@ -234,7 +234,7 @@ class RadioGroup(BaseInput[RadioGroupConfig]):
         return v
 
 
-class Checkbox(BaseInput[CheckboxConfig]):
+class Checkbox(Input[CheckboxConfig]):
     """
     Single boolean checkbox input.
 
@@ -261,7 +261,7 @@ class Checkbox(BaseInput[CheckboxConfig]):
         return v
 
 
-class CheckboxGroup(BaseInput[CheckboxGroupConfig]):
+class CheckboxGroup(Input[CheckboxGroupConfig]):
     """
     Group of checkboxes for multiple selections.
 
@@ -312,7 +312,7 @@ class CheckboxGroup(BaseInput[CheckboxGroupConfig]):
         return v
 
 
-class Toggle(BaseInput[ToggleConfig]):
+class Toggle(Input[ToggleConfig]):
     """
     Visual toggle switch for boolean values.
 

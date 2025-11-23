@@ -4,7 +4,7 @@ from typing import Literal, Optional, Tuple, Union
 
 from pydantic import Field, BaseModel
 
-from .base import BaseInput
+from .base import Input
 
 
 # ==============================================================================
@@ -47,7 +47,7 @@ class NumericRangeConfig(BaseModel):
 # Input Classes
 # ==============================================================================
 
-class NumericInput(BaseInput[NumericInputConfig]):
+class NumericInput(Input[NumericInputConfig]):
     """Numeric input with constraints."""
 
     __config_class__ = NumericInputConfig
@@ -65,7 +65,7 @@ class NumericInput(BaseInput[NumericInputConfig]):
     suffix: Optional[str] = Field(None, description="Suffix text (e.g., '%')")
 
 
-class Slider(BaseInput[SliderConfig]):
+class Slider(Input[SliderConfig]):
     """Visual slider for single value."""
 
     __config_class__ = SliderConfig
@@ -83,7 +83,7 @@ class Slider(BaseInput[SliderConfig]):
     show_ticks: bool = Field(False, description="Show tick marks")
 
 
-class RangeSlider(BaseInput[RangeSliderConfig]):
+class RangeSlider(Input[RangeSliderConfig]):
     """Visual slider for range (min/max)."""
 
     __config_class__ = RangeSliderConfig
@@ -100,7 +100,7 @@ class RangeSlider(BaseInput[RangeSliderConfig]):
     show_values: bool = Field(True, description="Show current values")
 
 
-class NumericRange(BaseInput[NumericRangeConfig]):
+class NumericRange(Input[NumericRangeConfig]):
     """Two numeric inputs for min/max range."""
 
     __config_class__ = NumericRangeConfig

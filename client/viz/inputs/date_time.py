@@ -4,7 +4,7 @@ from typing import Literal, Optional, Tuple, List
 
 from pydantic import Field, BaseModel
 
-from .base import BaseInput
+from .base import Input
 
 
 # ==============================================================================
@@ -51,7 +51,7 @@ class RelativeDateConfig(BaseModel):
 # Input Classes
 # ==============================================================================
 
-class DateInput(BaseInput[DateConfig]):
+class DateInput(Input[DateConfig]):
     """Date picker input."""
 
     __config_class__ = DateConfig
@@ -68,7 +68,7 @@ class DateInput(BaseInput[DateConfig]):
     first_day_of_week: Literal[0, 1] = Field(0, description="0=Sunday, 1=Monday")
 
 
-class DateRangeInput(BaseInput[DateRangeConfig]):
+class DateRangeInput(Input[DateRangeConfig]):
     """Date range picker."""
 
     __config_class__ = DateRangeConfig
@@ -85,7 +85,7 @@ class DateRangeInput(BaseInput[DateRangeConfig]):
     max_days: Optional[int] = Field(None, description="Maximum days in range")
 
 
-class TimeInput(BaseInput[TimeConfig]):
+class TimeInput(Input[TimeConfig]):
     """Time picker input."""
 
     __config_class__ = TimeConfig
@@ -102,7 +102,7 @@ class TimeInput(BaseInput[TimeConfig]):
     format_24h: bool = Field(True, description="Use 24-hour format")
 
 
-class DateTimeInput(BaseInput[DateTimeConfig]):
+class DateTimeInput(Input[DateTimeConfig]):
     """Combined date and time picker."""
 
     __config_class__ = DateTimeConfig
@@ -119,7 +119,7 @@ class DateTimeInput(BaseInput[DateTimeConfig]):
     format_24h: bool = Field(True, description="Use 24-hour format")
 
 
-class RelativeDateInput(BaseInput[RelativeDateConfig]):
+class RelativeDateInput(Input[RelativeDateConfig]):
     """Relative date range selector (last 7 days, etc.)."""
 
     __config_class__ = RelativeDateConfig
