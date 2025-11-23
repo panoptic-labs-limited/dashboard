@@ -211,14 +211,12 @@ class LayoutBuilder:
         if any(w < 1 for w in weights):
             raise ValueError("Weights must be >= 1")
 
-        # Create row and add to current context
-        row = Row()
-        cls._add_to_context(row)
-
         # Create columns with weights and add to row
         cols = tuple(Column(weight=w) for w in weights)
-        for col in cols:
-            row.add(col)
+
+        # Create row and add to current context
+        row = Row(children=cols)
+        cls._add_to_context(row)
 
         return cols
 

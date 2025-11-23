@@ -11,25 +11,25 @@ from typing import Union, Literal, Optional, List
 from pydantic import Field, field_validator
 
 from .base import Container
-from .components import Widget, Selector
+from .components import Widget
 from .containers import Section, Row, Column, Tabs
+from viz.inputs.base import Input
 
 
-class Page(Container):
+class Page(Container[Union[Section, Row, Column, Tabs, Widget, Input]]):
     """
     Page container representing a dashboard page/view.
 
-    Can contain: Sections, Rows, Columns, Tabs, Widgets, Selectors
+    Can contain: Sections, Rows, Columns, Tabs, Widgets, Inputs
     """
 
     type: Literal["page"] = "page"
-    children: list[Union[Section, Row, Column, Tabs, Widget, Selector]] = Field(default_factory=list)
     title: str
     description: Optional[str] = None
     icon: Optional[str] = None
 
 
-class Dashboard(Container):
+class Dashboard(Container['Page']):
     """
     Top-level dashboard container.
 
@@ -37,7 +37,6 @@ class Dashboard(Container):
     """
 
     type: Literal["dashboard"] = "dashboard"
-    children: list[Page] = Field(default_factory=list)
     title: str
     description: Optional[str] = None
     version: str = "1.0.0"

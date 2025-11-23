@@ -14,8 +14,11 @@ from .base import Container
 from .components import Widget
 from viz.inputs.base import Input
 
+# Type alias for standard layout children
+LayoutChild = Union['Row', 'Column', Widget, Input]
 
-class Row(Container):
+
+class Row(Container[LayoutChild]):
     """
     Horizontal layout container.
 
@@ -24,12 +27,11 @@ class Row(Container):
     """
 
     type: Literal["row"] = "row"
-    children: list[Union['Row', 'Column', Widget, Input]] = Field(default_factory=list)
     gap: Optional[str] = Field(None, description="Gap between children (CSS)")
     align: Optional[Literal["start", "center", "end", "stretch"]] = None
 
 
-class Column(Container):
+class Column(Container[LayoutChild]):
     """
     Vertical layout container.
 
@@ -41,12 +43,11 @@ class Column(Container):
     """
 
     type: Literal["column"] = "column"
-    children: list[Union['Row', 'Column', Widget, Input]] = Field(default_factory=list)
     weight: int = Field(1, description="Relative width weight (like CSS flex-grow)", ge=1)
     gap: Optional[str] = Field(None, description="Gap between children (CSS)")
 
 
-class Tab(Container):
+class Tab(Container[LayoutChild]):
     """
     Individual tab within a Tabs container.
 
@@ -54,13 +55,12 @@ class Tab(Container):
     """
 
     type: Literal["tab"] = "tab"
-    children: list[Union['Row', 'Column', Widget, Input]] = Field(default_factory=list)
     title: str
     icon: Optional[str] = None
     disabled: bool = False
 
 
-class Tabs(Container):
+class Tabs(Container['Tab']):
     """
     Tab container holding multiple Tab components.
 
@@ -68,14 +68,13 @@ class Tabs(Container):
     """
 
     type: Literal["tabs"] = "tabs"
-    children: list[Tab] = Field(default_factory=list)
     default_tab: Optional[str] = Field(
         None,
         description="ID of default active tab"
     )
 
 
-class Section(Container):
+class Section(Container[Union['Row', 'Column', 'Tabs', Widget, Input]]):
     """
     Section for organizing content within a Page.
 
@@ -83,7 +82,6 @@ class Section(Container):
     """
 
     type: Literal["section"] = "section"
-    children: list[Union['Row', 'Column', Tabs, Widget, Input]] = Field(default_factory=list)
     title: Optional[str] = None
     collapsible: bool = False
     collapsed: bool = False
