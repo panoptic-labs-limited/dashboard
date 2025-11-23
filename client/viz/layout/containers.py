@@ -12,13 +12,7 @@ from pydantic import Field
 
 from .base import Container
 from .components import Widget
-
-# Import BaseInput for type hints - avoid circular import with lazy import
-try:
-    from viz.inputs.base import Input
-except ImportError:
-    # During initial import, viz.inputs might not be available yet
-    BaseInput = None  # type: ignore
+from viz.inputs.base import Input
 
 
 class Row(Container):
