@@ -1,32 +1,20 @@
 """
-Base classes for layout framework.
+Container class for layout framework.
 
-Provides the foundational LayoutNode and Container classes that all
-layout components inherit from.
+Provides the Container class that layout components use for managing children.
+LayoutNode has been moved to viz/core/layout.py to avoid circular imports.
 """
 
 from __future__ import annotations
 from typing import TypeVar, Generic, Iterator
-from pydantic import BaseModel, Field, ConfigDict
-import uuid
+from pydantic import Field
+
+from viz.core.layout import LayoutNode
 
 
 # ============================================================================
-# Base Classes
+# Container Class
 # ============================================================================
-
-class LayoutNode(BaseModel):
-    """Base class for all layout nodes."""
-
-    model_config = ConfigDict(
-        extra='forbid',
-        use_enum_values=True,
-        validate_assignment=True
-    )
-
-    id: str = Field(default_factory=lambda: f"layout_{uuid.uuid4().hex[:8]}")
-    type: str = Field(..., description="Discriminator for union types")
-
 
 T = TypeVar('T', bound=LayoutNode)
 
@@ -79,7 +67,7 @@ class Container(LayoutNode, Generic[T]):
         created within the context are automatically added.
         """
         # Import here to avoid circular dependency
-        from .builder import LayoutBuilder
+        from viz.builder import LayoutBuilder
         LayoutBuilder._push_context(self)
         return self
 
@@ -89,5 +77,5 @@ class Container(LayoutNode, Generic[T]):
 
         Pops this container from the context stack.
         """
-        from .builder import LayoutBuilder
+        from viz.builder import LayoutBuilder
         LayoutBuilder._pop_context()

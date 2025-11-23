@@ -7,11 +7,11 @@ for building dashboard layouts.
 
 from typing import Optional, List, Any
 
-from .base import Container
-from .enums import WidgetType, InputType
-from .components import Widget, Selector
-from .containers import Row, Column, Tab, Tabs, Section
-from .dashboard import Page
+from viz.layout.base import Container
+from viz.layout.enums import WidgetType, InputType
+from viz.layout.components import Widget, Selector
+from viz.layout.containers import Row, Column, Tab, Tabs, Section
+from viz.layout.dashboard import Page
 
 
 class LayoutBuilder:

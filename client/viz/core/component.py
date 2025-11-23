@@ -1,46 +1,27 @@
 """Base Component class for creating dashboard components."""
 
-from abc import ABC, ABCMeta, abstractmethod
-from dataclasses import dataclass, fields as get_dataclass_fields, MISSING
-from typing import Any, Dict, Optional
+from abc import ABC, abstractmethod
+from typing import Any, Dict
+from pydantic import BaseModel, ConfigDict
 import inspect
 
 
-class ComponentMeta(ABCMeta):
+class Component(BaseModel, ABC):
     """
-    Metaclass that automatically applies @dataclass to Component subclasses.
+    Base class for all dashboard components using Pydantic.
 
-    This allows users to define components with clean field annotations
-    without needing to explicitly use @dataclass decorator.
-    """
-    def __new__(mcs, name, bases, namespace):
-        cls = super().__new__(mcs, name, bases, namespace)
-
-        # Auto-apply dataclass if the class has field annotations
-        # (but not for the base Component class itself)
-        if '__annotations__' in namespace and namespace['__annotations__'] and name != 'Component':
-            # Apply dataclass with kw_only to make all params keyword-only
-            cls = dataclass(kw_only=True)(cls)
-
-        return cls
-
-
-class Component(ABC, metaclass=ComponentMeta):
-    """
-    Base class for all dashboard components.
-
-    Users extend this class, define parameters as class fields,
+    Users extend this class, define parameters as Pydantic fields,
     and implement three methods:
     - load(): Fetch/load data from a source
     - transform(): Process/transform the loaded data
     - render(): Create visualization from transformed data
 
-    The metaclass automatically converts subclasses to dataclasses,
-    so you don't need to use @dataclass decorator.
+    Pydantic provides automatic validation, serialization, and type checking
+    for component parameters.
 
     Example:
         class SalesChart(Component):
-            # Parameters as class fields (automatically become constructor params)
+            # Parameters as Pydantic fields (automatically validated)
             start_date: str
             region: str
 
@@ -57,6 +38,11 @@ class Component(ABC, metaclass=ComponentMeta):
         # Usage:
         chart = SalesChart(start_date="2024-01-01", region="North")
     """
+
+    model_config = ConfigDict(
+        arbitrary_types_allowed=True,  # Allow non-Pydantic types in methods
+        extra='forbid',  # Prevent extra fields
+    )
 
     @abstractmethod
     def load(self) -> Any:
@@ -124,48 +110,36 @@ class Component(ABC, metaclass=ComponentMeta):
     @classmethod
     def get_parameters(cls) -> Dict[str, Any]:
         """
-        Extract parameters from the dataclass fields.
+        Extract parameters from the Pydantic model fields.
 
         Returns:
-            Dict mapping parameter names to their type annotations
+            Dict mapping parameter names to their type annotations and metadata
         """
         params = {}
 
-        # If this is a dataclass, get fields from it
-        if hasattr(cls, '__dataclass_fields__'):
-            for field_name, field_obj in cls.__dataclass_fields__.items():
-                param_info = {
-                    "name": field_name,
-                    "required": field_obj.default == MISSING and field_obj.default_factory == MISSING,
-                }
+        # Get fields from Pydantic model
+        for field_name, field_info in cls.model_fields.items():
+            param_info = {
+                "name": field_name,
+                "required": field_info.is_required(),
+            }
 
-                # Get type annotation
-                type_str = str(field_obj.type)
-                # Clean up the type string
-                type_str = type_str.replace("<class '", "").replace("'>", "")
-                type_str = type_str.replace("typing.", "")
-                param_info["type"] = type_str
+            # Get type annotation
+            type_str = str(field_info.annotation)
+            # Clean up the type string
+            type_str = type_str.replace("<class '", "").replace("'>", "")
+            type_str = type_str.replace("typing.", "")
+            param_info["type"] = type_str
 
-                # Get default value
-                if field_obj.default != MISSING:
-                    param_info["default"] = field_obj.default
-                elif field_obj.default_factory != MISSING:
+            # Get default value if present
+            if not field_info.is_required():
+                # Pydantic stores defaults in field_info.default
+                if field_info.default is not None:
+                    param_info["default"] = field_info.default
+                elif field_info.default_factory is not None:
                     param_info["default_factory"] = True
 
-                params[field_name] = param_info
-        else:
-            # Fallback: extract from class annotations
-            annotations = getattr(cls, '__annotations__', {})
-            for param_name, param_type in annotations.items():
-                type_str = str(param_type)
-                type_str = type_str.replace("<class '", "").replace("'>", "")
-                type_str = type_str.replace("typing.", "")
-
-                params[param_name] = {
-                    "name": param_name,
-                    "type": type_str,
-                    "required": True,
-                }
+            params[field_name] = param_info
 
         return params
 

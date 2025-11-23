@@ -5,10 +5,8 @@ Type-safe, hierarchical layout system using Pydantic.
 """
 
 # Base classes
-from .base import (
-    LayoutNode,
-    Container,
-)
+from viz.core.layout import LayoutNode
+from .base import Container
 
 # Enums
 from .enums import (
@@ -37,8 +35,8 @@ from .dashboard import (
     Dashboard,
 )
 
-# Builder utilities
-from .builder import (
+# Builder utilities (moved to top-level viz.builder)
+from viz.builder import (
     LayoutBuilder,
     L,  # Convenience alias
 )
