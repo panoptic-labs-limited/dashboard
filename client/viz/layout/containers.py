@@ -62,7 +62,7 @@ class Tab(Container[LayoutChild]):
     disabled: bool = False
 
 
-class Tabs(Container['Tab']):
+class Tabs(Container[Tab]):
     """
     Tab container holding multiple Tab components.
 
@@ -76,7 +76,7 @@ class Tabs(Container['Tab']):
     )
 
 
-class Section(Container[Union['Row', 'Column', 'Tabs', Widget, Input]]):
+class Section(Container[Union[Row, Column, Tabs, Widget, Input]]):
     """
     Section for organizing content within a Page.
 
@@ -87,10 +87,3 @@ class Section(Container[Union['Row', 'Column', 'Tabs', Widget, Input]]):
     title: str | None = None
     collapsible: bool = False
     collapsed: bool = False
-
-
-# Resolve forward references
-Row.model_rebuild()
-Column.model_rebuild()
-Tab.model_rebuild()
-Section.model_rebuild()

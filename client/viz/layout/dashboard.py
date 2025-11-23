@@ -69,7 +69,3 @@ class Dashboard(Container['Page']):
         page = Page(title=title, description=description, **kwargs)
         self.add(page)
         return page
-
-
-# Resolve forward references
-Page.model_rebuild()
