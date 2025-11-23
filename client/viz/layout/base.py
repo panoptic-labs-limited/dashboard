@@ -80,3 +80,17 @@ class Container(LayoutNode, Generic[T]):
         """
         from viz.builder import LayoutBuilder
         LayoutBuilder._pop_context()
+
+
+class LeafNode(LayoutNode):
+    """
+    Base class for leaf nodes in the layout tree.
+
+    Leaf nodes do not contain children. Examples include:
+    - Widget
+    - Selector/Input
+
+    This class exists to differentiate leaf nodes from container nodes.
+    """
+
+    pass

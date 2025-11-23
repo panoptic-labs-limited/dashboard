@@ -1,20 +1,20 @@
 """
-Leaf components (Widget and Selector).
+Leaf components (Widget).
 
 These are terminal nodes in the layout tree that don't contain children.
 """
 
 from __future__ import annotations
 
-from typing import Literal, Optional, List, Any
+from typing import Literal, Any
 
 from pydantic import Field
 
-from .base import LayoutNode
-from .enums import WidgetType, InputType
+from .base import LeafNode
+from .enums import WidgetType
 
 
-class Widget(LayoutNode):
+class Widget(LeafNode):
     """
     Leaf node representing a visualization or content widget.
 
@@ -23,30 +23,12 @@ class Widget(LayoutNode):
 
     type: Literal["widget"] = "widget"
     widget_type: WidgetType
-    title: Optional[str] = None
-    description: Optional[str] = None
+    title: str | None = None
+    description: str | None = None
 
     # Component reference
-    component_alias: Optional[str] = None
+    component_alias: str | None = None
     params: dict[str, Any] = Field(default_factory=dict)
 
     # Widget-specific configuration
-    config: dict[str, Any] = Field(default_factory=dict)
-
-
-class Selector(LayoutNode):
-    """
-    Leaf node for user input components.
-
-    Examples: dropdowns, date pickers, sliders
-    """
-
-    type: Literal["selector"] = "selector"
-    input_type: InputType
-    name: str = Field(..., description="Parameter name")
-    label: str
-    default: Any = None
-    options: Optional[List[Any]] = None
-
-    # Selector-specific configuration
     config: dict[str, Any] = Field(default_factory=dict)

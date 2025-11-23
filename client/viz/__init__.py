@@ -43,8 +43,8 @@ from .inputs import (
 )
 # Layout components
 from .layout import (
-    Dashboard, Page, Section, Row, Column, Widget, Selector,
-    Tabs, Tab, WidgetType, InputType
+    Dashboard, Page, Section, Row, Column, Widget,
+    Tabs, Tab, WidgetType
 )
 
 __all__ = [
@@ -61,7 +61,6 @@ __all__ = [
     "Row",
     "Column",
     "Widget",
-    "Selector",
     "Tabs",
     "Tab",
     # Builder
@@ -69,7 +68,6 @@ __all__ = [
     "L",
     # Enums
     "WidgetType",
-    "InputType",
     # Inputs - Base
     "Option",
     "Input",

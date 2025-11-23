@@ -7,17 +7,14 @@ These components can contain children and form the structure of layouts.
 from __future__ import annotations
 
 from typing import Literal
+from typing import Union
 
 from pydantic import Field
 
-from typing import Union
-
-from .base import Container
-from .components import Widget
-from viz.inputs.base import Input
+from .base import Container, LeafNode
 
 # Type alias for standard layout children
-LayoutChild = Union['Row', 'Column', Widget, Input]
+LayoutChild = Union['Row', 'Column', LeafNode]
 
 
 class Row(Container[LayoutChild]):
@@ -76,7 +73,7 @@ class Tabs(Container[Tab]):
     )
 
 
-class Section(Container[Union[Row, Column, Tabs, Widget, Input]]):
+class Section(Container[Union[Row, Column, Tabs, LeafNode]]):
     """
     Section for organizing content within a Page.
 

@@ -32,3 +32,16 @@ class LayoutNode(BaseModel):
 
     id: str = Field(default_factory=lambda: f"layout_{uuid.uuid4().hex[:8]}")
     type: str = Field(..., description="Discriminator for union types")
+
+class LeafNode(LayoutNode):
+    """
+    Base class for leaf nodes in the layout tree.
+
+    Leaf nodes do not contain children. Examples include:
+    - Widget
+    - Selector/Input
+
+    This class exists to differentiate leaf nodes from container nodes.
+    """
+
+    pass
