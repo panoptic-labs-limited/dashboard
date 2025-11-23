@@ -1,7 +1,9 @@
 """API client for communicating with the Viz Function Registry."""
 
-import httpx
 from typing import Optional, Dict, Any, List
+
+import httpx
+
 from viz_shared import (
     ComponentCreate,
     ComponentResponse,

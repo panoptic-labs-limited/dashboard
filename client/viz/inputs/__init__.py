@@ -1,35 +1,18 @@
 """Comprehensive input components for dashboards."""
 
 # Base classes
-from .base import Option, BaseInput
-
-# Sources
-from .sources import FunctionSource
-
-# Config models (for type hints and schemas)
-from .config import (
+from .base import BaseInput
+# Choice-based inputs and configs
+from .choice import (
+    # Config models
+    Option,
     SelectConfig,
     MultiSelectConfig,
     RadioGroupConfig,
     CheckboxConfig,
     CheckboxGroupConfig,
     ToggleConfig,
-    TextInputConfig,
-    TextAreaConfig,
-    SearchInputConfig,
-    NumericInputConfig,
-    SliderConfig,
-    RangeSliderConfig,
-    NumericRangeConfig,
-    DateConfig,
-    DateRangeConfig,
-    TimeConfig,
-    DateTimeConfig,
-    RelativeDateConfig,
-)
-
-# Choice-based inputs
-from .choice import (
+    # Input classes
     Select,
     MultiSelect,
     RadioGroup,
@@ -37,29 +20,46 @@ from .choice import (
     CheckboxGroup,
     Toggle,
 )
-
-# Text inputs
-from .text import (
-    TextInput,
-    TextArea,
-    SearchInput,
-)
-
-# Numeric inputs
-from .numeric import (
-    NumericInput,
-    Slider,
-    RangeSlider,
-    NumericRange,
-)
-
-# Date/time inputs
+# Date/time inputs and configs
 from .date_time import (
+    # Config models
+    DateConfig,
+    DateRangeConfig,
+    TimeConfig,
+    DateTimeConfig,
+    RelativeDateConfig,
+    # Input classes
     DateInput,
     DateRangeInput,
     TimeInput,
     DateTimeInput,
     RelativeDateInput,
+)
+# Numeric inputs and configs
+from .numeric import (
+    # Config models
+    NumericInputConfig,
+    SliderConfig,
+    RangeSliderConfig,
+    NumericRangeConfig,
+    # Input classes
+    NumericInput,
+    Slider,
+    RangeSlider,
+    NumericRange,
+)
+# Sources
+from .sources import FunctionSource
+# Text inputs and configs
+from .text import (
+    # Config models
+    TextInputConfig,
+    TextAreaConfig,
+    SearchInputConfig,
+    # Input classes
+    TextInput,
+    TextArea,
+    SearchInput,
 )
 
 __all__ = [

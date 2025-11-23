@@ -1,8 +1,9 @@
 """Component registration utilities."""
 
 from typing import Type, Optional
-from viz.core.component import Component
+
 from viz.api.client import RegistryClient
+from viz.core.component import Component
 from viz_shared import ComponentMetadata, ComponentParameter
 
 

@@ -5,7 +5,9 @@ These are terminal nodes in the layout tree that don't contain children.
 """
 
 from __future__ import annotations
+
 from typing import Literal, Optional, List, Any
+
 from pydantic import Field
 
 from .base import LayoutNode

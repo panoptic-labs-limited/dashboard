@@ -6,11 +6,12 @@ LayoutNode has been moved to viz/core/layout.py to avoid circular imports.
 """
 
 from __future__ import annotations
+
 from typing import TypeVar, Generic, Iterator
+
 from pydantic import Field
 
 from viz.core.layout import LayoutNode
-
 
 # ============================================================================
 # Container Class

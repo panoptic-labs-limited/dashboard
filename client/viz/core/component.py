@@ -1,9 +1,10 @@
 """Base Component class for creating dashboard components."""
 
+import inspect
 from abc import ABC, abstractmethod
 from typing import Any, Dict
+
 from pydantic import BaseModel, ConfigDict
-import inspect
 
 
 class Component(BaseModel, ABC):

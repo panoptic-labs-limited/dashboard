@@ -8,10 +8,10 @@ for building dashboard layouts.
 from typing import Optional, List, Any
 
 from viz.layout.base import Container
-from viz.layout.enums import WidgetType, InputType
 from viz.layout.components import Widget, Selector
 from viz.layout.containers import Row, Column, Tab, Tabs, Section
 from viz.layout.dashboard import Page
+from viz.layout.enums import WidgetType, InputType
 
 
 class LayoutBuilder:

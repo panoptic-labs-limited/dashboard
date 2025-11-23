@@ -5,11 +5,13 @@ These components can contain children and form the structure of layouts.
 """
 
 from __future__ import annotations
-from typing import Union, Literal, Optional, TYPE_CHECKING
+
+from typing import Union, Literal, Optional
+
 from pydantic import Field
 
 from .base import Container
-from .components import Widget, Selector
+from .components import Widget
 
 # Import BaseInput for type hints - avoid circular import with lazy import
 try:

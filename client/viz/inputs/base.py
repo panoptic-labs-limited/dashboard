@@ -1,51 +1,14 @@
 """Base classes for inputs."""
 
 from __future__ import annotations
-from typing import Any, Optional, TypeVar, Generic, Type, ClassVar, Union
-from pydantic import BaseModel, Field, model_validator
+
 import uuid
+from typing import Optional, TypeVar, Generic, Type, ClassVar
+
+from pydantic import BaseModel, Field, model_validator
 
 from viz.core.layout import LayoutNode
 from .sources import FunctionSource
-class Option(BaseModel):
-    """
-    Represents a selectable option.
-
-    Can be constructed from:
-    - Simple value: "north"
-    - Dict: {"value": "north", "label": "North Region"}
-    - Dict with selected: {"value": "north", "label": "North", "selected": True}
-    - Explicit: Option(value="north", label="North Region")
-
-    Future fields: disabled, icon, group for advanced UI features.
-    """
-
-    value: Any = Field(..., description="The actual option value")
-    label: str = Field(..., description="Display label for the option")
-    selected: bool = Field(False, description="Pre-selected state")
-    disabled: bool = Field(False, description="Disabled state")
-    icon: Optional[str] = Field(None, description="Optional icon identifier")
-    group: Optional[str] = Field(None, description="Group name for grouped options")
-
-    @model_validator(mode='before')
-    @classmethod
-    def normalize_input(cls, data):
-        """
-        Normalize various input formats to dict.
-
-        Handles:
-        - dict with value/label
-        - simple value → {value: x, label: str(x)}
-        """
-        if isinstance(data, dict):
-            # If label not provided, use value as label
-            if 'label' not in data and 'value' in data:
-                data['label'] = str(data['value'])
-            return data
-
-        # Simple value - use as both value and label
-        return {'value': data, 'label': str(data)}
-
 
 # Generic type variable for config models
 TConfig = TypeVar('TConfig', bound=BaseModel)

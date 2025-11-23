@@ -6,8 +6,10 @@ and input components inherit from.
 """
 
 from __future__ import annotations
-from pydantic import BaseModel, Field, ConfigDict
+
 import uuid
+
+from pydantic import BaseModel, Field, ConfigDict
 
 
 class LayoutNode(BaseModel):

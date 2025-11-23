@@ -1,12 +1,41 @@
 """Text-based inputs (text input, textarea, search)."""
 
 from typing import Literal, Optional
-from pydantic import Field, field_validator
+
+from pydantic import Field, BaseModel
 
 from .base import BaseInput
-from .config import TextInputConfig, TextAreaConfig, SearchInputConfig
-from .sources import FunctionSource
 
+
+# ==============================================================================
+# Config Models
+# ==============================================================================
+
+class TextInputConfig(BaseModel):
+    """Configuration for TextInput."""
+    default: Optional[str] = None
+    min_length: Optional[int] = None
+    max_length: Optional[int] = None
+    pattern: Optional[str] = None
+
+
+class TextAreaConfig(BaseModel):
+    """Configuration for TextArea."""
+    default: Optional[str] = None
+    min_length: Optional[int] = None
+    max_length: Optional[int] = None
+    rows: int = 3
+
+
+class SearchInputConfig(BaseModel):
+    """Configuration for SearchInput."""
+    default: Optional[str] = None
+    min_length: Optional[int] = None
+
+
+# ==============================================================================
+# Input Classes
+# ==============================================================================
 
 class TextInput(BaseInput[TextInputConfig]):
     """Single-line text input."""

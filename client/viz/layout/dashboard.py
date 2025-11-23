@@ -5,7 +5,9 @@ These are the main entry points for building dashboards.
 """
 
 from __future__ import annotations
+
 from typing import Union, Literal, Optional, List
+
 from pydantic import Field, field_validator
 
 from .base import Container

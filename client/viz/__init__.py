@@ -2,16 +2,11 @@
 
 __version__ = "0.1.0"
 
+from .api import RegistryClient
+# Builder utilities
+from .builder import LayoutBuilder, L
 # Core components
 from .core import Component, DataSourceComponent, register_component, auto_register_components
-from .api import RegistryClient
-
-# Layout components
-from .layout import (
-    Dashboard, Page, Section, Row, Column, Widget, Selector,
-    Tabs, Tab, LayoutBuilder as L, WidgetType, InputType
-)
-
 # Inputs
 from .inputs import (
     # Base
@@ -46,6 +41,11 @@ from .inputs import (
     DateTimeInput,
     RelativeDateInput,
 )
+# Layout components
+from .layout import (
+    Dashboard, Page, Section, Row, Column, Widget, Selector,
+    Tabs, Tab, WidgetType, InputType
+)
 
 __all__ = [
     # Core
@@ -64,7 +64,10 @@ __all__ = [
     "Selector",
     "Tabs",
     "Tab",
+    # Builder
+    "LayoutBuilder",
     "L",
+    # Enums
     "WidgetType",
     "InputType",
     # Inputs - Base

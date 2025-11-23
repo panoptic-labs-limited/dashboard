@@ -12,7 +12,7 @@ Demonstrates:
 from viz import (
     Component,
     L,  # LayoutBuilder fluent API
-    WidgetType, SelectorType,
+    WidgetType, InputType,
     RegistryClient, register_component
 )
 import plotly.express as px
@@ -146,7 +146,7 @@ def main():
             with L.row(gap="16px"):
                 with L.column(weight=1):
                     L.selector(
-                        selector_type=SelectorType.DATE,
+                        selector_type=InputType.DATE,
                         name="date",
                         label="Report Date",
                         default="2024-01-01"
@@ -154,7 +154,7 @@ def main():
 
                 with L.column(weight=1):
                     L.selector(
-                        selector_type=SelectorType.DROPDOWN,
+                        selector_type=InputType.SELECT,
                         name="region",
                         label="Region",
                         options=["North", "South", "East", "West"],
@@ -208,7 +208,7 @@ def main():
     print(f"\nDashboard '{dashboard.title}' is ready!")
     print(f"\nNew features demonstrated:")
     print(f"- ✓ Context manager API with automatic parent tracking (Streamlit-style)")
-    print(f"- ✓ Type-safe enums (WidgetType, SelectorType)")
+    print(f"- ✓ Type-safe enums (WidgetType, InputType)")
     print(f"- ✓ Flexible column weights (like CSS flexbox)")
     print(f"- ✓ Component binding via aliases and params")
     print(f"- ✓ Pydantic validation and JSON serialization")

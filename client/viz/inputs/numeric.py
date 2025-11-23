@@ -1,12 +1,51 @@
 """Numeric inputs (number input, slider, range)."""
 
 from typing import Literal, Optional, Tuple, Union
-from pydantic import Field, model_validator
+
+from pydantic import Field, BaseModel
 
 from .base import BaseInput
-from .config import NumericInputConfig, SliderConfig, RangeSliderConfig, NumericRangeConfig
-from .sources import FunctionSource
 
+
+# ==============================================================================
+# Config Models
+# ==============================================================================
+
+class NumericInputConfig(BaseModel):
+    """Configuration for NumericInput."""
+    min_value: Optional[float] = None
+    max_value: Optional[float] = None
+    step: Optional[float] = None
+    default: Optional[float] = None
+
+
+class SliderConfig(BaseModel):
+    """Configuration for Slider."""
+    min_value: float
+    max_value: float
+    step: Optional[float] = None
+    default: Optional[float] = None
+
+
+class RangeSliderConfig(BaseModel):
+    """Configuration for RangeSlider."""
+    min_value: float
+    max_value: float
+    step: Optional[float] = None
+    default: Optional[Tuple[float, float]] = None
+
+
+class NumericRangeConfig(BaseModel):
+    """Configuration for NumericRange."""
+    min_value: Optional[float] = None
+    max_value: Optional[float] = None
+    step: Optional[float] = None
+    default: Optional[Tuple[float, float]] = None
+
+
+# ==============================================================================
+# Input Classes
+# ==============================================================================
 
 class NumericInput(BaseInput[NumericInputConfig]):
     """Numeric input with constraints."""

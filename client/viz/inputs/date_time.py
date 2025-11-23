@@ -1,12 +1,55 @@
 """Date and time inputs."""
 
-from typing import Literal, Optional, Tuple
-from pydantic import Field
+from typing import Literal, Optional, Tuple, List
+
+from pydantic import Field, BaseModel
 
 from .base import BaseInput
-from .config import DateConfig, DateRangeConfig, TimeConfig, DateTimeConfig, RelativeDateConfig
-from .sources import FunctionSource
 
+
+# ==============================================================================
+# Config Models
+# ==============================================================================
+
+class DateConfig(BaseModel):
+    """Configuration for DateInput."""
+    min_date: Optional[str] = None
+    max_date: Optional[str] = None
+    default: Optional[str] = None
+
+
+class DateRangeConfig(BaseModel):
+    """Configuration for DateRangeInput."""
+    min_date: Optional[str] = None
+    max_date: Optional[str] = None
+    default: Optional[Tuple[str, str]] = None
+
+
+class TimeConfig(BaseModel):
+    """Configuration for TimeInput."""
+    min_time: Optional[str] = None
+    max_time: Optional[str] = None
+    step_minutes: int = 1
+    default: Optional[str] = None
+
+
+class DateTimeConfig(BaseModel):
+    """Configuration for DateTimeInput."""
+    min_datetime: Optional[str] = None
+    max_datetime: Optional[str] = None
+    default: Optional[str] = None
+
+
+class RelativeDateConfig(BaseModel):
+    """Configuration for RelativeDateInput."""
+    options: List[dict[str, str]]
+    default: Optional[str] = None
+    allow_custom: bool = False
+
+
+# ==============================================================================
+# Input Classes
+# ==============================================================================
 
 class DateInput(BaseInput[DateConfig]):
     """Date picker input."""

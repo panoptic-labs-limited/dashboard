@@ -5,6 +5,7 @@ Currently supports function-based sources for dynamic configuration.
 """
 
 from typing import Generic, TypeVar, Callable, Any, Literal
+
 from pydantic import BaseModel, Field
 
 T = TypeVar('T')
