@@ -51,82 +51,52 @@ class RelativeDateConfig(BaseModel):
 # Input Classes
 # ==============================================================================
 
-class DateInput(Input[DateConfig]):
+class DateInput(DateConfig, Input[DateConfig]):
     """Date picker input."""
 
     __config_class__ = DateConfig
     input_type: Literal["date"] = "date"
 
-    # Config fields
-    min_date: str | None = None
-    max_date: str | None = None
-    default: str | None = None
-
-
-    # Display options
+    # Display options (config fields inherited from DateConfig)
     format: str = Field("YYYY-MM-DD", description="Display format")
     first_day_of_week: Literal[0, 1] = Field(0, description="0=Sunday, 1=Monday")
 
 
-class DateRangeInput(Input[DateRangeConfig]):
+class DateRangeInput(DateRangeConfig, Input[DateRangeConfig]):
     """Date range picker."""
 
     __config_class__ = DateRangeConfig
     input_type: Literal["date_range"] = "date_range"
 
-    # Config fields
-    min_date: str | None = None
-    max_date: str | None = None
-    default: tuple[str, str | None] = None
-
-
-    # Display options
+    # Display options (config fields inherited from DateRangeConfig)
     format: str = Field("YYYY-MM-DD", description="Display format")
     max_days: int | None = Field(None, description="Maximum days in range")
 
 
-class TimeInput(Input[TimeConfig]):
+class TimeInput(TimeConfig, Input[TimeConfig]):
     """Time picker input."""
 
     __config_class__ = TimeConfig
     input_type: Literal["time"] = "time"
 
-    # Config fields
-    min_time: str | None = None
-    max_time: str | None = None
-    step_minutes: int = 1
-    default: str | None = None
-
-
-    # Display options
+    # Display options (config fields inherited from TimeConfig)
     format_24h: bool = Field(True, description="Use 24-hour format")
 
 
-class DateTimeInput(Input[DateTimeConfig]):
+class DateTimeInput(DateTimeConfig, Input[DateTimeConfig]):
     """Combined date and time picker."""
 
     __config_class__ = DateTimeConfig
     input_type: Literal["datetime"] = "datetime"
 
-    # Config fields
-    min_datetime: str | None = None
-    max_datetime: str | None = None
-    default: str | None = None
-
-
-    # Display options
+    # Display options (config fields inherited from DateTimeConfig)
     format: str = Field("YYYY-MM-DD HH:mm", description="Display format")
     format_24h: bool = Field(True, description="Use 24-hour format")
 
 
-class RelativeDateInput(Input[RelativeDateConfig]):
+class RelativeDateInput(RelativeDateConfig, Input[RelativeDateConfig]):
     """Relative date range selector (last 7 days, etc.)."""
 
     __config_class__ = RelativeDateConfig
     input_type: Literal["relative_date"] = "relative_date"
-
-    # Config fields
-    options: list[dict[str, str]] = Field(..., description="Relative date options")
-    default: str | None = None
-    allow_custom: bool = False
 

@@ -37,20 +37,13 @@ class SearchInputConfig(BaseModel):
 # Input Classes
 # ==============================================================================
 
-class TextInput(Input[TextInputConfig]):
+class TextInput(TextInputConfig, Input[TextInputConfig]):
     """Single-line text input."""
 
     __config_class__ = TextInputConfig
     input_type: Literal["text_input"] = "text_input"
 
-    # Config fields
-    default: str | None = None
-    min_length: int | None = None
-    max_length: int | None = None
-    pattern: str | None = None
-
-
-    # Display options
+    # Display options (config fields inherited from TextInputConfig)
     input_type_html: Literal["text", "email", "url", "tel"] = Field(
         "text",
         description="HTML input type"
@@ -58,38 +51,26 @@ class TextInput(Input[TextInputConfig]):
     autocomplete: bool = Field(True, description="Enable autocomplete")
 
 
-class TextArea(Input[TextAreaConfig]):
+class TextArea(TextAreaConfig, Input[TextAreaConfig]):
     """Multi-line text area."""
 
     __config_class__ = TextAreaConfig
     input_type: Literal["textarea"] = "textarea"
 
-    # Config fields
-    default: str | None = None
-    min_length: int | None = None
-    max_length: int | None = None
-    rows: int = 3
-
-
-    # Display options
+    # Display options (config fields inherited from TextAreaConfig)
     resize: Literal["none", "vertical", "horizontal", "both"] = Field(
         "vertical",
         description="Resize behavior"
     )
 
 
-class SearchInput(Input[SearchInputConfig]):
+class SearchInput(SearchInputConfig, Input[SearchInputConfig]):
     """Search input with debounce."""
 
     __config_class__ = SearchInputConfig
     input_type: Literal["search_input"] = "search_input"
 
-    # Config fields
-    default: str | None = None
-    min_length: int | None = None
-
-
-    # Display options
+    # Display options (config fields inherited from SearchInputConfig)
     clear_button: bool = Field(True, description="Show clear button")
     debounce_ms: int = Field(
         300,

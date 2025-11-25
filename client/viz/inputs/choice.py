@@ -92,7 +92,7 @@ class ToggleConfig(BaseModel):
 # Input Classes
 # ==============================================================================
 
-class Select(Input[SelectConfig]):
+class Select(SelectConfig, Input[SelectConfig]):
     """
     Single-selection dropdown/select input.
 
@@ -121,11 +121,7 @@ class Select(Input[SelectConfig]):
     __config_class__ = SelectConfig
     input_type: Literal["select"] = "select"
 
-    # Config fields (from SelectConfig)
-    options: list[Option | None] = None
-    default: Any | None = None
-
-    # Select-specific display options
+    # Display options (config fields inherited from SelectConfig)
     searchable: bool = Field(False, description="Enable search/filter in dropdown")
     clear_button: bool = Field(False, description="Show clear button")
 
@@ -143,7 +139,7 @@ class Select(Input[SelectConfig]):
         return v
 
 
-class MultiSelect(Input[MultiSelectConfig]):
+class MultiSelect(MultiSelectConfig, Input[MultiSelectConfig]):
     """
     Multi-selection dropdown input.
 
@@ -195,7 +191,7 @@ class MultiSelect(Input[MultiSelectConfig]):
         return v
 
 
-class RadioGroup(Input[RadioGroupConfig]):
+class RadioGroup(RadioGroupConfig, Input[RadioGroupConfig]):
     """
     Radio button group input (single selection).
 
@@ -234,7 +230,7 @@ class RadioGroup(Input[RadioGroupConfig]):
         return v
 
 
-class Checkbox(Input[CheckboxConfig]):
+class Checkbox(CheckboxConfig, Input[CheckboxConfig]):
     """
     Single boolean checkbox input.
 
@@ -248,10 +244,6 @@ class Checkbox(Input[CheckboxConfig]):
 
     __config_class__ = CheckboxConfig
     input_type: Literal["checkbox"] = "checkbox"
-
-    # Config fields
-    default: bool | None = None
-
     @field_validator('default')
     @classmethod
     def validate_default_is_bool(cls, v):
@@ -261,7 +253,7 @@ class Checkbox(Input[CheckboxConfig]):
         return v
 
 
-class CheckboxGroup(Input[CheckboxGroupConfig]):
+class CheckboxGroup(CheckboxGroupConfig, Input[CheckboxGroupConfig]):
     """
     Group of checkboxes for multiple selections.
 
@@ -312,7 +304,7 @@ class CheckboxGroup(Input[CheckboxGroupConfig]):
         return v
 
 
-class Toggle(Input[ToggleConfig]):
+class Toggle(ToggleConfig, Input[ToggleConfig]):
     """
     Visual toggle switch for boolean values.
 
@@ -328,11 +320,6 @@ class Toggle(Input[ToggleConfig]):
 
     __config_class__ = ToggleConfig
     input_type: Literal["toggle"] = "toggle"
-
-    # Config fields
-    default: bool | None = None
-    on_label: str | None = None
-    off_label: str | None = None
 
     @field_validator('default')
     @classmethod
