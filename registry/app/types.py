@@ -50,16 +50,7 @@ class WidgetType(str, Enum):
     CUSTOM = "custom"
 
 
-class ColumnWidth(str, Enum):
-    """Standard column widths."""
-    FULL = "1/1"
-    HALF = "1/2"
-    THIRD = "1/3"
-    TWO_THIRDS = "2/3"
-    QUARTER = "1/4"
-    THREE_QUARTERS = "3/4"
-    SIXTH = "1/6"
-    FIVE_SIXTHS = "5/6"
+# Column width is now represented as weight (integer), not enum
 
 
 class RenderOutputType(str, Enum):

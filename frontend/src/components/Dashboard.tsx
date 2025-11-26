@@ -23,9 +23,8 @@ import type {
   SectionSchema,
   RowSchema,
   ColumnSchema,
-  SelectorLayoutSchema,
   WidgetSchema,
-  SelectorSchema,
+  InputSchema,
 } from '../types/dashboard';
 
 interface DashboardProps {
@@ -34,61 +33,55 @@ interface DashboardProps {
 
 export const Dashboard: React.FC<DashboardProps> = ({ dashboardName }) => {
   const { data: dashboard, isLoading, error } = useDashboard(dashboardName);
-  const [selectorValues, setSelectorValues] = useState<Record<string, any>>({});
+  const [inputValues, setInputValues] = useState<Record<string, any>>({});
   const [selectedPageId, setSelectedPageId] = useState<string>('');
   const [collapsedSections, setCollapsedSections] = useState<Set<string>>(new Set());
 
-  // Extract all selectors from dashboard structure
-  const selectors = useMemo(() => {
+  // Extract all inputs from dashboard structure
+  const inputs = useMemo(() => {
     if (!dashboard) return [];
-    const selectorList: Array<{ id: string; selector: SelectorSchema }> = [];
+    const inputList: Array<InputSchema> = [];
 
-    const extractSelectors = (node: any) => {
+    const extractInputs = (node: any) => {
       if (!node) return;
 
-      if (node.type === 'selector' && node.selector) {
-        selectorList.push({ id: node.id, selector: node.selector });
+      if (node.type === 'input') {
+        inputList.push(node as InputSchema);
       }
 
       // Recursively search children
       if (node.children && Array.isArray(node.children)) {
-        node.children.forEach(extractSelectors);
-      }
-      if (node.sections && Array.isArray(node.sections)) {
-        node.sections.forEach(extractSelectors);
-      }
-      if (node.pages && Array.isArray(node.pages)) {
-        node.pages.forEach(extractSelectors);
+        node.children.forEach(extractInputs);
       }
     };
 
-    extractSelectors(dashboard.structure);
-    return selectorList;
+    extractInputs(dashboard.structure);
+    return inputList;
   }, [dashboard]);
 
-  // Initialize selector values with defaults
+  // Initialize input values with defaults
   useEffect(() => {
-    if (selectors.length > 0 && Object.keys(selectorValues).length === 0) {
+    if (inputs.length > 0 && Object.keys(inputValues).length === 0) {
       const defaults: Record<string, any> = {};
-      selectors.forEach(({ selector }) => {
-        if (selector.default !== undefined && selector.default !== null) {
-          defaults[selector.name] = selector.default;
+      inputs.forEach((input) => {
+        if (input.default !== undefined && input.default !== null) {
+          defaults[input.id] = input.default;
         }
       });
-      setSelectorValues(defaults);
+      setInputValues(defaults);
     }
-  }, [selectors]);
+  }, [inputs]);
 
   // Set initial page selection
   useEffect(() => {
-    if (dashboard && !selectedPageId && dashboard.structure.pages.length > 0) {
-      setSelectedPageId(dashboard.structure.pages[0].id);
+    if (dashboard && !selectedPageId && dashboard.structure.children && dashboard.structure.children.length > 0) {
+      setSelectedPageId(dashboard.structure.children[0].id);
     }
   }, [dashboard, selectedPageId]);
 
-  // Handle selector value change
-  const handleSelectorChange = (name: string, value: any) => {
-    setSelectorValues(prev => ({ ...prev, [name]: value }));
+  // Handle input value change
+  const handleInputChange = (id: string, value: any) => {
+    setInputValues(prev => ({ ...prev, [id]: value }));
   };
 
   // Toggle section collapse
@@ -104,36 +97,35 @@ export const Dashboard: React.FC<DashboardProps> = ({ dashboardName }) => {
     });
   };
 
-  // Render selector
-  const renderSelector = (selectorLayout: SelectorLayoutSchema) => {
-    const { selector } = selectorLayout;
-    const value = selectorValues[selector.name];
+  // Render input
+  const renderInput = (input: InputSchema) => {
+    const value = inputValues[input.id];
 
-    switch (selector.selector_type) {
+    switch (input.input_type) {
       case 'date':
         return (
           <DateSelectorComponent
-            key={selectorLayout.id}
-            selector={selector}
+            key={input.id}
+            selector={input as any} // TODO: Update component to use InputSchema
             value={value || null}
-            onChange={(val) => handleSelectorChange(selector.name, val)}
+            onChange={(val) => handleInputChange(input.id, val)}
           />
         );
 
-      case 'dropdown':
+      case 'select':
         return (
           <DropdownSelectorComponent
-            key={selectorLayout.id}
-            selector={selector}
+            key={input.id}
+            selector={input as any} // TODO: Update component to use InputSchema
             value={value || null}
-            onChange={(val) => handleSelectorChange(selector.name, val)}
+            onChange={(val) => handleInputChange(input.id, val)}
           />
         );
 
       default:
         return (
-          <div key={selectorLayout.id}>
-            Unsupported selector type: {selector.selector_type}
+          <div key={input.id}>
+            Unsupported input type: {input.input_type}
           </div>
         );
     }
@@ -142,11 +134,11 @@ export const Dashboard: React.FC<DashboardProps> = ({ dashboardName }) => {
   // Render widget
   const renderWidget = (widget: WidgetSchema) => {
     return (
-      <div key={widget.id} style={{ gridColumn: '1 / -1' }}>
+      <div key={widget.id}>
         <WidgetContainer
           dashboardName={dashboardName}
           widget={widget}
-          selectorValues={selectorValues}
+          inputValues={inputValues}
         />
       </div>
     );
@@ -158,15 +150,15 @@ export const Dashboard: React.FC<DashboardProps> = ({ dashboardName }) => {
       <div
         key={column.id}
         style={{
-          gridColumn: column.width ? `span ${getColumnSpan(column.width)}` : '1 / -1',
+          flex: column.weight || 1,
         }}
       >
         <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
           {column.children.map(child => {
             if (child.type === 'widget') {
               return renderWidget(child as WidgetSchema);
-            } else if (child.type === 'selector') {
-              // Skip rendering selectors in the layout - they're already in the selector panel
+            } else if (child.type === 'input') {
+              // Skip rendering inputs in the layout - they're already in the input panel
               return null;
             } else if (child.type === 'row') {
               return renderRow(child as RowSchema);
@@ -184,9 +176,9 @@ export const Dashboard: React.FC<DashboardProps> = ({ dashboardName }) => {
       <div
         key={row.id}
         style={{
-          display: 'grid',
-          gridTemplateColumns: 'repeat(12, 1fr)',
-          gap: '20px',
+          display: 'flex',
+          gap: row.gap || '20px',
+          alignItems: row.align || 'stretch',
         }}
       >
         {row.children.map(renderColumn)}
@@ -264,7 +256,16 @@ export const Dashboard: React.FC<DashboardProps> = ({ dashboardName }) => {
         {page.description && (
           <Callout style={{ marginBottom: '20px' }}>{page.description}</Callout>
         )}
-        {page.sections.map(renderSection)}
+        {page.children && page.children.map(child => {
+          if (child.type === 'section') {
+            return renderSection(child as SectionSchema);
+          } else if (child.type === 'row') {
+            return renderRow(child as RowSchema);
+          } else if (child.type === 'column') {
+            return renderColumn(child as ColumnSchema);
+          }
+          return null;
+        })}
       </div>
     );
   };
@@ -311,7 +312,8 @@ export const Dashboard: React.FC<DashboardProps> = ({ dashboardName }) => {
     return null;
   }
 
-  const selectedPage = dashboard.structure.pages.find(p => p.id === selectedPageId);
+  const pages = dashboard.structure.children || [];
+  const selectedPage = pages.find(p => p.id === selectedPageId);
 
   return (
     <div style={{ padding: '20px', maxWidth: '1400px', margin: '0 auto' }}>
@@ -327,30 +329,30 @@ export const Dashboard: React.FC<DashboardProps> = ({ dashboardName }) => {
         )}
       </div>
 
-      {/* Selector panel */}
-      {selectors.length > 0 && (
+      {/* Input panel */}
+      {inputs.length > 0 && (
         <Card elevation={Elevation.TWO} style={{ marginBottom: '20px', padding: '20px' }}>
           <div style={{
             display: 'grid',
             gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))',
             gap: '20px',
           }}>
-            {selectors.map(({ id, selector }) => (
-              <div key={id}>{renderSelector({ id, type: 'selector', selector })}</div>
+            {inputs.map((input) => (
+              <div key={input.id}>{renderInput(input)}</div>
             ))}
           </div>
         </Card>
       )}
 
       {/* Pages (tabs) */}
-      {dashboard.structure.pages.length > 1 ? (
+      {pages.length > 1 ? (
         <Tabs
           id="dashboard-pages"
           selectedTabId={selectedPageId}
           onChange={(newTabId) => setSelectedPageId(newTabId as string)}
           renderActiveTabPanelOnly={false}
         >
-          {dashboard.structure.pages.map(page => (
+          {pages.map(page => (
             <Tab key={page.id} id={page.id} title={page.title} panel={renderPage(page)} />
           ))}
         </Tabs>

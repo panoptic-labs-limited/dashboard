@@ -186,7 +186,7 @@ class RegistryClient:
 
     def _register_component(self, component: Component, alias: str) -> Dict[str, Any]:
         """
-        Register a component with the registry (PUT for idempotent update).
+        Register a component with the registry (POST for creation).
 
         Args:
             component: Component instance
@@ -197,8 +197,8 @@ class RegistryClient:
         """
         component_data = serialize_component(component, alias)
 
-        response = self.client.put(
-            f"{self.base_url}/components/{alias}",
+        response = self.client.post(
+            f"{self.base_url}/components/",
             json=component_data,
             headers=self._get_headers()
         )

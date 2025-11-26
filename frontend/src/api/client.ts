@@ -3,7 +3,7 @@
  */
 
 import axios, { type AxiosInstance } from 'axios';
-import type { DashboardResponse, DashboardRenderRequest, DashboardRenderResponse } from '../types/dashboard';
+import type { DashboardResponse, DashboardRenderResponse } from '../types/dashboard';
 
 export class VizApiClient {
   private client: AxiosInstance;
@@ -66,14 +66,14 @@ export class VizApiClient {
   }
 
   /**
-   * Render a dashboard with selector values.
+   * Render a dashboard with input values.
    */
   async renderDashboard(
     name: string,
-    selectorValues: Record<string, any>
+    inputValues: Record<string, any>
   ): Promise<DashboardRenderResponse> {
-    const request: DashboardRenderRequest = {
-      selector_values: selectorValues,
+    const request = {
+      input_values: inputValues,
     };
 
     const response = await this.client.post<DashboardRenderResponse>(
@@ -85,12 +85,12 @@ export class VizApiClient {
   }
 
   /**
-   * Render an individual widget with selector values.
+   * Render an individual widget with input values.
    */
   async renderWidget(
     dashboardName: string,
     widgetId: string,
-    selectorValues: Record<string, any>
+    inputValues: Record<string, any>
   ): Promise<{
     widget_id: string;
     component_alias: string;
@@ -101,7 +101,7 @@ export class VizApiClient {
     const response = await this.client.post(
       `/dashboard/${dashboardName}/component/${widgetId}/render`,
       {
-        selector_values: selectorValues,
+        input_values: inputValues,
       }
     );
 

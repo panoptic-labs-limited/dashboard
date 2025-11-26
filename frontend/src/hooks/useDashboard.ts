@@ -18,17 +18,17 @@ export function useDashboard(name: string) {
 }
 
 /**
- * Render dashboard with selector values.
+ * Render dashboard with input values.
  */
 export function useRenderDashboard(name: string) {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: (selectorValues: Record<string, any>) =>
-      apiClient.renderDashboard(name, selectorValues),
+    mutationFn: (inputValues: Record<string, any>) =>
+      apiClient.renderDashboard(name, inputValues),
     onSuccess: (data) => {
       // Cache the render result
-      queryClient.setQueryData(['dashboard-render', name, data.selector_values], data);
+      queryClient.setQueryData(['dashboard-render', name, data.input_values], data);
     },
   });
 }
@@ -36,28 +36,28 @@ export function useRenderDashboard(name: string) {
 /**
  * Get cached dashboard render result or fetch if not available.
  */
-export function useDashboardRender(name: string, selectorValues: Record<string, any>) {
+export function useDashboardRender(name: string, inputValues: Record<string, any>) {
   return useQuery({
-    queryKey: ['dashboard-render', name, selectorValues],
-    queryFn: () => apiClient.renderDashboard(name, selectorValues),
-    enabled: !!name && Object.keys(selectorValues).length > 0,
+    queryKey: ['dashboard-render', name, inputValues],
+    queryFn: () => apiClient.renderDashboard(name, inputValues),
+    enabled: !!name && Object.keys(inputValues).length > 0,
     staleTime: 0, // Always consider stale to allow manual refresh
   });
 }
 
 /**
- * Render an individual widget with selector values.
+ * Render an individual widget with input values.
  */
 export function useWidgetRender(
   dashboardName: string,
   widgetId: string,
-  selectorValues: Record<string, any>,
+  inputValues: Record<string, any>,
   enabled: boolean = true
 ) {
   return useQuery({
-    queryKey: ['widget-render', dashboardName, widgetId, selectorValues],
-    queryFn: () => apiClient.renderWidget(dashboardName, widgetId, selectorValues),
-    enabled: enabled && !!dashboardName && !!widgetId && Object.keys(selectorValues).length > 0,
+    queryKey: ['widget-render', dashboardName, widgetId, inputValues],
+    queryFn: () => apiClient.renderWidget(dashboardName, widgetId, inputValues),
+    enabled: enabled && !!dashboardName && !!widgetId,
     staleTime: 0,
   });
 }

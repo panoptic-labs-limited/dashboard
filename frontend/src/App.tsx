@@ -104,7 +104,7 @@ function App() {
   return (
     <QueryClientProvider client={queryClient}>
       <div style={{ minHeight: '100vh', background: '#f5f8fa' }}>
-        <Dashboard dashboardName="sales_dashboard" />
+        <Dashboard dashboardName="plotly_datasets" />
       </div>
     </QueryClientProvider>
   );

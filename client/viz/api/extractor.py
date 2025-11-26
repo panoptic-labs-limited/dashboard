@@ -74,7 +74,7 @@ class ComponentExtractor:
 
         # Handle Widgets (check for Component instances)
         elif isinstance(node, Widget):
-            if node.component:
+            if node.component is not None:
                 self._extract_component(node.component)
 
         # Recursively traverse containers

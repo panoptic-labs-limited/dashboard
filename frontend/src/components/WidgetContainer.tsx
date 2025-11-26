@@ -12,18 +12,18 @@ import type { WidgetSchema } from '../types/dashboard';
 interface WidgetContainerProps {
   dashboardName: string;
   widget: WidgetSchema;
-  selectorValues: Record<string, any>;
+  inputValues: Record<string, any>;
 }
 
 export const WidgetContainer: React.FC<WidgetContainerProps> = ({
   dashboardName,
   widget,
-  selectorValues,
+  inputValues,
 }) => {
   const { data: renderResult, isLoading, error } = useWidgetRender(
     dashboardName,
     widget.id,
-    selectorValues
+    inputValues
   );
 
   if (isLoading || !renderResult) {

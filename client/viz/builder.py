@@ -250,6 +250,7 @@ class LayoutBuilder:
         cls,
         widget_type: WidgetType,
         title: str | None = None,
+        component: Any | None = None,
         component_alias: str | None = None,
         params: dict[str, Any | None] = None,
         **kwargs
@@ -260,7 +261,8 @@ class LayoutBuilder:
         Args:
             widget_type: Type of widget
             title: Optional widget title
-            component_alias: Alias of component to render
+            component: Component instance to render
+            component_alias: Alias of component (deprecated, use component instead)
             params: Component parameters
             **kwargs: Additional fields (description, config, etc.)
 
@@ -271,7 +273,7 @@ class LayoutBuilder:
             >>> widget = LayoutBuilder.widget(
             ...     widget_type=WidgetType.CHART,
             ...     title="Sales Chart",
-            ...     component_alias="sales_chart",
+            ...     component=MyComponent(),
             ...     params={"region": "North"}
             ... )
 
@@ -281,6 +283,7 @@ class LayoutBuilder:
         widget = Widget(
             widget_type=widget_type,
             title=title,
+            component=component,
             component_alias=component_alias,
             params=params or {},
             **kwargs
