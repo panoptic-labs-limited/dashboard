@@ -251,7 +251,6 @@ class LayoutBuilder:
         widget_type: WidgetType,
         title: str | None = None,
         component: Any | None = None,
-        component_alias: str | None = None,
         params: dict[str, Any | None] = None,
         **kwargs
     ) -> Widget:
@@ -261,8 +260,7 @@ class LayoutBuilder:
         Args:
             widget_type: Type of widget
             title: Optional widget title
-            component: Component instance to render
-            component_alias: Alias of component (deprecated, use component instead)
+            component: Component class (Type[Component]) or alias (str)
             params: Component parameters
             **kwargs: Additional fields (description, config, etc.)
 
@@ -273,8 +271,8 @@ class LayoutBuilder:
             >>> widget = LayoutBuilder.widget(
             ...     widget_type=WidgetType.CHART,
             ...     title="Sales Chart",
-            ...     component=MyComponent(),
-            ...     params={"region": "North"}
+            ...     component=MyComponent,  # Pass class not instance
+            ...     params={"region": region_input}
             ... )
 
         Note:
@@ -284,7 +282,6 @@ class LayoutBuilder:
             widget_type=widget_type,
             title=title,
             component=component,
-            component_alias=component_alias,
             params=params or {},
             **kwargs
         )

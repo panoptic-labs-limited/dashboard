@@ -47,9 +47,9 @@ class ComponentExtractor:
         self.component_map: Dict[type, str] = {}  # Component class → alias
         self.function_map: Dict[Any, str] = {}     # Function → alias
 
-        # Lists of instances (for serialization)
-        self.components: List[Tuple[Component, str]] = []  # (instance, alias)
-        self.functions: List[Tuple[Any, str]] = []          # (function, alias)
+        # Lists of classes/functions (for serialization)
+        self.components: List[Tuple[type, str]] = []  # (Component class, alias)
+        self.functions: List[Tuple[Any, str]] = []     # (function, alias)
 
     def extract(self) -> None:
         """
@@ -72,40 +72,42 @@ class ComponentExtractor:
             if node.source and isinstance(node.source, FunctionSource):
                 self._extract_function_source(node.source)
 
-        # Handle Widgets (check for Component instances)
+        # Handle Widgets (check for Component class or string alias)
         elif isinstance(node, Widget):
-            if node.component is not None:
-                self._extract_component(node.component)
+            if node.component is not None and not isinstance(node.component, str):
+                # Only extract if it's a Component class (not a string alias)
+                self._extract_component_class(node.component)
 
         # Recursively traverse containers
         if isinstance(node, Container) and hasattr(node, 'children'):
             for child in node.children:
                 self._traverse(child)
 
-    def _extract_component(self, component: Component) -> None:
+    def _extract_component_class(self, component_class: type) -> None:
         """
-        Extract a Component instance.
+        Extract a Component class.
 
         Args:
-            component: Component instance from a Widget
+            component_class: Component class (Type[Component]) from a Widget
         """
-        cls = component.__class__
-
         # Skip if already extracted
-        if cls in self._component_classes:
+        if component_class in self._component_classes:
             return
 
         # Get component alias
-        if hasattr(cls, '__id__'):
-            alias = cls.__id__
+        if hasattr(component_class, '__id__'):
+            alias = component_class.__id__
         else:
-            # Fallback to lowercase class name
-            alias = cls.__name__.lower()
+            # Fallback: convert class name to snake_case
+            import re
+            name = component_class.__name__
+            s1 = re.sub('(.)([A-Z][a-z]+)', r'\1_\2', name)
+            alias = re.sub('([a-z0-9])([A-Z])', r'\1_\2', s1).lower()
 
-        # Record component
-        self._component_classes.add(cls)
-        self.component_map[cls] = alias
-        self.components.append((component, alias))
+        # Record component class
+        self._component_classes.add(component_class)
+        self.component_map[component_class] = alias
+        self.components.append((component_class, alias))
 
     def _extract_function_source(self, source: FunctionSource) -> None:
         """
@@ -139,12 +141,12 @@ class ComponentExtractor:
                     if param_value.source and isinstance(param_value.source, FunctionSource):
                         self._extract_function_source(param_value.source)
 
-    def get_components(self) -> List[Tuple[Component, str]]:
+    def get_components(self) -> List[Tuple[type, str]]:
         """
         Get list of extracted components.
 
         Returns:
-            List of (Component instance, alias) tuples
+            List of (Component class, alias) tuples
         """
         return self.components
 
@@ -157,12 +159,12 @@ class ComponentExtractor:
         """
         return self.functions
 
-    def get_component_alias(self, component: Component) -> str:
+    def get_component_alias(self, component_class: type) -> str:
         """
-        Get the alias for a component instance.
+        Get the alias for a component class.
 
         Args:
-            component: Component instance
+            component_class: Component class
 
         Returns:
             Component alias
@@ -170,8 +172,7 @@ class ComponentExtractor:
         Raises:
             KeyError: If component not found (should call extract() first)
         """
-        cls = component.__class__
-        return self.component_map[cls]
+        return self.component_map[component_class]
 
     def get_function_alias(self, func: Any) -> str:
         """

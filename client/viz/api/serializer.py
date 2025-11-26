@@ -69,29 +69,27 @@ def serialize_input(input_obj: Input) -> Dict[str, Any]:
     return data
 
 
-def serialize_component(component: Component, alias: str) -> Dict[str, Any]:
+def serialize_component(component_class: type, alias: str) -> Dict[str, Any]:
     """
-    Serialize a Component instance to ComponentCreate schema.
+    Serialize a Component class to ComponentCreate schema.
 
     Extracts source code and parameter definitions from a Component class.
 
     Args:
-        component: Component instance
+        component_class: Component class (Type[Component])
         alias: Unique identifier for this component
 
     Returns:
         Dictionary matching ComponentCreate schema
     """
-    cls = component.__class__
-
     return {
         "alias": alias,
-        "class_name": cls.get_class_name(),
-        "source_code": cls.get_source_code(),
-        "description": cls.__doc__.strip() if cls.__doc__ else None,
-        "parameters": _extract_component_parameters(cls),
+        "class_name": component_class.get_class_name(),
+        "source_code": component_class.get_source_code(),
+        "description": component_class.__doc__.strip() if component_class.__doc__ else None,
+        "parameters": _extract_component_parameters(component_class),
         "metadata": {
-            "name": cls.__name__,
+            "name": component_class.__name__,
             "version": "1.0.0",
             "tags": []
         },
@@ -137,7 +135,7 @@ def serialize_widget(widget: Widget, input_map: Dict[str, str]) -> Dict[str, Any
     """
     Serialize a Widget to API schema format.
 
-    Converts Widget with Component instance to schema with component_alias and
+    Converts Widget with Component class/alias to schema with component_alias and
     parameter bindings.
 
     Args:
@@ -156,11 +154,15 @@ def serialize_widget(widget: Widget, input_map: Dict[str, str]) -> Dict[str, Any
         "config": widget.config or {}
     }
 
-    # Extract component_alias from Component instance or use existing alias
-    component_alias = widget.component_alias
+    # Get component alias from either class or string
+    component_alias = None
     if widget.component is not None:
-        # Get alias from Component instance (use snake_case of class name)
-        component_alias = _get_component_alias(widget.component.__class__)
+        if isinstance(widget.component, str):
+            # String alias provided directly
+            component_alias = widget.component
+        else:
+            # Component class provided - extract alias
+            component_alias = _get_component_alias(widget.component)
 
     if component_alias:
         data["component_alias"] = component_alias

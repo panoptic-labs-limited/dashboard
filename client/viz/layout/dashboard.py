@@ -29,7 +29,7 @@ class Page(Container[Union[Section, Row, Column, Tabs, Widget, Input]]):
     icon: str | None = None
 
 
-class Dashboard(Container['Page']):
+class Dashboard(Container[Page]):
     """
     Top-level dashboard container.
 

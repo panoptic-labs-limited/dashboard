@@ -328,7 +328,7 @@ with dashboard.page(id="gapminder", title="Gapminder Analysis", icon="🌍"):
                 L.widget(
                     widget_type=WidgetType.CHART,
                     title="Trends Over Time",
-                    component=GapminderTrends(),
+                    component=GapminderTrends,
                     params={
                         "continent": continent_input,
                         "show_population": show_pop_input
@@ -373,7 +373,7 @@ with dashboard.page(id="gapminder", title="Gapminder Analysis", icon="🌍"):
                 L.widget(
                     widget_type=WidgetType.CHART,
                     title="Country Metrics",
-                    component=CountryComparison(),
+                    component=CountryComparison,
                     params={
                         "countries": countries_input,
                         "year": year_input,
@@ -417,7 +417,7 @@ with dashboard.page(id="iris", title="Iris Dataset", icon="🌸"):
                 L.widget(
                     widget_type=WidgetType.CHART,
                     title="Species Classification",
-                    component=IrisClassification(),
+                    component=IrisClassification,
                     params={
                         "x_axis": x_axis_input,
                         "y_axis": y_axis_input
@@ -458,7 +458,7 @@ with dashboard.page(id="tips", title="Restaurant Tips", icon="💵"):
                 L.widget(
                     widget_type=WidgetType.CHART,
                     title="Tip Distribution",
-                    component=TipsAnalysis(),
+                    component=TipsAnalysis,
                     params={
                         "groupby": groupby_input,
                         "min_tip": min_tip_input
@@ -492,7 +492,7 @@ with dashboard.page(id="stocks", title="Stock Prices", icon="📈"):
                 L.widget(
                     widget_type=WidgetType.CHART,
                     title="Price Trends",
-                    component=StockPriceChart(),
+                    component=StockPriceChart,
                     params={
                         "stocks": stocks_input
                     }

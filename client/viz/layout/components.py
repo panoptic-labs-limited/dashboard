@@ -6,9 +6,9 @@ These are terminal nodes in the layout tree that don't contain children.
 
 from __future__ import annotations
 
-from typing import Literal, Any, TYPE_CHECKING
+from typing import Literal, Any, Type, TYPE_CHECKING
 
-from pydantic import Field
+from pydantic import Field, model_validator, field_serializer
 
 from .base import LeafNode
 from .enums import WidgetType
@@ -29,17 +29,23 @@ class Widget(LeafNode):
     title: str | None = None
     description: str | None = None
 
-    # Component reference (instance, not alias string)
-    # Using default=None instead of exclude=True to keep the field accessible
-    component: Component | None = Field(default=None, repr=False)
-    component_alias: str | None = None  # Will be populated during serialization
+    # Component reference - either a class or string alias
+    # Type[Component] for local components (will be auto-registered)
+    # str for pre-registered components (referenced by alias)
+    component: Type[Component] | str | None = Field(default=None, repr=False)
     params: dict[str, Any] = Field(default_factory=dict)
 
-    def model_dump(self, **kwargs):
-        """Override to exclude component field from serialization."""
-        data = super().model_dump(**kwargs)
-        data.pop('component', None)
-        return data
+    @model_validator(mode='after')
+    def validate_component(self):
+        """Ensure component is provided."""
+        if self.component is None:
+            raise ValueError("Widget must have a component")
+        return self
+
+    @field_serializer('component')
+    def serialize_component(self, component: Type['Component'] | str | None, _info):
+        """Exclude component from serialization - it's handled separately by the serializer."""
+        return None
 
     # Widget-specific configuration
     config: dict[str, Any] = Field(default_factory=dict)

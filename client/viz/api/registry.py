@@ -184,24 +184,34 @@ class RegistryClient:
         response.raise_for_status()
         return response.json()
 
-    def _register_component(self, component: Component, alias: str) -> Dict[str, Any]:
+    def _register_component(self, component_class: type, alias: str) -> Dict[str, Any]:
         """
-        Register a component with the registry (POST for creation).
+        Register a component with the registry (PUT for upsert).
 
         Args:
-            component: Component instance
+            component_class: Component class (Type[Component])
             alias: Component alias
 
         Returns:
             Registration response
         """
-        component_data = serialize_component(component, alias)
+        component_data = serialize_component(component_class, alias)
 
-        response = self.client.post(
-            f"{self.base_url}/components/",
+        # Try PUT first (update existing), fallback to POST (create new)
+        response = self.client.put(
+            f"{self.base_url}/components/{alias}",
             json=component_data,
             headers=self._get_headers()
         )
+
+        if response.status_code == 404:
+            # Component doesn't exist, create it
+            response = self.client.post(
+                f"{self.base_url}/components/",
+                json=component_data,
+                headers=self._get_headers()
+            )
+
         response.raise_for_status()
         return response.json()
 
