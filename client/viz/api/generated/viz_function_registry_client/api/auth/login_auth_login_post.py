@@ -70,7 +70,7 @@ def sync_detailed(
      Login and get access token.
 
     Args:
-        body (LoginRequest):
+        body (LoginRequest): Schema for login request.
 
     Raises:
         errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
@@ -101,7 +101,7 @@ def sync(
      Login and get access token.
 
     Args:
-        body (LoginRequest):
+        body (LoginRequest): Schema for login request.
 
     Raises:
         errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
@@ -127,7 +127,7 @@ async def asyncio_detailed(
      Login and get access token.
 
     Args:
-        body (LoginRequest):
+        body (LoginRequest): Schema for login request.
 
     Raises:
         errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
@@ -156,7 +156,7 @@ async def asyncio(
      Login and get access token.
 
     Args:
-        body (LoginRequest):
+        body (LoginRequest): Schema for login request.
 
     Raises:
         errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.

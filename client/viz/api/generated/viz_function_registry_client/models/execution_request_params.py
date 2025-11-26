@@ -11,7 +11,7 @@ T = TypeVar("T", bound="ExecutionRequestParams")
 
 @_attrs_define
 class ExecutionRequestParams:
-    """Function parameters"""
+    """ """
 
     additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
 

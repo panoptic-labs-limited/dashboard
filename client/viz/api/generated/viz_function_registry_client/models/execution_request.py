@@ -17,9 +17,10 @@ T = TypeVar("T", bound="ExecutionRequest")
 
 @_attrs_define
 class ExecutionRequest:
-    """
+    """Request to execute a function.
+
     Attributes:
-        params (ExecutionRequestParams | Unset): Function parameters
+        params (ExecutionRequestParams | Unset):
     """
 
     params: ExecutionRequestParams | Unset = UNSET

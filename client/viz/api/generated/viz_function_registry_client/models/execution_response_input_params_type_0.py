@@ -6,60 +6,28 @@ from typing import Any, TypeVar
 from attrs import define as _attrs_define
 from attrs import field as _attrs_field
 
-T = TypeVar("T", bound="UserCreate")
+T = TypeVar("T", bound="ExecutionResponseInputParamsType0")
 
 
 @_attrs_define
-class UserCreate:
-    """Schema for creating a new user.
+class ExecutionResponseInputParamsType0:
+    """ """
 
-    Attributes:
-        username (str):
-        email (str):
-        password (str):
-    """
-
-    username: str
-    email: str
-    password: str
     additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
 
     def to_dict(self) -> dict[str, Any]:
-        username = self.username
-
-        email = self.email
-
-        password = self.password
-
         field_dict: dict[str, Any] = {}
         field_dict.update(self.additional_properties)
-        field_dict.update(
-            {
-                "username": username,
-                "email": email,
-                "password": password,
-            }
-        )
 
         return field_dict
 
     @classmethod
     def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
         d = dict(src_dict)
-        username = d.pop("username")
+        execution_response_input_params_type_0 = cls()
 
-        email = d.pop("email")
-
-        password = d.pop("password")
-
-        user_create = cls(
-            username=username,
-            email=email,
-            password=password,
-        )
-
-        user_create.additional_properties = d
-        return user_create
+        execution_response_input_params_type_0.additional_properties = d
+        return execution_response_input_params_type_0
 
     @property
     def additional_keys(self) -> list[str]:

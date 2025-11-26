@@ -13,26 +13,27 @@ T = TypeVar("T", bound="UserResponse")
 
 @_attrs_define
 class UserResponse:
-    """
+    """Schema for user response.
+
     Attributes:
+        id (int):
         username (str):
         email (str):
-        id (int):
         created_at (datetime.datetime):
     """
 
+    id: int
     username: str
     email: str
-    id: int
     created_at: datetime.datetime
     additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
 
     def to_dict(self) -> dict[str, Any]:
+        id = self.id
+
         username = self.username
 
         email = self.email
-
-        id = self.id
 
         created_at = self.created_at.isoformat()
 
@@ -40,9 +41,9 @@ class UserResponse:
         field_dict.update(self.additional_properties)
         field_dict.update(
             {
+                "id": id,
                 "username": username,
                 "email": email,
-                "id": id,
                 "created_at": created_at,
             }
         )
@@ -52,18 +53,18 @@ class UserResponse:
     @classmethod
     def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
         d = dict(src_dict)
+        id = d.pop("id")
+
         username = d.pop("username")
 
         email = d.pop("email")
 
-        id = d.pop("id")
-
         created_at = isoparse(d.pop("created_at"))
 
         user_response = cls(
+            id=id,
             username=username,
             email=email,
-            id=id,
             created_at=created_at,
         )
 

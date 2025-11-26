@@ -15,38 +15,43 @@ T = TypeVar("T", bound="FunctionResponse")
 
 @_attrs_define
 class FunctionResponse:
-    """
+    """Schema for function response.
+
     Attributes:
-        alias (str): Unique alias for the function
-        code (str): Python function code as string
         id (int):
+        alias (str):
+        code (str):
         owner_id (int):
+        memory_limit_mb (int):
+        timeout_seconds (int):
         created_at (datetime.datetime):
         updated_at (datetime.datetime):
         description (None | str | Unset):
-        memory_limit_mb (int | Unset):  Default: 200.
-        timeout_seconds (int | Unset):  Default: 30.
     """
 
+    id: int
     alias: str
     code: str
-    id: int
     owner_id: int
+    memory_limit_mb: int
+    timeout_seconds: int
     created_at: datetime.datetime
     updated_at: datetime.datetime
     description: None | str | Unset = UNSET
-    memory_limit_mb: int | Unset = 200
-    timeout_seconds: int | Unset = 30
     additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
 
     def to_dict(self) -> dict[str, Any]:
+        id = self.id
+
         alias = self.alias
 
         code = self.code
 
-        id = self.id
-
         owner_id = self.owner_id
+
+        memory_limit_mb = self.memory_limit_mb
+
+        timeout_seconds = self.timeout_seconds
 
         created_at = self.created_at.isoformat()
 
@@ -58,41 +63,39 @@ class FunctionResponse:
         else:
             description = self.description
 
-        memory_limit_mb = self.memory_limit_mb
-
-        timeout_seconds = self.timeout_seconds
-
         field_dict: dict[str, Any] = {}
         field_dict.update(self.additional_properties)
         field_dict.update(
             {
+                "id": id,
                 "alias": alias,
                 "code": code,
-                "id": id,
                 "owner_id": owner_id,
+                "memory_limit_mb": memory_limit_mb,
+                "timeout_seconds": timeout_seconds,
                 "created_at": created_at,
                 "updated_at": updated_at,
             }
         )
         if description is not UNSET:
             field_dict["description"] = description
-        if memory_limit_mb is not UNSET:
-            field_dict["memory_limit_mb"] = memory_limit_mb
-        if timeout_seconds is not UNSET:
-            field_dict["timeout_seconds"] = timeout_seconds
 
         return field_dict
 
     @classmethod
     def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
         d = dict(src_dict)
+        id = d.pop("id")
+
         alias = d.pop("alias")
 
         code = d.pop("code")
 
-        id = d.pop("id")
-
         owner_id = d.pop("owner_id")
+
+        memory_limit_mb = d.pop("memory_limit_mb")
+
+        timeout_seconds = d.pop("timeout_seconds")
 
         created_at = isoparse(d.pop("created_at"))
 
@@ -107,20 +110,16 @@ class FunctionResponse:
 
         description = _parse_description(d.pop("description", UNSET))
 
-        memory_limit_mb = d.pop("memory_limit_mb", UNSET)
-
-        timeout_seconds = d.pop("timeout_seconds", UNSET)
-
         function_response = cls(
+            id=id,
             alias=alias,
             code=code,
-            id=id,
             owner_id=owner_id,
+            memory_limit_mb=memory_limit_mb,
+            timeout_seconds=timeout_seconds,
             created_at=created_at,
             updated_at=updated_at,
             description=description,
-            memory_limit_mb=memory_limit_mb,
-            timeout_seconds=timeout_seconds,
         )
 
         function_response.additional_properties = d

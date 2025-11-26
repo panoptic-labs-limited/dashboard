@@ -13,10 +13,11 @@ T = TypeVar("T", bound="FunctionCreate")
 
 @_attrs_define
 class FunctionCreate:
-    """
+    """Schema for creating a new function.
+
     Attributes:
-        alias (str): Unique alias for the function
-        code (str): Python function code as string
+        alias (str): Unique identifier for the function
+        code (str): Python function code
         description (None | str | Unset):
         memory_limit_mb (int | Unset):  Default: 200.
         timeout_seconds (int | Unset):  Default: 30.

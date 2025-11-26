@@ -11,6 +11,7 @@ from dateutil.parser import isoparse
 from ..types import UNSET, Unset
 
 if TYPE_CHECKING:
+    from ..models.execution_response_input_params_type_0 import ExecutionResponseInputParamsType0
     from ..models.execution_response_output_type_0 import ExecutionResponseOutputType0
 
 
@@ -19,12 +20,14 @@ T = TypeVar("T", bound="ExecutionResponse")
 
 @_attrs_define
 class ExecutionResponse:
-    """
+    """Response from function execution.
+
     Attributes:
         id (int):
         function_id (int):
         status (str):
         started_at (datetime.datetime):
+        input_params (ExecutionResponseInputParamsType0 | None | Unset):
         output (ExecutionResponseOutputType0 | None | Unset):
         error_message (None | str | Unset):
         execution_time_ms (float | None | Unset):
@@ -36,6 +39,7 @@ class ExecutionResponse:
     function_id: int
     status: str
     started_at: datetime.datetime
+    input_params: ExecutionResponseInputParamsType0 | None | Unset = UNSET
     output: ExecutionResponseOutputType0 | None | Unset = UNSET
     error_message: None | str | Unset = UNSET
     execution_time_ms: float | None | Unset = UNSET
@@ -44,6 +48,7 @@ class ExecutionResponse:
     additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
 
     def to_dict(self) -> dict[str, Any]:
+        from ..models.execution_response_input_params_type_0 import ExecutionResponseInputParamsType0
         from ..models.execution_response_output_type_0 import ExecutionResponseOutputType0
 
         id = self.id
@@ -53,6 +58,14 @@ class ExecutionResponse:
         status = self.status
 
         started_at = self.started_at.isoformat()
+
+        input_params: dict[str, Any] | None | Unset
+        if isinstance(self.input_params, Unset):
+            input_params = UNSET
+        elif isinstance(self.input_params, ExecutionResponseInputParamsType0):
+            input_params = self.input_params.to_dict()
+        else:
+            input_params = self.input_params
 
         output: dict[str, Any] | None | Unset
         if isinstance(self.output, Unset):
@@ -98,6 +111,8 @@ class ExecutionResponse:
                 "started_at": started_at,
             }
         )
+        if input_params is not UNSET:
+            field_dict["input_params"] = input_params
         if output is not UNSET:
             field_dict["output"] = output
         if error_message is not UNSET:
@@ -113,6 +128,7 @@ class ExecutionResponse:
 
     @classmethod
     def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
+        from ..models.execution_response_input_params_type_0 import ExecutionResponseInputParamsType0
         from ..models.execution_response_output_type_0 import ExecutionResponseOutputType0
 
         d = dict(src_dict)
@@ -123,6 +139,23 @@ class ExecutionResponse:
         status = d.pop("status")
 
         started_at = isoparse(d.pop("started_at"))
+
+        def _parse_input_params(data: object) -> ExecutionResponseInputParamsType0 | None | Unset:
+            if data is None:
+                return data
+            if isinstance(data, Unset):
+                return data
+            try:
+                if not isinstance(data, dict):
+                    raise TypeError()
+                input_params_type_0 = ExecutionResponseInputParamsType0.from_dict(data)
+
+                return input_params_type_0
+            except (TypeError, ValueError, AttributeError, KeyError):
+                pass
+            return cast(ExecutionResponseInputParamsType0 | None | Unset, data)
+
+        input_params = _parse_input_params(d.pop("input_params", UNSET))
 
         def _parse_output(data: object) -> ExecutionResponseOutputType0 | None | Unset:
             if data is None:
@@ -190,6 +223,7 @@ class ExecutionResponse:
             function_id=function_id,
             status=status,
             started_at=started_at,
+            input_params=input_params,
             output=output,
             error_message=error_message,
             execution_time_ms=execution_time_ms,

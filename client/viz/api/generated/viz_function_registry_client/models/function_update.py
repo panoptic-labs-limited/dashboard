@@ -13,7 +13,8 @@ T = TypeVar("T", bound="FunctionUpdate")
 
 @_attrs_define
 class FunctionUpdate:
-    """
+    """Schema for updating a function.
+
     Attributes:
         code (None | str | Unset):
         description (None | str | Unset):

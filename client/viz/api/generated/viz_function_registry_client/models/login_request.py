@@ -11,7 +11,8 @@ T = TypeVar("T", bound="LoginRequest")
 
 @_attrs_define
 class LoginRequest:
-    """
+    """Schema for login request.
+
     Attributes:
         username (str):
         password (str):

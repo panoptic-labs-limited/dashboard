@@ -6,19 +6,22 @@ from typing import Any, TypeVar
 from attrs import define as _attrs_define
 from attrs import field as _attrs_field
 
+from ..types import UNSET, Unset
+
 T = TypeVar("T", bound="Token")
 
 
 @_attrs_define
 class Token:
-    """
+    """Schema for JWT token response.
+
     Attributes:
         access_token (str):
-        token_type (str):
+        token_type (str | Unset):  Default: 'bearer'.
     """
 
     access_token: str
-    token_type: str
+    token_type: str | Unset = "bearer"
     additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
 
     def to_dict(self) -> dict[str, Any]:
@@ -31,9 +34,10 @@ class Token:
         field_dict.update(
             {
                 "access_token": access_token,
-                "token_type": token_type,
             }
         )
+        if token_type is not UNSET:
+            field_dict["token_type"] = token_type
 
         return field_dict
 
@@ -42,7 +46,7 @@ class Token:
         d = dict(src_dict)
         access_token = d.pop("access_token")
 
-        token_type = d.pop("token_type")
+        token_type = d.pop("token_type", UNSET)
 
         token = cls(
             access_token=access_token,
