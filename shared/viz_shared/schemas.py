@@ -5,7 +5,7 @@ from typing import Any, Dict, List, Optional, Union
 from pydantic import BaseModel, Field, field_validator
 
 from .types import (
-    ExecutionStage, SelectorType, LayoutType, RenderOutputType,
+    ExecutionStage, InputType, LayoutType, RenderOutputType,
     WidgetType, ColumnWidth
 )
 
@@ -119,82 +119,246 @@ class ComponentExecutionResponse(BaseModel):
 
 
 # ============================================================================
-# Selector Schemas
+# Input Schemas
 # ============================================================================
 
-class SelectorDataSourceFunction(BaseModel):
-    """Function that provides data for a selector."""
-    alias: str  # Function alias in registry
-    params: Dict[str, Any] = Field(default_factory=dict)
+class Option(BaseModel):
+    """Represents a selectable option."""
+    value: Any = Field(..., description="The actual option value")
+    label: str = Field(..., description="Display label for the option")
+    selected: bool = Field(False, description="Pre-selected state")
+    disabled: bool = Field(False, description="Disabled state")
+    icon: Optional[str] = Field(None, description="Optional icon identifier")
+    group: Optional[str] = Field(None, description="Group name for grouped options")
 
 
-class SelectorBase(BaseModel):
-    """Base schema for selectors."""
-    name: str = Field(..., description="Parameter name this selector controls")
-    label: Optional[str] = None  # Display label (defaults to name)
-    selector_type: SelectorType
+class InputDataSource(BaseModel):
+    """Function or API source that provides data for an input."""
+    type: str = Field("function", description="Source type: 'function' or 'api'")
+    alias: Optional[str] = Field(None, description="Function alias in registry")
+    params: Dict[str, Any] = Field(default_factory=dict, description="Parameters for the source")
+
+
+class InputBase(BaseModel):
+    """Base schema for inputs."""
+    type: str = Field("input", description="Node type")
+    id: str = Field(..., description="Unique identifier for this input")
+    input_type: InputType
+    label: Optional[str] = None
+    description: Optional[str] = None
     default: Optional[Any] = None
     required: bool = True
-    description: Optional[str] = None
+    source: Optional[InputDataSource] = None
+    visible: bool = True
+    disabled: bool = False
 
 
-class DateSelectorSchema(SelectorBase):
-    """Date selector configuration."""
-    selector_type: SelectorType = SelectorType.DATE
-    min_date: Optional[str] = None  # ISO format
-    max_date: Optional[str] = None  # ISO format
-    data_source: Optional[SelectorDataSourceFunction] = None
+# ==============================================================================
+# Text Input Schemas
+# ==============================================================================
 
-
-class DateRangeSelectorSchema(SelectorBase):
-    """Date range selector configuration."""
-    selector_type: SelectorType = SelectorType.DATE_RANGE
-    min_date: Optional[str] = None
-    max_date: Optional[str] = None
-    default: Optional[tuple[str, str]] = None
-
-
-class DropdownSelectorSchema(SelectorBase):
-    """Dropdown selector configuration."""
-    selector_type: SelectorType = SelectorType.DROPDOWN
-    options: Optional[List[Union[str, int, float]]] = None
-    data_source: Optional[SelectorDataSourceFunction] = None  # Dynamic options
-    allow_custom: bool = False
-
-
-class MultiSelectSelectorSchema(SelectorBase):
-    """Multi-select selector configuration."""
-    selector_type: SelectorType = SelectorType.MULTI_SELECT
-    options: Optional[List[Union[str, int, float]]] = None
-    data_source: Optional[SelectorDataSourceFunction] = None
-    max_selections: Optional[int] = None
-
-
-class TextInputSchema(SelectorBase):
-    """Text input selector configuration."""
-    selector_type: SelectorType = SelectorType.TEXT_INPUT
-    placeholder: Optional[str] = None
-    validation_regex: Optional[str] = None
+class TextInputSchema(InputBase):
+    """Single-line text input."""
+    input_type: InputType = InputType.TEXT_INPUT
+    min_length: Optional[int] = None
     max_length: Optional[int] = None
+    pattern: Optional[str] = None
+    input_type_html: str = Field("text", description="HTML input type: text, email, url, tel")
+    autocomplete: bool = True
+    placeholder: Optional[str] = None
 
 
-class NumericInputSchema(SelectorBase):
-    """Numeric input selector configuration."""
-    selector_type: SelectorType = SelectorType.NUMERIC_INPUT
+class TextAreaSchema(InputBase):
+    """Multi-line text area."""
+    input_type: InputType = InputType.TEXTAREA
+    min_length: Optional[int] = None
+    max_length: Optional[int] = None
+    rows: int = 3
+    resize: str = Field("vertical", description="Resize behavior: none, vertical, horizontal, both")
+    placeholder: Optional[str] = None
+
+
+class SearchInputSchema(InputBase):
+    """Search input with debounce."""
+    input_type: InputType = InputType.SEARCH_INPUT
+    min_length: Optional[int] = None
+    clear_button: bool = True
+    debounce_ms: int = Field(300, ge=0, description="Debounce delay in milliseconds")
+    placeholder: Optional[str] = None
+
+
+# ==============================================================================
+# Numeric Input Schemas
+# ==============================================================================
+
+class NumericInputSchema(InputBase):
+    """Numeric input with constraints."""
+    input_type: InputType = InputType.NUMERIC_INPUT
     min_value: Optional[float] = None
     max_value: Optional[float] = None
     step: Optional[float] = None
+    prefix: Optional[str] = Field(None, description="Prefix text (e.g., '$')")
+    suffix: Optional[str] = Field(None, description="Suffix text (e.g., '%')")
     placeholder: Optional[str] = None
 
 
-# Union of all selector schemas
-SelectorSchema = Union[
-    DateSelectorSchema,
-    DateRangeSelectorSchema,
-    DropdownSelectorSchema,
-    MultiSelectSelectorSchema,
+class SliderSchema(InputBase):
+    """Visual slider for single value."""
+    input_type: InputType = InputType.SLIDER
+    min_value: float
+    max_value: float
+    step: Optional[float] = None
+    show_value: bool = True
+    show_ticks: bool = False
+
+
+class RangeSliderSchema(InputBase):
+    """Visual slider for range (min/max)."""
+    input_type: InputType = InputType.RANGE_SLIDER
+    min_value: float
+    max_value: float
+    step: Optional[float] = None
+    default: Optional[tuple[float, Optional[float]]] = None
+    show_values: bool = True
+
+
+class NumericRangeSchema(InputBase):
+    """Two numeric inputs for min/max range."""
+    input_type: InputType = InputType.NUMERIC_RANGE
+    min_value: Optional[float] = None
+    max_value: Optional[float] = None
+    step: Optional[float] = None
+    default: Optional[tuple[float, Optional[float]]] = None
+    prefix: Optional[str] = None
+    suffix: Optional[str] = None
+
+
+# ==============================================================================
+# Choice Input Schemas
+# ==============================================================================
+
+class SelectSchema(InputBase):
+    """Single-selection dropdown/select input."""
+    input_type: InputType = InputType.SELECT
+    options: Optional[List[Option]] = None
+    searchable: bool = False
+    clear_button: bool = False
+
+
+class MultiSelectSchema(InputBase):
+    """Multi-selection dropdown input."""
+    input_type: InputType = InputType.MULTI_SELECT
+    options: Optional[List[Option]] = None
+    default: Optional[List[Any]] = None
+    max_selections: Optional[int] = None
+    searchable: bool = False
+
+
+class RadioGroupSchema(InputBase):
+    """Radio button group input (single selection)."""
+    input_type: InputType = InputType.RADIO
+    options: Optional[List[Option]] = None
+    layout: str = Field("vertical", description="Layout direction: vertical, horizontal")
+
+
+class CheckboxSchema(InputBase):
+    """Single boolean checkbox input."""
+    input_type: InputType = InputType.CHECKBOX
+    default: Optional[bool] = None
+
+
+class CheckboxGroupSchema(InputBase):
+    """Group of checkboxes for multiple selections."""
+    input_type: InputType = InputType.CHECKBOX_GROUP
+    options: Optional[List[Option]] = None
+    default: Optional[List[Any]] = None
+    layout: str = Field("vertical", description="Layout: vertical, horizontal, grid")
+    columns: Optional[int] = Field(None, description="Number of columns for grid layout")
+
+
+class ToggleSchema(InputBase):
+    """Visual toggle switch for boolean values."""
+    input_type: InputType = InputType.TOGGLE
+    default: Optional[bool] = None
+    on_label: Optional[str] = None
+    off_label: Optional[str] = None
+
+
+# ==============================================================================
+# DateTime Input Schemas
+# ==============================================================================
+
+class DateInputSchema(InputBase):
+    """Date picker input."""
+    input_type: InputType = InputType.DATE
+    min_date: Optional[str] = None
+    max_date: Optional[str] = None
+    format: str = Field("YYYY-MM-DD", description="Display format")
+    first_day_of_week: int = Field(0, description="0=Sunday, 1=Monday")
+
+
+class DateRangeInputSchema(InputBase):
+    """Date range picker."""
+    input_type: InputType = InputType.DATE_RANGE
+    min_date: Optional[str] = None
+    max_date: Optional[str] = None
+    default: Optional[tuple[str, Optional[str]]] = None
+    format: str = Field("YYYY-MM-DD", description="Display format")
+    max_days: Optional[int] = Field(None, description="Maximum days in range")
+
+
+class TimeInputSchema(InputBase):
+    """Time picker input."""
+    input_type: InputType = InputType.TIME
+    min_time: Optional[str] = None
+    max_time: Optional[str] = None
+    step_minutes: int = 1
+    format_24h: bool = True
+
+
+class DateTimeInputSchema(InputBase):
+    """Combined date and time picker."""
+    input_type: InputType = InputType.DATETIME
+    min_datetime: Optional[str] = None
+    max_datetime: Optional[str] = None
+    format: str = Field("YYYY-MM-DD HH:mm", description="Display format")
+    format_24h: bool = True
+
+
+class RelativeDateInputSchema(InputBase):
+    """Relative date range selector (last 7 days, etc.)."""
+    input_type: InputType = InputType.RELATIVE_DATE
+    options: List[Dict[str, str]]
+    allow_custom: bool = False
+
+
+# ==============================================================================
+# Union of all input schemas
+# ==============================================================================
+
+InputSchema = Union[
+    # Text inputs
     TextInputSchema,
+    TextAreaSchema,
+    SearchInputSchema,
+    # Numeric inputs
     NumericInputSchema,
+    SliderSchema,
+    RangeSliderSchema,
+    NumericRangeSchema,
+    # Choice inputs
+    SelectSchema,
+    MultiSelectSchema,
+    RadioGroupSchema,
+    CheckboxSchema,
+    CheckboxGroupSchema,
+    ToggleSchema,
+    # DateTime inputs
+    DateInputSchema,
+    DateRangeInputSchema,
+    TimeInputSchema,
+    DateTimeInputSchema,
+    RelativeDateInputSchema,
 ]
 
 
@@ -209,9 +373,9 @@ class LayoutNodeBase(BaseModel):
 
 
 class ParameterBinding(BaseModel):
-    """Binding between a component parameter and a selector."""
-    type: str = "selector"  # Future: could be "constant", "computed", etc.
-    selector_name: str  # Name of the selector to bind to
+    """Binding between a component parameter and an input."""
+    type: str = "input"  # Future: could be "constant", "computed", etc.
+    input_id: str  # ID of the input to bind to
 
 
 class WidgetSchema(LayoutNodeBase):
@@ -225,23 +389,12 @@ class WidgetSchema(LayoutNodeBase):
     config: Dict[str, Any] = Field(default_factory=dict)
 
 
-class SelectorLayoutSchema(LayoutNodeBase):
-    """Selector in the layout."""
-    type: LayoutType = LayoutType.SELECTOR
-    selector_type: SelectorType
-    name: str = Field(..., description="Parameter name")
-    label: str
-    default: Any = None
-    options: Optional[List[Any]] = None
-    config: Dict[str, Any] = Field(default_factory=dict)
-
-
 class ColumnSchema(LayoutNodeBase):
     """Column layout container."""
     type: LayoutType = LayoutType.COLUMN
     width: ColumnWidth = ColumnWidth.FULL
     gap: Optional[str] = Field(None, description="Gap between children (CSS)")
-    children: List[Union['RowSchema', 'ColumnSchema', 'WidgetSchema', 'SelectorLayoutSchema']] = Field(default_factory=list)
+    children: List[Union['RowSchema', 'ColumnSchema', 'WidgetSchema']] = Field(default_factory=list)
 
 
 class RowSchema(LayoutNodeBase):
@@ -249,7 +402,7 @@ class RowSchema(LayoutNodeBase):
     type: LayoutType = LayoutType.ROW
     gap: Optional[str] = Field(None, description="Gap between children (CSS)")
     align: Optional[str] = None  # "start", "center", "end", "stretch"
-    children: List[Union['RowSchema', ColumnSchema, WidgetSchema, SelectorLayoutSchema]] = Field(default_factory=list)
+    children: List[Union['RowSchema', ColumnSchema, WidgetSchema]] = Field(default_factory=list)
 
 
 class TabSchema(LayoutNodeBase):
@@ -258,7 +411,7 @@ class TabSchema(LayoutNodeBase):
     title: str
     icon: Optional[str] = None
     disabled: bool = False
-    children: List[Union[RowSchema, ColumnSchema, WidgetSchema, SelectorLayoutSchema]] = Field(default_factory=list)
+    children: List[Union[RowSchema, ColumnSchema, WidgetSchema]] = Field(default_factory=list)
 
 
 class TabsSchema(LayoutNodeBase):
@@ -274,7 +427,7 @@ class SectionSchema(LayoutNodeBase):
     title: Optional[str] = None
     collapsible: bool = False
     collapsed: bool = False
-    children: List[Union[RowSchema, ColumnSchema, TabsSchema, WidgetSchema, SelectorLayoutSchema]] = Field(default_factory=list)
+    children: List[Union[RowSchema, ColumnSchema, TabsSchema, WidgetSchema]] = Field(default_factory=list)
 
 
 class PageSchema(LayoutNodeBase):
@@ -283,7 +436,7 @@ class PageSchema(LayoutNodeBase):
     title: str
     description: Optional[str] = None
     icon: Optional[str] = None
-    children: List[Union[SectionSchema, RowSchema, ColumnSchema, TabsSchema, WidgetSchema, SelectorLayoutSchema]] = Field(default_factory=list)
+    children: List[Union[SectionSchema, RowSchema, ColumnSchema, TabsSchema, WidgetSchema]] = Field(default_factory=list)
 
 
 class DashboardStructure(BaseModel):
@@ -302,7 +455,7 @@ class DashboardStructure(BaseModel):
 
 class DashboardCreate(BaseModel):
     """Schema for creating a dashboard."""
-    name: str = Field(..., description="Unique dashboard identifier")
+    id: str = Field(..., description="Unique dashboard identifier")
     title: str
     description: Optional[str] = None
     structure: DashboardStructure
@@ -317,8 +470,8 @@ class DashboardUpdate(BaseModel):
 
 class DashboardResponse(BaseModel):
     """Schema for dashboard response."""
-    id: int
-    name: str
+    db_id: int = Field(..., description="Database ID")
+    id: str = Field(..., description="Dashboard identifier")
     title: str
     description: Optional[str] = None
     structure: DashboardStructure
@@ -330,20 +483,20 @@ class DashboardResponse(BaseModel):
         from_attributes = True
 
 
-class SelectorValueUpdate(BaseModel):
-    """Update a selector value."""
-    selector_name: str
+class InputValueUpdate(BaseModel):
+    """Update an input value."""
+    input_id: str
     value: Any
 
 
 class DashboardRenderRequest(BaseModel):
     """Request to render a dashboard."""
-    selector_values: Dict[str, Any] = Field(default_factory=dict)
+    input_values: Dict[str, Any] = Field(default_factory=dict)
 
 
 class WidgetRenderRequest(BaseModel):
     """Request to render a single widget."""
-    selector_values: Dict[str, Any] = Field(default_factory=dict)
+    input_values: Dict[str, Any] = Field(default_factory=dict)
 
 
 class WidgetRenderResult(BaseModel):
@@ -358,8 +511,8 @@ class WidgetRenderResult(BaseModel):
 
 class DashboardRenderResponse(BaseModel):
     """Response from rendering a dashboard."""
-    dashboard_name: str
-    selector_values: Dict[str, Any]
+    dashboard_id: str
+    input_values: Dict[str, Any]
     widgets: List[WidgetRenderResult]
     total_execution_time_ms: float
 

@@ -11,16 +11,33 @@ class ExecutionStage(str, Enum):
     LOAD_TRANSFORM_RENDER = "load_transform_render"
 
 
-class SelectorType(str, Enum):
-    """Types of selectors available."""
-    DROPDOWN = "dropdown"
+class InputType(str, Enum):
+    """Types of inputs available."""
+    # Text inputs
+    TEXT_INPUT = "text_input"
+    TEXTAREA = "textarea"
+    SEARCH_INPUT = "search_input"
+
+    # Numeric inputs
+    NUMERIC_INPUT = "numeric_input"
+    SLIDER = "slider"
+    RANGE_SLIDER = "range_slider"
+    NUMERIC_RANGE = "numeric_range"
+
+    # Choice inputs
+    SELECT = "select"
     MULTI_SELECT = "multi_select"
+    RADIO = "radio"
+    CHECKBOX = "checkbox"
+    CHECKBOX_GROUP = "checkbox_group"
+    TOGGLE = "toggle"
+
+    # DateTime inputs
     DATE = "date"
     DATE_RANGE = "date_range"
-    SLIDER = "slider"
-    TEXT_INPUT = "text_input"
-    CHECKBOX = "checkbox"
-    NUMERIC_INPUT = "numeric_input"
+    TIME = "time"
+    DATETIME = "datetime"
+    RELATIVE_DATE = "relative_date"
 
 
 class WidgetType(str, Enum):
@@ -63,12 +80,12 @@ class LayoutType(str, Enum):
     ROW = "row"
     COLUMN = "column"
     WIDGET = "widget"
-    SELECTOR = "selector"
+    INPUT = "input"
 
 
 # Type aliases for common patterns
 ComponentAlias = str
-DashboardName = str
+DashboardId = str
 PageId = str
-SelectorName = str
+InputId = str
 ParameterName = str

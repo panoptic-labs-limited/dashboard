@@ -1,4 +1,4 @@
-"""Dashboard-scoped component and selector API endpoints."""
+"""Dashboard-scoped component and input API endpoints."""
 
 from fastapi import APIRouter, Depends, HTTPException, status, Query
 from sqlalchemy.orm import Session
@@ -41,14 +41,12 @@ def _find_widget_in_dashboard(dashboard_structure: dict, widget_id: str) -> Opti
     return search_node(dashboard_structure)
 
 
-def _find_selector_in_dashboard(dashboard_structure: dict, selector_name: str) -> Optional[dict]:
-    """Recursively find a selector by name in dashboard structure."""
+def _find_input_in_dashboard(dashboard_structure: dict, input_id: str) -> Optional[dict]:
+    """Recursively find an input by ID in dashboard structure."""
     def search_node(node):
         if isinstance(node, dict):
-            if node.get("type") == "selector":
-                selector_config = node.get("selector", {})
-                if selector_config.get("name") == selector_name:
-                    return selector_config
+            if node.get("type") == "input" and node.get("id") == input_id:
+                return node
             # Recurse into children
             for key in ["children", "sections", "pages"]:
                 if key in node:
@@ -71,9 +69,9 @@ def _find_selector_in_dashboard(dashboard_structure: dict, selector_name: str) -
     return search_node(dashboard_structure)
 
 
-@router.post("/{dashboard_name}/component/{widget_id}/render")
+@router.post("/{dashboard_id}/component/{widget_id}/render")
 def render_component(
-    dashboard_name: str,
+    dashboard_id: str,
     widget_id: str,
     request: WidgetRenderRequest,
     current_user: User = Depends(get_current_user),
@@ -83,22 +81,22 @@ def render_component(
     Render a component (full execution: load → transform → render).
 
     Args:
-        dashboard_name: Name of the dashboard
+        dashboard_id: ID of the dashboard
         widget_id: ID of the widget to render
-        request: Widget render request containing selector values
+        request: Widget render request containing input values
 
     Returns the final rendered output (Plotly figure, Vega-Lite spec, etc.)
     """
     # Get dashboard
     dashboard = db.query(Dashboard).filter(
-        Dashboard.name == dashboard_name,
+        Dashboard.dashboard_id == dashboard_id,
         Dashboard.owner_id == current_user.id
     ).first()
 
     if not dashboard:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
-            detail=f"Dashboard '{dashboard_name}' not found"
+            detail=f"Dashboard '{dashboard_id}' not found"
         )
 
     # Find widget in dashboard structure
@@ -106,7 +104,7 @@ def render_component(
     if not widget:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
-            detail=f"Widget '{widget_id}' not found in dashboard '{dashboard_name}'"
+            detail=f"Widget '{widget_id}' not found in dashboard '{dashboard_id}'"
         )
 
     # Get the component
@@ -127,12 +125,12 @@ def render_component(
     resolved_params = {}
 
     for param_name, param_value in widget_params.items():
-        if isinstance(param_value, dict) and param_value.get("type") == "selector":
-            # Parameter is bound to a selector
-            selector_name = param_value.get("name")
-            if selector_name in request.selector_values:
-                resolved_params[param_name] = request.selector_values[selector_name]
-            # If selector value not provided, skip (don't include in params)
+        if isinstance(param_value, dict) and param_value.get("type") == "input":
+            # Parameter is bound to an input
+            input_id = param_value.get("input_id")
+            if input_id in request.input_values:
+                resolved_params[param_name] = request.input_values[input_id]
+            # If input value not provided, skip (don't include in params)
         elif isinstance(param_value, dict) and param_value.get("type") == "literal":
             # Literal value wrapped in binding structure
             resolved_params[param_name] = param_value.get("value")
@@ -165,9 +163,9 @@ def render_component(
     }
 
 
-@router.get("/{dashboard_name}/component/{widget_id}/data")
+@router.get("/{dashboard_id}/component/{widget_id}/data")
 def get_component_data(
-    dashboard_name: str,
+    dashboard_id: str,
     widget_id: str,
     mode: Literal["raw", "transformed"] = Query("transformed"),
     params: Optional[str] = Query(None, description="JSON-encoded params"),
@@ -187,14 +185,14 @@ def get_component_data(
 
     # Get dashboard
     dashboard = db.query(Dashboard).filter(
-        Dashboard.name == dashboard_name,
+        Dashboard.dashboard_id == dashboard_id,
         Dashboard.owner_id == current_user.id
     ).first()
 
     if not dashboard:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
-            detail=f"Dashboard '{dashboard_name}' not found"
+            detail=f"Dashboard '{dashboard_id}' not found"
         )
 
     # Find widget
@@ -261,49 +259,49 @@ def get_component_data(
     }
 
 
-@router.get("/{dashboard_name}/input/{selector_name}/data")
-def get_selector_data(
-    dashboard_name: str,
-    selector_name: str,
+@router.get("/{dashboard_id}/input/{input_id}/data")
+def get_input_data(
+    dashboard_id: str,
+    input_id: str,
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db)
 ):
     """
-    Get data for a selector (e.g., dropdown options from a data source function).
+    Get data for an input (e.g., dropdown options from a data source function).
 
-    Returns the options/data to populate the selector in the UI.
+    Returns the options/data to populate the input in the UI.
     """
     # Get dashboard
     dashboard = db.query(Dashboard).filter(
-        Dashboard.name == dashboard_name,
+        Dashboard.dashboard_id == dashboard_id,
         Dashboard.owner_id == current_user.id
     ).first()
 
     if not dashboard:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
-            detail=f"Dashboard '{dashboard_name}' not found"
+            detail=f"Dashboard '{dashboard_id}' not found"
         )
 
-    # Find selector
-    selector = _find_selector_in_dashboard(dashboard.structure, selector_name)
-    if not selector:
+    # Find input
+    input_config = _find_input_in_dashboard(dashboard.structure, input_id)
+    if not input_config:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
-            detail=f"Selector '{selector_name}' not found in dashboard"
+            detail=f"Input '{input_id}' not found in dashboard"
         )
 
-    # Check if selector has a data source
-    data_source = selector.get("data_source")
+    # Check if input has a data source
+    data_source = input_config.get("source")
     if not data_source:
-        # Selector has static options
+        # Input has static options
         return {
-            "selector_name": selector_name,
+            "input_id": input_id,
             "type": "static",
-            "options": selector.get("options", [])
+            "options": input_config.get("options", [])
         }
 
-    # Selector has dynamic data source (function)
+    # Input has dynamic data source (function)
     function_alias = data_source.get("alias")
     function_params = data_source.get("params", {})
 
@@ -332,11 +330,11 @@ def get_selector_data(
     if status_result != "success":
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Failed to load selector data: {result_data.get('error_message')}"
+            detail=f"Failed to load input data: {result_data.get('error_message')}"
         )
 
     return {
-        "selector_name": selector_name,
+        "input_id": input_id,
         "type": "dynamic",
         "options": result_data.get("output"),
         "execution_time_ms": result_data.get("execution_time_ms")
