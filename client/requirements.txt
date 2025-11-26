@@ -2,4 +2,6 @@ httpx>=0.28.0
 pydantic>=2.0.0
 plotly>=5.18.0
 pandas>=2.0.0
--e ../shared
+click>=8.0.0
+rich>=13.0.0
+watchdog>=3.0.0
