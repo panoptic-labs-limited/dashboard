@@ -16,6 +16,7 @@ To serve this dashboard:
 import plotly.express as px
 import pandas as pd
 from datetime import datetime
+from pydantic import Field
 
 from viz import (
     Component, L, Dashboard,
@@ -76,12 +77,12 @@ class GapminderTrends(Component):
         filtered = data[data['continent'] == self.continent].copy()
 
         # Calculate weighted averages by year
-        grouped = filtered.groupby('year').apply(
+        grouped = filtered.groupby('year', as_index=False).apply(
             lambda x: pd.Series({
                 'gdpPercap': (x['gdpPercap'] * x['pop']).sum() / x['pop'].sum(),
                 'lifeExp': (x['lifeExp'] * x['pop']).sum() / x['pop'].sum(),
                 'pop': x['pop'].sum()
-            })
+            }), include_groups=False
         ).reset_index()
 
         return grouped
@@ -139,7 +140,7 @@ class CountryComparison(Component):
     """
     __id__ = "country_comparison"
 
-    countries: list[str] = ["United States", "China", "India"]
+    countries: list[str] = Field(default_factory=lambda: ["United States", "China", "India"])
     year: int = 2007
     metric: str = "gdpPercap"
 
@@ -263,7 +264,7 @@ class StockPriceChart(Component):
     """
     __id__ = "stock_prices"
 
-    stocks: list[str] = ["GOOG", "AAPL"]
+    stocks: list[str] = Field(default_factory=lambda: ["GOOG", "AAPL"])
 
     def load(self):
         """Load stock data."""
@@ -309,14 +310,14 @@ with dashboard.page(id="gapminder", title="Gapminder Analysis", icon="🌍"):
         with L.row():
             # Inputs
             with L.column(weight=1):
-                L.input(Select(
+                continent_input = L.input(Select(
                     name="continent",
                     label="Continent",
                     options=get_continents(),
                     default="Asia"
                 ))
 
-                L.input(Toggle(
+                show_pop_input = L.input(Toggle(
                     name="show_population",
                     label="Show Population",
                     default=False
@@ -327,10 +328,10 @@ with dashboard.page(id="gapminder", title="Gapminder Analysis", icon="🌍"):
                 L.widget(
                     widget_type=WidgetType.CHART,
                     title="Trends Over Time",
-                    component_alias="gapminder_trends",
+                    component=GapminderTrends(),
                     params={
-                        "continent": "continent",
-                        "show_population": "show_population"
+                        "continent": continent_input,
+                        "show_population": show_pop_input
                     }
                 )
 
@@ -338,7 +339,7 @@ with dashboard.page(id="gapminder", title="Gapminder Analysis", icon="🌍"):
         with L.row():
             # Inputs
             with L.column(weight=1):
-                L.input(MultiSelect(
+                countries_input = L.input(MultiSelect(
                     name="countries",
                     label="Select Countries",
                     options=get_countries(),
@@ -346,7 +347,7 @@ with dashboard.page(id="gapminder", title="Gapminder Analysis", icon="🌍"):
                     max_selections=10
                 ))
 
-                L.input(Slider(
+                year_input = L.input(Slider(
                     name="year",
                     label="Year",
                     min_value=1952,
@@ -356,7 +357,7 @@ with dashboard.page(id="gapminder", title="Gapminder Analysis", icon="🌍"):
                     show_value=True
                 ))
 
-                L.input(Select(
+                metric_input = L.input(Select(
                     name="metric",
                     label="Metric",
                     options=[
@@ -372,11 +373,11 @@ with dashboard.page(id="gapminder", title="Gapminder Analysis", icon="🌍"):
                 L.widget(
                     widget_type=WidgetType.CHART,
                     title="Country Metrics",
-                    component_alias="country_comparison",
+                    component=CountryComparison(),
                     params={
-                        "countries": "countries",
-                        "year": "year",
-                        "metric": "metric"
+                        "countries": countries_input,
+                        "year": year_input,
+                        "metric": metric_input
                     }
                 )
 
@@ -387,7 +388,7 @@ with dashboard.page(id="iris", title="Iris Dataset", icon="🌸"):
         with L.row():
             # Inputs
             with L.column(weight=1):
-                L.input(Select(
+                x_axis_input = L.input(Select(
                     name="x_axis",
                     label="X-Axis",
                     options=[
@@ -399,7 +400,7 @@ with dashboard.page(id="iris", title="Iris Dataset", icon="🌸"):
                     default="sepal_length"
                 ))
 
-                L.input(Select(
+                y_axis_input = L.input(Select(
                     name="y_axis",
                     label="Y-Axis",
                     options=[
@@ -416,10 +417,10 @@ with dashboard.page(id="iris", title="Iris Dataset", icon="🌸"):
                 L.widget(
                     widget_type=WidgetType.CHART,
                     title="Species Classification",
-                    component_alias="iris_classification",
+                    component=IrisClassification(),
                     params={
-                        "x_axis": "x_axis",
-                        "y_axis": "y_axis"
+                        "x_axis": x_axis_input,
+                        "y_axis": y_axis_input
                     }
                 )
 
@@ -430,7 +431,7 @@ with dashboard.page(id="tips", title="Restaurant Tips", icon="💵"):
         with L.row():
             # Inputs
             with L.column(weight=1):
-                L.input(Select(
+                groupby_input = L.input(Select(
                     name="groupby",
                     label="Group By",
                     options=[
@@ -442,7 +443,7 @@ with dashboard.page(id="tips", title="Restaurant Tips", icon="💵"):
                     default="day"
                 ))
 
-                L.input(Slider(
+                min_tip_input = L.input(Slider(
                     name="min_tip",
                     label="Minimum Tip ($)",
                     min_value=0,
@@ -457,10 +458,10 @@ with dashboard.page(id="tips", title="Restaurant Tips", icon="💵"):
                 L.widget(
                     widget_type=WidgetType.CHART,
                     title="Tip Distribution",
-                    component_alias="tips_analysis",
+                    component=TipsAnalysis(),
                     params={
-                        "groupby": "groupby",
-                        "min_tip": "min_tip"
+                        "groupby": groupby_input,
+                        "min_tip": min_tip_input
                     }
                 )
 
@@ -471,7 +472,7 @@ with dashboard.page(id="stocks", title="Stock Prices", icon="📈"):
         with L.row():
             # Inputs
             with L.column(weight=1):
-                L.input(MultiSelect(
+                stocks_input = L.input(MultiSelect(
                     name="stocks",
                     label="Select Stocks",
                     options=[
@@ -491,8 +492,8 @@ with dashboard.page(id="stocks", title="Stock Prices", icon="📈"):
                 L.widget(
                     widget_type=WidgetType.CHART,
                     title="Price Trends",
-                    component_alias="stock_prices",
+                    component=StockPriceChart(),
                     params={
-                        "stocks": "stocks"
+                        "stocks": stocks_input
                     }
                 )

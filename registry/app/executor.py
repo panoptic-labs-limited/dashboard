@@ -91,20 +91,40 @@ def _execute_component(
         stderr_capture = io.StringIO()
 
         # Create a minimal Component base class for the execution context
-        from abc import ABC, abstractmethod
-        class Component(ABC):
-            """Minimal Component base class for execution context."""
-            @abstractmethod
-            def load(self):
-                pass
+        # Use Pydantic BaseModel to support Field() properly
+        try:
+            from pydantic import BaseModel
+            from abc import abstractmethod
 
-            @abstractmethod
-            def transform(self, data):
-                pass
+            class Component(BaseModel):
+                """Minimal Component base class for execution context (Pydantic)."""
+                @abstractmethod
+                def load(self):
+                    pass
 
-            @abstractmethod
-            def render(self, data):
-                pass
+                @abstractmethod
+                def transform(self, data):
+                    pass
+
+                @abstractmethod
+                def render(self, data):
+                    pass
+        except ImportError:
+            # Fallback to ABC if Pydantic not available
+            from abc import ABC, abstractmethod
+            class Component(ABC):
+                """Minimal Component base class for execution context."""
+                @abstractmethod
+                def load(self):
+                    pass
+
+                @abstractmethod
+                def transform(self, data):
+                    pass
+
+                @abstractmethod
+                def render(self, data):
+                    pass
 
         # Create restricted globals with common modules
         restricted_globals = {
@@ -112,6 +132,13 @@ def _execute_component(
             "json": json,
             "Component": Component,  # Provide Component base class
         }
+
+        # Import pydantic Field for default_factory support
+        try:
+            from pydantic import Field
+            restricted_globals["Field"] = Field
+        except ImportError:
+            pass
 
         # Try to import common data/viz libraries if available
         try:
@@ -138,12 +165,8 @@ def _execute_component(
             if component_class is None:
                 raise ValueError(f"Component class '{class_name}' not found in code")
 
-            # Apply dataclass if the class has annotations (field definitions)
-            if hasattr(component_class, '__annotations__') and component_class.__annotations__:
-                from dataclasses import dataclass
-                component_class = dataclass(component_class)
-
             # Instantiate the component with parameters
+            # Component classes should inherit from the Pydantic Component base class
             component = component_class(**params)
 
             # Execute based on stage

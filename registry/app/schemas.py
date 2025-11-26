@@ -6,7 +6,7 @@ from pydantic import BaseModel, Field, field_validator, EmailStr
 
 from app.types import (
     ExecutionStage, InputType, LayoutType, RenderOutputType,
-    WidgetType, ColumnWidth
+    WidgetType
 )
 
 
@@ -490,9 +490,9 @@ class WidgetSchema(LayoutNodeBase):
 class ColumnSchema(LayoutNodeBase):
     """Column layout container."""
     type: LayoutType = LayoutType.COLUMN
-    width: ColumnWidth = ColumnWidth.FULL
+    weight: int = Field(1, description="Relative width weight (like CSS flex-grow)", ge=1)
     gap: Optional[str] = Field(None, description="Gap between children (CSS)")
-    children: List[Union['RowSchema', 'ColumnSchema', 'WidgetSchema']] = Field(default_factory=list)
+    children: List[Union['RowSchema', 'ColumnSchema', 'WidgetSchema', InputSchema]] = Field(default_factory=list)
 
 
 class RowSchema(LayoutNodeBase):
@@ -500,7 +500,7 @@ class RowSchema(LayoutNodeBase):
     type: LayoutType = LayoutType.ROW
     gap: Optional[str] = Field(None, description="Gap between children (CSS)")
     align: Optional[str] = None  # "start", "center", "end", "stretch"
-    children: List[Union['RowSchema', ColumnSchema, WidgetSchema]] = Field(default_factory=list)
+    children: List[Union['RowSchema', ColumnSchema, WidgetSchema, InputSchema]] = Field(default_factory=list)
 
 
 class TabSchema(LayoutNodeBase):
@@ -509,7 +509,7 @@ class TabSchema(LayoutNodeBase):
     title: str
     icon: Optional[str] = None
     disabled: bool = False
-    children: List[Union[RowSchema, ColumnSchema, WidgetSchema]] = Field(default_factory=list)
+    children: List[Union[RowSchema, ColumnSchema, WidgetSchema, InputSchema]] = Field(default_factory=list)
 
 
 class TabsSchema(LayoutNodeBase):
@@ -525,7 +525,7 @@ class SectionSchema(LayoutNodeBase):
     title: Optional[str] = None
     collapsible: bool = False
     collapsed: bool = False
-    children: List[Union[RowSchema, ColumnSchema, TabsSchema, WidgetSchema]] = Field(default_factory=list)
+    children: List[Union[RowSchema, ColumnSchema, TabsSchema, WidgetSchema, InputSchema]] = Field(default_factory=list)
 
 
 class PageSchema(LayoutNodeBase):
@@ -534,7 +534,7 @@ class PageSchema(LayoutNodeBase):
     title: str
     description: Optional[str] = None
     icon: Optional[str] = None
-    children: List[Union[SectionSchema, RowSchema, ColumnSchema, TabsSchema, WidgetSchema]] = Field(default_factory=list)
+    children: List[Union[SectionSchema, RowSchema, ColumnSchema, TabsSchema, WidgetSchema, InputSchema]] = Field(default_factory=list)
 
 
 class DashboardStructure(BaseModel):
@@ -568,8 +568,8 @@ class DashboardUpdate(BaseModel):
 
 class DashboardResponse(BaseModel):
     """Schema for dashboard response."""
-    db_id: int = Field(..., description="Database ID")
-    id: str = Field(..., description="Dashboard identifier")
+    db_id: int = Field(..., alias="id", description="Database ID")
+    id: str = Field(..., alias="dashboard_id", description="Dashboard identifier")
     title: str
     description: Optional[str] = None
     structure: DashboardStructure
@@ -579,6 +579,7 @@ class DashboardResponse(BaseModel):
 
     class Config:
         from_attributes = True
+        populate_by_name = True
 
 
 class InputValueUpdate(BaseModel):

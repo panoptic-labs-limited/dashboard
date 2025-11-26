@@ -40,6 +40,9 @@ def serialize_input(input_obj: Input) -> Dict[str, Any]:
     # Start with base serialization from Pydantic
     data = input_obj.model_dump(exclude_none=True)
 
+    # Ensure type is "input" for layout purposes (not the specific input_type like "select")
+    data["type"] = "input"
+
     # Handle FunctionSource in source field
     if input_obj.source and isinstance(input_obj.source, FunctionSource):
         source = input_obj.source
@@ -99,6 +102,8 @@ def serialize_component(component: Component, alias: str) -> Dict[str, Any]:
 
 def _extract_component_parameters(cls: type[Component]) -> List[Dict[str, Any]]:
     """Extract parameter definitions from Component class fields."""
+    from pydantic_core import PydanticUndefined
+
     parameters = []
 
     for field_name, field_info in cls.model_fields.items():
@@ -111,8 +116,17 @@ def _extract_component_parameters(cls: type[Component]) -> List[Dict[str, Any]]:
         if field_info.description:
             param["description"] = field_info.description
 
-        if not field_info.is_required() and field_info.default is not None:
-            param["default"] = field_info.default
+        # Handle default values (skip if undefined or has default_factory)
+        if not field_info.is_required():
+            if field_info.default is not PydanticUndefined and field_info.default is not None:
+                param["default"] = field_info.default
+            elif field_info.default_factory is not None:
+                # Call default_factory to get the actual default value
+                try:
+                    param["default"] = field_info.default_factory()
+                except:
+                    # If factory fails, skip default
+                    pass
 
         parameters.append(param)
 
@@ -142,33 +156,44 @@ def serialize_widget(widget: Widget, input_map: Dict[str, str]) -> Dict[str, Any
         "config": widget.config or {}
     }
 
-    # Handle component
-    if widget.component:
-        component = widget.component
+    # Extract component_alias from Component instance or use existing alias
+    component_alias = widget.component_alias
+    if widget.component is not None:
+        # Get alias from Component instance (use snake_case of class name)
+        component_alias = _get_component_alias(widget.component.__class__)
 
-        # Get component alias from __id__ class variable
-        if hasattr(component.__class__, '__id__'):
-            data["component_alias"] = component.__class__.__id__
-        else:
-            # Fallback to class name if __id__ not set
-            data["component_alias"] = component.__class__.__name__.lower()
+    if component_alias:
+        data["component_alias"] = component_alias
 
-        # Serialize component parameters
+        # Serialize widget params (which may contain Input bindings)
         params = {}
-        for field_name, field_value in component.model_dump().items():
-            if isinstance(field_value, Input):
+        for param_name, param_value in widget.params.items():
+            if isinstance(param_value, Input):
                 # Parameter bound to an input
-                params[field_name] = {
+                params[param_name] = {
                     "type": "input",
-                    "id": field_value.id
+                    "input_id": param_value.id
                 }
             else:
                 # Literal value
-                params[field_name] = field_value
+                params[param_name] = param_value
 
         data["params"] = params
 
     return data
+
+
+def _get_component_alias(component_class: type) -> str:
+    """Get component alias, using __id__ if available, otherwise convert class name to snake_case."""
+    # Check for explicit __id__ attribute first
+    if hasattr(component_class, '__id__'):
+        return component_class.__id__
+
+    # Fallback: convert class name to snake_case
+    import re
+    name = component_class.__name__
+    s1 = re.sub('(.)([A-Z][a-z]+)', r'\1_\2', name)
+    return re.sub('([a-z0-9])([A-Z])', r'\1_\2', s1).lower()
 
 
 def serialize_dashboard(dashboard: Dashboard) -> Dict[str, Any]:
@@ -218,11 +243,8 @@ def _build_input_map(node: Any) -> Dict[str, str]:
         if isinstance(n, Container) and hasattr(n, 'children'):
             for child in n.children:
                 traverse(child)
-        if isinstance(n, Widget) and n.component:
-            # Check component fields for Input references
-            for field_value in n.component.model_dump().values():
-                if isinstance(field_value, Input):
-                    input_map[id(field_value)] = field_value.id
+        # Note: Widgets use component_alias (string), not embedded Component instances
+        # No need to check n.component since it doesn't exist
 
     traverse(node)
     return input_map
@@ -276,7 +298,7 @@ def _serialize_node(node: Any, input_map: Dict[str, str]) -> Dict[str, Any]:
         return {
             "type": "column",
             "id": node.id or _generate_id("column"),
-            "width": node.width,
+            "weight": node.weight,
             "gap": node.gap,
             "children": [_serialize_node(child, input_map) for child in node.children]
         }

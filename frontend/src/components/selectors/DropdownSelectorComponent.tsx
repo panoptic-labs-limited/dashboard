@@ -36,10 +36,19 @@ export const DropdownSelectorComponent: React.FC<DropdownSelectorComponentProps>
         fill={true}
         options={[
           { label: 'Select...', value: '' },
-          ...(selector.options || []).map(opt => ({
-            label: String(opt),
-            value: opt
-          }))
+          ...(selector.options || []).map(opt => {
+            // Handle both object format {value, label} and simple values
+            if (typeof opt === 'object' && opt !== null && 'value' in opt) {
+              return {
+                label: opt.label || String(opt.value),
+                value: opt.value
+              };
+            }
+            return {
+              label: String(opt),
+              value: opt
+            };
+          })
         ]}
       />
     </FormGroup>
