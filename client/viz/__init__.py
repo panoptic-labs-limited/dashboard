@@ -2,11 +2,12 @@
 
 __version__ = "0.1.0"
 
-from .api import RegistryClient
+# API utilities (serializer/extractor)
+from .api import serialize_dashboard, serialize_component, serialize_input, ComponentExtractor
 # Builder utilities
 from .builder import LayoutBuilder, L
 # Core components
-from .core import Component, DataSourceComponent, register_component, auto_register_components
+from .core import Component, DataSourceComponent
 # Inputs
 from .inputs import (
     # Base
@@ -51,9 +52,11 @@ __all__ = [
     # Core
     "Component",
     "DataSourceComponent",
-    "register_component",
-    "auto_register_components",
-    "RegistryClient",
+    # API utilities
+    "serialize_dashboard",
+    "serialize_component",
+    "serialize_input",
+    "ComponentExtractor",
     # Layout
     "Dashboard",
     "Page",

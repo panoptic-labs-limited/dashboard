@@ -1,5 +1,12 @@
-"""API client for Viz."""
+"""API utilities for Viz."""
 
-from .client import RegistryClient
+from .serializer import serialize_dashboard, serialize_component, serialize_input
+from .extractor import ComponentExtractor, serialize_function
 
-__all__ = ["RegistryClient"]
+__all__ = [
+    "serialize_dashboard",
+    "serialize_component",
+    "serialize_input",
+    "ComponentExtractor",
+    "serialize_function",
+]
