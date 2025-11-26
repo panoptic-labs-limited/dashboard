@@ -7,11 +7,13 @@ from typing import List
 from app.database import get_db
 from app.models import User, Component
 from app.auth import get_current_user
-from viz_shared import (
+from app.schemas import (
     ComponentCreate,
     ComponentUpdate,
     ComponentResponse,
     ComponentParameter,
+)
+from app.utils import (
     validate_component_source,
     extract_component_parameters,
 )

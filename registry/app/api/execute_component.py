@@ -9,11 +9,11 @@ from app.database import get_db
 from app.models import User, Component, ComponentExecution
 from app.auth import get_current_user
 from app.executor import executor
-from viz_shared import (
+from app.schemas import (
     ComponentExecutionRequest,
     ComponentExecutionResponse,
-    ExecutionStage,
 )
+from app.types import ExecutionStage
 
 router = APIRouter(prefix="/execute/component", tags=["component-execution"])
 
