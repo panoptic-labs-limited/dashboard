@@ -13,14 +13,13 @@ To serve this dashboard:
     streamviz serve examples/plotly_datasets_dashboard.py
 """
 
-import plotly.express as px
 import pandas as pd
-from datetime import datetime
+import plotly.express as px
 from pydantic import Field
 
 from viz import (
     Component, L, Dashboard,
-    Select, DateRangeInput, Slider, MultiSelect, Toggle
+    Select, Slider, MultiSelect, Toggle
 )
 from viz.layout import WidgetType
 
@@ -78,11 +77,13 @@ class GapminderTrends(Component):
 
         # Calculate weighted averages by year
         grouped = filtered.groupby('year', as_index=False).apply(
-            lambda x: pd.Series({
-                'gdpPercap': (x['gdpPercap'] * x['pop']).sum() / x['pop'].sum(),
-                'lifeExp': (x['lifeExp'] * x['pop']).sum() / x['pop'].sum(),
-                'pop': x['pop'].sum()
-            }), include_groups=False
+            lambda x: pd.Series(
+                {
+                    'gdpPercap': (x['gdpPercap'] * x['pop']).sum() / x['pop'].sum(),
+                    'lifeExp': (x['lifeExp'] * x['pop']).sum() / x['pop'].sum(),
+                    'pop': x['pop'].sum()
+                }
+            ), include_groups=False
         ).reset_index()
 
         return grouped
@@ -97,15 +98,19 @@ class GapminderTrends(Component):
 
         # Add GDP trace
         fig.add_trace(
-            go.Scatter(x=data['year'], y=data['gdpPercap'],
-                      name="GDP per Capita", line=dict(color='blue')),
+            go.Scatter(
+                x=data['year'], y=data['gdpPercap'],
+                name="GDP per Capita", line=dict(color='blue')
+                ),
             secondary_y=False,
         )
 
         # Add Life Expectancy trace
         fig.add_trace(
-            go.Scatter(x=data['year'], y=data['lifeExp'],
-                      name="Life Expectancy", line=dict(color='red')),
+            go.Scatter(
+                x=data['year'], y=data['lifeExp'],
+                name="Life Expectancy", line=dict(color='red')
+                ),
             secondary_y=True,
         )
 
@@ -113,9 +118,11 @@ class GapminderTrends(Component):
             # Normalize population for display
             data['pop_normalized'] = data['pop'] / data['pop'].max() * data['lifeExp'].max()
             fig.add_trace(
-                go.Scatter(x=data['year'], y=data['pop_normalized'],
-                          name="Population (scaled)",
-                          line=dict(color='green', dash='dash')),
+                go.Scatter(
+                    x=data['year'], y=data['pop_normalized'],
+                    name="Population (scaled)",
+                    line=dict(color='green', dash='dash')
+                    ),
                 secondary_y=True,
             )
 
@@ -153,7 +160,7 @@ class CountryComparison(Component):
         filtered = data[
             (data['year'] == self.year) &
             (data['country'].isin(self.countries))
-        ].copy()
+            ].copy()
 
         return filtered.sort_values(self.metric, ascending=False)
 
@@ -305,23 +312,26 @@ dashboard = Dashboard(id="plotly_datasets", title="Plotly Datasets Explorer")
 
 # Page 1: Gapminder Analysis
 with dashboard.page(id="gapminder", title="Gapminder Analysis", icon="🌍"):
-
     with L.section(title="Economic & Health Trends"):
         with L.row():
             # Inputs
             with L.column(weight=1):
-                continent_input = L.input(Select(
-                    name="continent",
-                    label="Continent",
-                    options=get_continents(),
-                    default="Asia"
-                ))
+                continent_input = L.input(
+                    Select(
+                        name="continent",
+                        label="Continent",
+                        options=get_continents(),
+                        default="Asia"
+                    )
+                )
 
-                show_pop_input = L.input(Toggle(
-                    name="show_population",
-                    label="Show Population",
-                    default=False
-                ))
+                show_pop_input = L.input(
+                    Toggle(
+                        name="show_population",
+                        label="Show Population",
+                        default=False
+                    )
+                )
 
             # Chart
             with L.column(weight=3):
@@ -339,34 +349,40 @@ with dashboard.page(id="gapminder", title="Gapminder Analysis", icon="🌍"):
         with L.row():
             # Inputs
             with L.column(weight=1):
-                countries_input = L.input(MultiSelect(
-                    name="countries",
-                    label="Select Countries",
-                    options=get_countries(),
-                    default=["United States", "China", "India", "Brazil", "Germany"],
-                    max_selections=10
-                ))
+                countries_input = L.input(
+                    MultiSelect(
+                        name="countries",
+                        label="Select Countries",
+                        options=get_countries(),
+                        default=["United States", "China", "India", "Brazil", "Germany"],
+                        max_selections=10
+                    )
+                )
 
-                year_input = L.input(Slider(
-                    name="year",
-                    label="Year",
-                    min_value=1952,
-                    max_value=2007,
-                    step=5,
-                    default=2007,
-                    show_value=True
-                ))
+                year_input = L.input(
+                    Slider(
+                        name="year",
+                        label="Year",
+                        min_value=1952,
+                        max_value=2007,
+                        step=5,
+                        default=2007,
+                        show_value=True
+                    )
+                )
 
-                metric_input = L.input(Select(
-                    name="metric",
-                    label="Metric",
-                    options=[
-                        {"value": "gdpPercap", "label": "GDP per Capita"},
-                        {"value": "lifeExp", "label": "Life Expectancy"},
-                        {"value": "pop", "label": "Population"}
-                    ],
-                    default="gdpPercap"
-                ))
+                metric_input = L.input(
+                    Select(
+                        name="metric",
+                        label="Metric",
+                        options=[
+                            {"value": "gdpPercap", "label": "GDP per Capita"},
+                            {"value": "lifeExp", "label": "Life Expectancy"},
+                            {"value": "pop", "label": "Population"}
+                        ],
+                        default="gdpPercap"
+                    )
+                )
 
             # Chart
             with L.column(weight=2):
@@ -383,34 +399,37 @@ with dashboard.page(id="gapminder", title="Gapminder Analysis", icon="🌍"):
 
 # Page 2: Iris Classification
 with dashboard.page(id="iris", title="Iris Dataset", icon="🌸"):
-
     with L.section(title="Flower Measurements"):
         with L.row():
             # Inputs
             with L.column(weight=1):
-                x_axis_input = L.input(Select(
-                    name="x_axis",
-                    label="X-Axis",
-                    options=[
-                        {"value": "sepal_length", "label": "Sepal Length"},
-                        {"value": "sepal_width", "label": "Sepal Width"},
-                        {"value": "petal_length", "label": "Petal Length"},
-                        {"value": "petal_width", "label": "Petal Width"},
-                    ],
-                    default="sepal_length"
-                ))
+                x_axis_input = L.input(
+                    Select(
+                        name="x_axis",
+                        label="X-Axis",
+                        options=[
+                            {"value": "sepal_length", "label": "Sepal Length"},
+                            {"value": "sepal_width", "label": "Sepal Width"},
+                            {"value": "petal_length", "label": "Petal Length"},
+                            {"value": "petal_width", "label": "Petal Width"},
+                        ],
+                        default="sepal_length"
+                    )
+                )
 
-                y_axis_input = L.input(Select(
-                    name="y_axis",
-                    label="Y-Axis",
-                    options=[
-                        {"value": "sepal_length", "label": "Sepal Length"},
-                        {"value": "sepal_width", "label": "Sepal Width"},
-                        {"value": "petal_length", "label": "Petal Length"},
-                        {"value": "petal_width", "label": "Petal Width"},
-                    ],
-                    default="sepal_width"
-                ))
+                y_axis_input = L.input(
+                    Select(
+                        name="y_axis",
+                        label="Y-Axis",
+                        options=[
+                            {"value": "sepal_length", "label": "Sepal Length"},
+                            {"value": "sepal_width", "label": "Sepal Width"},
+                            {"value": "petal_length", "label": "Petal Length"},
+                            {"value": "petal_width", "label": "Petal Width"},
+                        ],
+                        default="sepal_width"
+                    )
+                )
 
             # Chart
             with L.column(weight=3):
@@ -426,32 +445,35 @@ with dashboard.page(id="iris", title="Iris Dataset", icon="🌸"):
 
 # Page 3: Restaurant Tips
 with dashboard.page(id="tips", title="Restaurant Tips", icon="💵"):
-
     with L.section(title="Tip Analysis"):
         with L.row():
             # Inputs
             with L.column(weight=1):
-                groupby_input = L.input(Select(
-                    name="groupby",
-                    label="Group By",
-                    options=[
-                        {"value": "day", "label": "Day of Week"},
-                        {"value": "time", "label": "Time (Lunch/Dinner)"},
-                        {"value": "sex", "label": "Gender"},
-                        {"value": "smoker", "label": "Smoker"}
-                    ],
-                    default="day"
-                ))
+                groupby_input = L.input(
+                    Select(
+                        name="groupby",
+                        label="Group By",
+                        options=[
+                            {"value": "day", "label": "Day of Week"},
+                            {"value": "time", "label": "Time (Lunch/Dinner)"},
+                            {"value": "sex", "label": "Gender"},
+                            {"value": "smoker", "label": "Smoker"}
+                        ],
+                        default="day"
+                    )
+                )
 
-                min_tip_input = L.input(Slider(
-                    name="min_tip",
-                    label="Minimum Tip ($)",
-                    min_value=0,
-                    max_value=10,
-                    step=0.5,
-                    default=0,
-                    show_value=True
-                ))
+                min_tip_input = L.input(
+                    Slider(
+                        name="min_tip",
+                        label="Minimum Tip ($)",
+                        min_value=0,
+                        max_value=10,
+                        step=0.5,
+                        default=0,
+                        show_value=True
+                    )
+                )
 
             # Chart
             with L.column(weight=3):
@@ -467,25 +489,26 @@ with dashboard.page(id="tips", title="Restaurant Tips", icon="💵"):
 
 # Page 4: Stock Prices
 with dashboard.page(id="stocks", title="Stock Prices", icon="📈"):
-
     with L.section(title="Stock Trends"):
         with L.row():
             # Inputs
             with L.column(weight=1):
-                stocks_input = L.input(MultiSelect(
-                    name="stocks",
-                    label="Select Stocks",
-                    options=[
-                        {"value": "GOOG", "label": "Google"},
-                        {"value": "AAPL", "label": "Apple"},
-                        {"value": "AMZN", "label": "Amazon"},
-                        {"value": "FB", "label": "Facebook"},
-                        {"value": "NFLX", "label": "Netflix"},
-                        {"value": "MSFT", "label": "Microsoft"}
-                    ],
-                    default=["GOOG", "AAPL"],
-                    max_selections=6
-                ))
+                stocks_input = L.input(
+                    MultiSelect(
+                        name="stocks",
+                        label="Select Stocks",
+                        options=[
+                            {"value": "GOOG", "label": "Google"},
+                            {"value": "AAPL", "label": "Apple"},
+                            {"value": "AMZN", "label": "Amazon"},
+                            {"value": "FB", "label": "Facebook"},
+                            {"value": "NFLX", "label": "Netflix"},
+                            {"value": "MSFT", "label": "Microsoft"}
+                        ],
+                        default=["GOOG", "AAPL"],
+                        max_selections=6
+                    )
+                )
 
             # Chart
             with L.column(weight=3):

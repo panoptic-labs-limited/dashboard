@@ -20,10 +20,27 @@ export const WidgetContainer: React.FC<WidgetContainerProps> = ({
   widget,
   inputValues,
 }) => {
+  // Extract only the input values this widget depends on
+  const widgetInputValues = React.useMemo(() => {
+    if (!widget.params) return {};
+
+    const relevantInputs: Record<string, any> = {};
+    Object.entries(widget.params).forEach(([paramName, paramValue]) => {
+      // Check if param is bound to an input
+      if (typeof paramValue === 'object' && paramValue?.type === 'input') {
+        const inputId = paramValue.input_id;
+        if (inputId && inputValues[inputId] !== undefined) {
+          relevantInputs[inputId] = inputValues[inputId];
+        }
+      }
+    });
+    return relevantInputs;
+  }, [widget.params, inputValues]);
+
   const { data: renderResult, isLoading, error } = useWidgetRender(
     dashboardName,
     widget.id,
-    inputValues
+    widgetInputValues
   );
 
   if (isLoading || !renderResult) {

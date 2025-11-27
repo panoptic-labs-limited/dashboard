@@ -18,6 +18,9 @@ import { useDashboard } from '../hooks/useDashboard';
 import { WidgetContainer } from './WidgetContainer';
 import { DateSelectorComponent } from './selectors/DateSelectorComponent';
 import { DropdownSelectorComponent } from './selectors/DropdownSelectorComponent';
+import { ToggleSelectorComponent } from './selectors/ToggleSelectorComponent';
+import { MultiSelectSelectorComponent } from './selectors/MultiSelectSelectorComponent';
+import { SliderSelectorComponent } from './selectors/SliderSelectorComponent';
 import type {
   PageSchema,
   SectionSchema,
@@ -36,6 +39,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ dashboardName }) => {
   const [inputValues, setInputValues] = useState<Record<string, any>>({});
   const [selectedPageId, setSelectedPageId] = useState<string>('');
   const [collapsedSections, setCollapsedSections] = useState<Set<string>>(new Set());
+  const [showFilters, setShowFilters] = useState<boolean>(false);
 
   // Extract all inputs from dashboard structure
   const inputs = useMemo(() => {
@@ -122,6 +126,36 @@ export const Dashboard: React.FC<DashboardProps> = ({ dashboardName }) => {
           />
         );
 
+      case 'toggle':
+        return (
+          <ToggleSelectorComponent
+            key={input.id}
+            selector={input as any}
+            value={value || null}
+            onChange={(val) => handleInputChange(input.id, val)}
+          />
+        );
+
+      case 'multi_select':
+        return (
+          <MultiSelectSelectorComponent
+            key={input.id}
+            selector={input as any}
+            value={value || null}
+            onChange={(val) => handleInputChange(input.id, val)}
+          />
+        );
+
+      case 'slider':
+        return (
+          <SliderSelectorComponent
+            key={input.id}
+            selector={input as any}
+            value={value || null}
+            onChange={(val) => handleInputChange(input.id, val)}
+          />
+        );
+
       default:
         return (
           <div key={input.id}>
@@ -158,8 +192,8 @@ export const Dashboard: React.FC<DashboardProps> = ({ dashboardName }) => {
             if (child.type === 'widget') {
               return renderWidget(child as WidgetSchema);
             } else if (child.type === 'input') {
-              // Skip rendering inputs in the layout - they're already in the input panel
-              return null;
+              // Render inputs inline
+              return renderInput(child as InputSchema);
             } else if (child.type === 'row') {
               return renderRow(child as RowSchema);
             }
@@ -329,18 +363,38 @@ export const Dashboard: React.FC<DashboardProps> = ({ dashboardName }) => {
         )}
       </div>
 
-      {/* Input panel */}
+      {/* Global filters panel */}
       {inputs.length > 0 && (
-        <Card elevation={Elevation.TWO} style={{ marginBottom: '20px', padding: '20px' }}>
-          <div style={{
-            display: 'grid',
-            gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))',
-            gap: '20px',
-          }}>
-            {inputs.map((input) => (
-              <div key={input.id}>{renderInput(input)}</div>
-            ))}
+        <Card elevation={Elevation.TWO} style={{ marginBottom: '20px' }}>
+          <div
+            onClick={() => setShowFilters(!showFilters)}
+            style={{
+              padding: '12px 20px',
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '10px',
+              borderBottom: showFilters ? '1px solid #e1e8ed' : 'none',
+            }}
+          >
+            <Icon icon={showFilters ? 'chevron-down' : 'chevron-right'} />
+            <span style={{ fontWeight: 500, fontSize: '14px' }}>
+              Global Filters {!showFilters && `(${inputs.length})`}
+            </span>
           </div>
+          <Collapse isOpen={showFilters}>
+            <div style={{ padding: '20px' }}>
+              <div style={{
+                display: 'grid',
+                gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))',
+                gap: '20px',
+              }}>
+                {inputs.map((input) => (
+                  <div key={input.id}>{renderInput(input)}</div>
+                ))}
+              </div>
+            </div>
+          </Collapse>
         </Card>
       )}
 
