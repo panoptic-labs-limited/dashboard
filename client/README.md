@@ -22,6 +22,7 @@ from viz import (
     Select, Slider,
 )
 
+
 # 1. Define a RenderableComponent for server-side visualizations
 class SalesChart(RenderableComponent):
     region: str
@@ -37,21 +38,26 @@ class SalesChart(RenderableComponent):
         import plotly.express as px
         return px.bar(data, x="product", y="sales")
 
+
 # 2. Build the dashboard
 dashboard = Dashboard(id="sales", title="Sales Dashboard")
 
 with dashboard.page(title="Overview"):
     with L.section(title="Filters"):
-        region = L.input(Select(
-            name="region",
-            options=[("north", "North"), ("south", "South")]
-        ))
-        year = L.input(Slider(
-            name="year",
-            min_value=2020,
-            max_value=2024,
-            default=2024
-        ))
+        region = L.input(
+            Select(
+                name="region",
+                options=[("north", "North"), ("south", "South")]
+            )
+        )
+        year = L.input(
+            Slider(
+                name="year",
+                min_value=2020,
+                max_value=2024,
+                default=2024
+            )
+        )
 
     with L.row():
         with L.column(weight=2):
@@ -77,9 +83,12 @@ stocks = TimeseriesSource(name="market.stocks")
 # Component class
 sales_data = ComponentSource(component=SalesLoader)
 
+
 # Simple function
 def get_options():
     return ["A", "B", "C"]
+
+
 options_source = FunctionSource(func=get_options)
 ```
 
@@ -87,14 +96,15 @@ options_source = FunctionSource(func=get_options)
 
 Components define data pipelines with `load()` and `transform()` methods.
 
-| Class | Purpose | Methods |
-|-------|---------|---------|
-| `Component` | Data-only (frontend renders) | `load()`, `transform()` |
-| `RenderableComponent` | Server-side rendering | `load()`, `transform()`, `render()` |
-| `DataSourceComponent` | Simple data fetching | `load()` only |
+| Class                 | Purpose                      | Methods                             |
+|-----------------------|------------------------------|-------------------------------------|
+| `Component`           | Data-only (frontend renders) | `load()`, `transform()`             |
+| `RenderableComponent` | Server-side rendering        | `load()`, `transform()`, `render()` |
+| `DataSourceComponent` | Simple data fetching         | `load()` only                       |
 
 ```python
 from viz import Component, RenderableComponent
+
 
 # Data-only component (for frontend-native widgets)
 class StockData(Component):
@@ -105,6 +115,7 @@ class StockData(Component):
 
     def transform(self, data):
         return data.tail(30)  # Last 30 days
+
 
 # Server-rendered component (for PlotlyWidget)
 class StockChart(RenderableComponent):
@@ -125,14 +136,14 @@ class StockChart(RenderableComponent):
 
 Widgets display data visualizations. Each widget type has specific configuration options.
 
-| Widget | Type | Use Case |
-|--------|------|----------|
-| `LineChartWidget` | Frontend-native | Time series, trends |
-| `BarChartWidget` | Frontend-native | Comparisons, categories |
-| `AreaChartWidget` | Frontend-native | Cumulative data |
-| `TableWidget` | Frontend-native | Data tables |
-| `MetricWidget` | Frontend-native | KPIs, single values |
-| `PlotlyWidget` | Server-rendered | Custom visualizations |
+| Widget            | Type            | Use Case                |
+|-------------------|-----------------|-------------------------|
+| `LineChartWidget` | Frontend-native | Time series, trends     |
+| `BarChartWidget`  | Frontend-native | Comparisons, categories |
+| `AreaChartWidget` | Frontend-native | Cumulative data         |
+| `TableWidget`     | Frontend-native | Data tables             |
+| `MetricWidget`    | Frontend-native | KPIs, single values     |
+| `PlotlyWidget`    | Server-rendered | Custom visualizations   |
 
 ```python
 from viz import (
@@ -170,6 +181,7 @@ PlotlyWidget(
 Inputs allow user interaction and can be bound to widget parameters.
 
 **Choice Inputs:**
+
 - `Select` - Single selection dropdown
 - `MultiSelect` - Multiple selection
 - `RadioGroup` - Radio buttons
@@ -178,17 +190,20 @@ Inputs allow user interaction and can be bound to widget parameters.
 - `Toggle` - Boolean toggle switch
 
 **Text Inputs:**
+
 - `TextInput` - Single line text
 - `TextArea` - Multi-line text
 - `SearchInput` - Search with autocomplete
 
 **Numeric Inputs:**
+
 - `NumericInput` - Number input
 - `Slider` - Single value slider
 - `RangeSlider` - Min/max range slider
 - `NumericRange` - Two number inputs
 
 **Date/Time Inputs:**
+
 - `DateInput` - Single date
 - `DateRangeInput` - Date range
 - `TimeInput` - Time picker
@@ -205,9 +220,11 @@ region = Select(
     options=[("north", "North"), ("south", "South")]
 )
 
+
 # Dynamic options from function
 def get_products():
     return [{"value": p.id, "label": p.name} for p in fetch_products()]
+
 
 product = Select(
     name="product",
@@ -275,22 +292,22 @@ with dashboard.page(title="Overview", icon="📊"):
 
 **Builder Methods:**
 
-| Method | Creates |
-|--------|---------|
-| `L.page(title, ...)` | Page |
-| `L.section(title, ...)` | Section |
-| `L.row(gap, ...)` | Row container |
-| `L.column(weight, ...)` | Column container |
+| Method                   | Creates                   |
+|--------------------------|---------------------------|
+| `L.page(title, ...)`     | Page                      |
+| `L.section(title, ...)`  | Section                   |
+| `L.row(gap, ...)`        | Row container             |
+| `L.column(weight, ...)`  | Column container          |
 | `L.columns(w1, w2, ...)` | Row with weighted columns |
-| `L.tabs(...)` | Tabs container |
-| `L.tab(title, ...)` | Tab |
-| `L.input(input_obj)` | Add input to layout |
-| `L.line_chart(...)` | LineChartWidget |
-| `L.bar_chart(...)` | BarChartWidget |
-| `L.area_chart(...)` | AreaChartWidget |
-| `L.table(...)` | TableWidget |
-| `L.metric(...)` | MetricWidget |
-| `L.plotly(...)` | PlotlyWidget |
+| `L.tabs(...)`            | Tabs container            |
+| `L.tab(title, ...)`      | Tab                       |
+| `L.input(input_obj)`     | Add input to layout       |
+| `L.line_chart(...)`      | LineChartWidget           |
+| `L.bar_chart(...)`       | BarChartWidget            |
+| `L.area_chart(...)`      | AreaChartWidget           |
+| `L.table(...)`           | TableWidget               |
+| `L.metric(...)`          | MetricWidget              |
+| `L.plotly(...)`          | PlotlyWidget              |
 
 ## File Structure
 
@@ -346,7 +363,7 @@ extractor = ComponentExtractor(dashboard)
 extractor.extract()
 
 components = extractor.get_components()  # [(class, name), ...]
-functions = extractor.get_functions()    # [(func, name), ...]
+functions = extractor.get_functions()  # [(func, name), ...]
 
 # Serialize dashboard structure
 dashboard_json = serialize_dashboard(dashboard)
@@ -380,14 +397,14 @@ python examples/plotly_datasets_dashboard.py
 
 If you were using the old API, here are the key changes:
 
-| Old | New |
-|-----|-----|
-| `Component` with `render()` | `RenderableComponent` |
-| `L.widget(widget_type=WidgetType.CHART, component=...)` | `L.plotly(data_source=ComponentSource(component=...))` |
-| `WidgetType.CHART` | Use typed widgets: `LineChartWidget`, `BarChartWidget`, etc. |
-| `component=MyClass` | `data_source=ComponentSource(component=MyClass)` |
-| `__id__ = "name"` | `__component_name__ = "name"` |
-| `alias` parameter | `name` parameter |
+| Old                                                     | New                                                          |
+|---------------------------------------------------------|--------------------------------------------------------------|
+| `Component` with `render()`                             | `RenderableComponent`                                        |
+| `L.widget(widget_type=WidgetType.CHART, component=...)` | `L.plotly(data_source=ComponentSource(component=...))`       |
+| `WidgetType.CHART`                                      | Use typed widgets: `LineChartWidget`, `BarChartWidget`, etc. |
+| `component=MyClass`                                     | `data_source=ComponentSource(component=MyClass)`             |
+| `__id__ = "name"`                                       | `__component_name__ = "name"`                                |
+| `alias` parameter                                       | `name` parameter                                             |
 
 ## Development
 

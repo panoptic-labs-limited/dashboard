@@ -34,8 +34,8 @@ def _build_response(*, client: AuthenticatedClient | Client, response: httpx.Res
 
 
 def sync_detailed(
-    *,
-    client: AuthenticatedClient,
+        *,
+        client: AuthenticatedClient,
 ) -> Response[Any]:
     """List Dashboards
 
@@ -59,8 +59,8 @@ def sync_detailed(
 
 
 async def asyncio_detailed(
-    *,
-    client: AuthenticatedClient,
+        *,
+        client: AuthenticatedClient,
 ) -> Response[Any]:
     """List Dashboards
 

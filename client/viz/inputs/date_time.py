@@ -99,4 +99,3 @@ class RelativeDateInput(RelativeDateConfig, Input[RelativeDateConfig]):
 
     __config_class__ = RelativeDateConfig
     input_type: Literal["relative_date"] = "relative_date"
-

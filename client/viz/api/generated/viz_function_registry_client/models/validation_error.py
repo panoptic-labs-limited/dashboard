@@ -52,7 +52,6 @@ class ValidationError:
         loc = []
         _loc = d.pop("loc")
         for loc_item_data in _loc:
-
             def _parse_loc_item(data: object) -> int | str:
                 return cast(int | str, data)
 

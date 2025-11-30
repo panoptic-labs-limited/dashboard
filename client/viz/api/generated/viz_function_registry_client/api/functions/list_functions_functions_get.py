@@ -36,7 +36,7 @@ def _parse_response(*, client: AuthenticatedClient | Client, response: httpx.Res
 
 
 def _build_response(
-    *, client: AuthenticatedClient | Client, response: httpx.Response
+        *, client: AuthenticatedClient | Client, response: httpx.Response
 ) -> Response[list[FunctionResponse]]:
     return Response(
         status_code=HTTPStatus(response.status_code),
@@ -47,8 +47,8 @@ def _build_response(
 
 
 def sync_detailed(
-    *,
-    client: AuthenticatedClient,
+        *,
+        client: AuthenticatedClient,
 ) -> Response[list[FunctionResponse]]:
     """List Functions
 
@@ -72,8 +72,8 @@ def sync_detailed(
 
 
 def sync(
-    *,
-    client: AuthenticatedClient,
+        *,
+        client: AuthenticatedClient,
 ) -> list[FunctionResponse] | None:
     """List Functions
 
@@ -93,8 +93,8 @@ def sync(
 
 
 async def asyncio_detailed(
-    *,
-    client: AuthenticatedClient,
+        *,
+        client: AuthenticatedClient,
 ) -> Response[list[FunctionResponse]]:
     """List Functions
 
@@ -116,8 +116,8 @@ async def asyncio_detailed(
 
 
 async def asyncio(
-    *,
-    client: AuthenticatedClient,
+        *,
+        client: AuthenticatedClient,
 ) -> list[FunctionResponse] | None:
     """List Functions
 

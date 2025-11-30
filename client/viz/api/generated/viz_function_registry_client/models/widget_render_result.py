@@ -12,7 +12,6 @@ if TYPE_CHECKING:
     from ..models.render_output import RenderOutput
     from ..models.widget_render_result_output_type_0 import WidgetRenderResultOutputType0
 
-
 T = TypeVar("T", bound="WidgetRenderResult")
 
 

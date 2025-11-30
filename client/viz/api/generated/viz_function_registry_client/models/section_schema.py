@@ -15,7 +15,6 @@ if TYPE_CHECKING:
     from ..models.tabs_schema import TabsSchema
     from ..models.widget_schema import WidgetSchema
 
-
 T = TypeVar("T", bound="SectionSchema")
 
 

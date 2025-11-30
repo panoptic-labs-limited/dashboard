@@ -11,9 +11,9 @@ from ...types import Response
 
 
 def _get_kwargs(
-    dashboard_id: str,
-    *,
-    body: DashboardUpdate,
+        dashboard_id: str,
+        *,
+        body: DashboardUpdate,
 ) -> dict[str, Any]:
     headers: dict[str, Any] = {}
 
@@ -52,10 +52,10 @@ def _build_response(*, client: AuthenticatedClient | Client, response: httpx.Res
 
 
 def sync_detailed(
-    dashboard_id: str,
-    *,
-    client: AuthenticatedClient,
-    body: DashboardUpdate,
+        dashboard_id: str,
+        *,
+        client: AuthenticatedClient,
+        body: DashboardUpdate,
 ) -> Response[HTTPValidationError]:
     """Update Dashboard
 
@@ -86,10 +86,10 @@ def sync_detailed(
 
 
 def sync(
-    dashboard_id: str,
-    *,
-    client: AuthenticatedClient,
-    body: DashboardUpdate,
+        dashboard_id: str,
+        *,
+        client: AuthenticatedClient,
+        body: DashboardUpdate,
 ) -> HTTPValidationError | None:
     """Update Dashboard
 
@@ -115,10 +115,10 @@ def sync(
 
 
 async def asyncio_detailed(
-    dashboard_id: str,
-    *,
-    client: AuthenticatedClient,
-    body: DashboardUpdate,
+        dashboard_id: str,
+        *,
+        client: AuthenticatedClient,
+        body: DashboardUpdate,
 ) -> Response[HTTPValidationError]:
     """Update Dashboard
 
@@ -147,10 +147,10 @@ async def asyncio_detailed(
 
 
 async def asyncio(
-    dashboard_id: str,
-    *,
-    client: AuthenticatedClient,
-    body: DashboardUpdate,
+        dashboard_id: str,
+        *,
+        client: AuthenticatedClient,
+        body: DashboardUpdate,
 ) -> HTTPValidationError | None:
     """Update Dashboard
 

@@ -244,6 +244,7 @@ class Checkbox(CheckboxConfig, Input[CheckboxConfig]):
 
     __config_class__ = CheckboxConfig
     input_type: Literal["checkbox"] = "checkbox"
+
     @field_validator('default')
     @classmethod
     def validate_default_is_bool(cls, v):

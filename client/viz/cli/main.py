@@ -107,6 +107,7 @@ def validate_dashboard(dashboard: Dashboard) -> bool:
 
     # Check for duplicate IDs
     seen_ids = set()
+
     def check_ids(node, path=""):
         if hasattr(node, 'id') and node.id:
             if node.id in seen_ids:
@@ -155,7 +156,14 @@ def cli():
 @click.option('--password', envvar='VIZ_PASSWORD', help='Registry password')
 @click.option('--watch/--no-watch', default=True, help='Watch file for changes')
 @click.option('--validate/--no-validate', default=True, help='Validate before registering')
-def serve(filepath: str, registry_url: str, username: Optional[str], password: Optional[str], watch: bool, validate: bool):
+def serve(
+        filepath: str,
+        registry_url: str,
+        username: Optional[str],
+        password: Optional[str],
+        watch: bool,
+        validate: bool
+        ):
     """
     Serve a dashboard file with auto-reload.
 
@@ -171,12 +179,14 @@ def serve(filepath: str, registry_url: str, username: Optional[str], password: O
         sys.exit(1)
 
     # Show header
-    console.print(Panel.fit(
-        f"[bold cyan]Streamviz Dashboard Server[/bold cyan]\n"
-        f"File: {filepath}\n"
-        f"Registry: {registry_url}",
-        border_style="cyan"
-    ))
+    console.print(
+        Panel.fit(
+            f"[bold cyan]Streamviz Dashboard Server[/bold cyan]\n"
+            f"File: {filepath}\n"
+            f"Registry: {registry_url}",
+            border_style="cyan"
+        )
+    )
 
     # Initial registration
     def register_dashboard():
@@ -201,14 +211,14 @@ def serve(filepath: str, registry_url: str, username: Optional[str], password: O
                 results = client.register_dashboard_full(dashboard)
 
                 # Summary
-                console.print("\n" + "="*60)
+                console.print("\n" + "=" * 60)
                 console.print("[bold green]Registration Complete[/bold green]")
                 console.print(f"  Functions: {len(results['functions'])}")
                 console.print(f"  Components: {len(results['components'])}")
                 console.print(f"  Dashboard: {dashboard.id}")
                 if results['errors']:
                     console.print(f"  [red]Errors: {len(results['errors'])}[/red]")
-                console.print("="*60)
+                console.print("=" * 60)
 
         except Exception as e:
             console.print(f"\n[red]✗[/red] Registration failed: {e}")

@@ -16,7 +16,6 @@ if TYPE_CHECKING:
     from ..models.tabs_schema import TabsSchema
     from ..models.widget_schema import WidgetSchema
 
-
 T = TypeVar("T", bound="PageSchema")
 
 
@@ -149,7 +148,7 @@ class PageSchema:
             for children_item_data in _children:
 
                 def _parse_children_item(
-                    data: object,
+                        data: object,
                 ) -> ColumnSchema | RowSchema | SectionSchema | TabsSchema | WidgetSchema:
                     try:
                         if not isinstance(data, dict):

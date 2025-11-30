@@ -9,7 +9,6 @@ from attrs import field as _attrs_field
 if TYPE_CHECKING:
     from ..models.parameter_binding import ParameterBinding
 
-
 T = TypeVar("T", bound="WidgetSchemaParams")
 
 

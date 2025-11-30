@@ -28,11 +28,11 @@ class RegistryClient:
     """
 
     def __init__(
-        self,
-        base_url: str = "http://localhost:8000",
-        username: Optional[str] = None,
-        password: Optional[str] = None,
-        token: Optional[str] = None
+            self,
+            base_url: str = "http://localhost:8000",
+            username: Optional[str] = None,
+            password: Optional[str] = None,
+            token: Optional[str] = None
     ):
         """
         Initialize registry client.
@@ -108,9 +108,9 @@ class RegistryClient:
 
         # Register functions
         with Progress(
-            SpinnerColumn(),
-            TextColumn("[progress.description]{task.description}"),
-            console=console,
+                SpinnerColumn(),
+                TextColumn("[progress.description]{task.description}"),
+                console=console,
         ) as progress:
 
             # Functions

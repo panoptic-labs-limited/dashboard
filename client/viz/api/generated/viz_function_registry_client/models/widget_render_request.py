@@ -11,7 +11,6 @@ from ..types import UNSET, Unset
 if TYPE_CHECKING:
     from ..models.widget_render_request_input_values import WidgetRenderRequestInputValues
 
-
 T = TypeVar("T", bound="WidgetRenderRequest")
 
 

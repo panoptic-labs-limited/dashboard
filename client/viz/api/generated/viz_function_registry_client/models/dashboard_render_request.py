@@ -11,7 +11,6 @@ from ..types import UNSET, Unset
 if TYPE_CHECKING:
     from ..models.dashboard_render_request_input_values import DashboardRenderRequestInputValues
 
-
 T = TypeVar("T", bound="DashboardRenderRequest")
 
 

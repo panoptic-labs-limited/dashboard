@@ -19,7 +19,7 @@ def _get_kwargs() -> dict[str, Any]:
 
 
 def _parse_response(
-    *, client: AuthenticatedClient | Client, response: httpx.Response
+        *, client: AuthenticatedClient | Client, response: httpx.Response
 ) -> list[ComponentResponse] | None:
     if response.status_code == 200:
         response_200 = []
@@ -38,7 +38,7 @@ def _parse_response(
 
 
 def _build_response(
-    *, client: AuthenticatedClient | Client, response: httpx.Response
+        *, client: AuthenticatedClient | Client, response: httpx.Response
 ) -> Response[list[ComponentResponse]]:
     return Response(
         status_code=HTTPStatus(response.status_code),
@@ -49,8 +49,8 @@ def _build_response(
 
 
 def sync_detailed(
-    *,
-    client: AuthenticatedClient,
+        *,
+        client: AuthenticatedClient,
 ) -> Response[list[ComponentResponse]]:
     """List Components
 
@@ -74,8 +74,8 @@ def sync_detailed(
 
 
 def sync(
-    *,
-    client: AuthenticatedClient,
+        *,
+        client: AuthenticatedClient,
 ) -> list[ComponentResponse] | None:
     """List Components
 
@@ -95,8 +95,8 @@ def sync(
 
 
 async def asyncio_detailed(
-    *,
-    client: AuthenticatedClient,
+        *,
+        client: AuthenticatedClient,
 ) -> Response[list[ComponentResponse]]:
     """List Components
 
@@ -118,8 +118,8 @@ async def asyncio_detailed(
 
 
 async def asyncio(
-    *,
-    client: AuthenticatedClient,
+        *,
+        client: AuthenticatedClient,
 ) -> list[ComponentResponse] | None:
     """List Components
 

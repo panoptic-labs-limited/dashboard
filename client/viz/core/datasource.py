@@ -13,12 +13,13 @@ Supported sources:
 from __future__ import annotations
 
 from abc import ABC
-from typing import Callable, Any, Literal, Union, TYPE_CHECKING
+from typing import Callable, Any, Literal, TYPE_CHECKING
 
 from pydantic import BaseModel, Field, ConfigDict
 
 if TYPE_CHECKING:
-    from .component import Component
+    pass
+
 
 class DataSource(BaseModel, ABC):
     """

@@ -12,7 +12,6 @@ from ..types import UNSET, Unset
 if TYPE_CHECKING:
     from ..models.tab_schema import TabSchema
 
-
 T = TypeVar("T", bound="TabsSchema")
 
 

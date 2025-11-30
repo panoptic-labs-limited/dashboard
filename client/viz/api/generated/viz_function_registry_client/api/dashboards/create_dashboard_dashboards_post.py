@@ -11,8 +11,8 @@ from ...types import Response
 
 
 def _get_kwargs(
-    *,
-    body: DashboardCreate,
+        *,
+        body: DashboardCreate,
 ) -> dict[str, Any]:
     headers: dict[str, Any] = {}
 
@@ -51,9 +51,9 @@ def _build_response(*, client: AuthenticatedClient | Client, response: httpx.Res
 
 
 def sync_detailed(
-    *,
-    client: AuthenticatedClient,
-    body: DashboardCreate,
+        *,
+        client: AuthenticatedClient,
+        body: DashboardCreate,
 ) -> Response[HTTPValidationError]:
     """Create Dashboard
 
@@ -82,9 +82,9 @@ def sync_detailed(
 
 
 def sync(
-    *,
-    client: AuthenticatedClient,
-    body: DashboardCreate,
+        *,
+        client: AuthenticatedClient,
+        body: DashboardCreate,
 ) -> HTTPValidationError | None:
     """Create Dashboard
 
@@ -108,9 +108,9 @@ def sync(
 
 
 async def asyncio_detailed(
-    *,
-    client: AuthenticatedClient,
-    body: DashboardCreate,
+        *,
+        client: AuthenticatedClient,
+        body: DashboardCreate,
 ) -> Response[HTTPValidationError]:
     """Create Dashboard
 
@@ -137,9 +137,9 @@ async def asyncio_detailed(
 
 
 async def asyncio(
-    *,
-    client: AuthenticatedClient,
-    body: DashboardCreate,
+        *,
+        client: AuthenticatedClient,
+        body: DashboardCreate,
 ) -> HTTPValidationError | None:
     """Create Dashboard
 

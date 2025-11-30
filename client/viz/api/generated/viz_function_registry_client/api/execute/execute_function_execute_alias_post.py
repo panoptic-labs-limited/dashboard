@@ -12,9 +12,9 @@ from ...types import Response
 
 
 def _get_kwargs(
-    alias: str,
-    *,
-    body: ExecutionRequest,
+        alias: str,
+        *,
+        body: ExecutionRequest,
 ) -> dict[str, Any]:
     headers: dict[str, Any] = {}
 
@@ -32,7 +32,7 @@ def _get_kwargs(
 
 
 def _parse_response(
-    *, client: AuthenticatedClient | Client, response: httpx.Response
+        *, client: AuthenticatedClient | Client, response: httpx.Response
 ) -> ExecutionResponse | HTTPValidationError | None:
     if response.status_code == 200:
         response_200 = ExecutionResponse.from_dict(response.json())
@@ -51,7 +51,7 @@ def _parse_response(
 
 
 def _build_response(
-    *, client: AuthenticatedClient | Client, response: httpx.Response
+        *, client: AuthenticatedClient | Client, response: httpx.Response
 ) -> Response[ExecutionResponse | HTTPValidationError]:
     return Response(
         status_code=HTTPStatus(response.status_code),
@@ -62,10 +62,10 @@ def _build_response(
 
 
 def sync_detailed(
-    alias: str,
-    *,
-    client: AuthenticatedClient,
-    body: ExecutionRequest,
+        alias: str,
+        *,
+        client: AuthenticatedClient,
+        body: ExecutionRequest,
 ) -> Response[ExecutionResponse | HTTPValidationError]:
     """Execute Function
 
@@ -96,10 +96,10 @@ def sync_detailed(
 
 
 def sync(
-    alias: str,
-    *,
-    client: AuthenticatedClient,
-    body: ExecutionRequest,
+        alias: str,
+        *,
+        client: AuthenticatedClient,
+        body: ExecutionRequest,
 ) -> ExecutionResponse | HTTPValidationError | None:
     """Execute Function
 
@@ -125,10 +125,10 @@ def sync(
 
 
 async def asyncio_detailed(
-    alias: str,
-    *,
-    client: AuthenticatedClient,
-    body: ExecutionRequest,
+        alias: str,
+        *,
+        client: AuthenticatedClient,
+        body: ExecutionRequest,
 ) -> Response[ExecutionResponse | HTTPValidationError]:
     """Execute Function
 
@@ -157,10 +157,10 @@ async def asyncio_detailed(
 
 
 async def asyncio(
-    alias: str,
-    *,
-    client: AuthenticatedClient,
-    body: ExecutionRequest,
+        alias: str,
+        *,
+        client: AuthenticatedClient,
+        body: ExecutionRequest,
 ) -> ExecutionResponse | HTTPValidationError | None:
     """Execute Function
 

@@ -37,8 +37,8 @@ def _build_response(*, client: AuthenticatedClient | Client, response: httpx.Res
 
 
 def sync_detailed(
-    *,
-    client: AuthenticatedClient | Client,
+        *,
+        client: AuthenticatedClient | Client,
 ) -> Response[Any]:
     """Health Check
 
@@ -60,8 +60,8 @@ def sync_detailed(
 
 
 async def asyncio_detailed(
-    *,
-    client: AuthenticatedClient | Client,
+        *,
+        client: AuthenticatedClient | Client,
 ) -> Response[Any]:
     """Health Check
 

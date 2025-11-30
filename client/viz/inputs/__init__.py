@@ -1,5 +1,7 @@
 """Comprehensive input components for dashboards."""
 
+# Re-export FunctionSource from core for backward compatibility
+from viz.core.datasource import FunctionSource
 # Base classes
 from .base import Input
 # Choice-based inputs and configs
@@ -48,8 +50,6 @@ from .numeric import (
     RangeSlider,
     NumericRange,
 )
-# Re-export FunctionSource from core for backward compatibility
-from viz.core.datasource import FunctionSource
 # Text inputs and configs
 from .text import (
     # Config models

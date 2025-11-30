@@ -11,7 +11,6 @@ from ..types import UNSET, Unset
 if TYPE_CHECKING:
     from ..models.validation_error import ValidationError
 
-
 T = TypeVar("T", bound="HTTPValidationError")
 
 

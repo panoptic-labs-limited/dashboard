@@ -10,7 +10,7 @@ from ...types import Response
 
 
 def _get_kwargs(
-    dashboard_id: str,
+        dashboard_id: str,
 ) -> dict[str, Any]:
     _kwargs: dict[str, Any] = {
         "method": "get",
@@ -42,9 +42,9 @@ def _build_response(*, client: AuthenticatedClient | Client, response: httpx.Res
 
 
 def sync_detailed(
-    dashboard_id: str,
-    *,
-    client: AuthenticatedClient,
+        dashboard_id: str,
+        *,
+        client: AuthenticatedClient,
 ) -> Response[HTTPValidationError]:
     """Get Dashboard
 
@@ -73,9 +73,9 @@ def sync_detailed(
 
 
 def sync(
-    dashboard_id: str,
-    *,
-    client: AuthenticatedClient,
+        dashboard_id: str,
+        *,
+        client: AuthenticatedClient,
 ) -> HTTPValidationError | None:
     """Get Dashboard
 
@@ -99,9 +99,9 @@ def sync(
 
 
 async def asyncio_detailed(
-    dashboard_id: str,
-    *,
-    client: AuthenticatedClient,
+        dashboard_id: str,
+        *,
+        client: AuthenticatedClient,
 ) -> Response[HTTPValidationError]:
     """Get Dashboard
 
@@ -128,9 +128,9 @@ async def asyncio_detailed(
 
 
 async def asyncio(
-    dashboard_id: str,
-    *,
-    client: AuthenticatedClient,
+        dashboard_id: str,
+        *,
+        client: AuthenticatedClient,
 ) -> HTTPValidationError | None:
     """Get Dashboard
 

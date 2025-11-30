@@ -12,9 +12,9 @@ from ...types import Response
 
 
 def _get_kwargs(
-    alias: str,
-    *,
-    body: ComponentExecutionRequest,
+        alias: str,
+        *,
+        body: ComponentExecutionRequest,
 ) -> dict[str, Any]:
     headers: dict[str, Any] = {}
 
@@ -32,7 +32,7 @@ def _get_kwargs(
 
 
 def _parse_response(
-    *, client: AuthenticatedClient | Client, response: httpx.Response
+        *, client: AuthenticatedClient | Client, response: httpx.Response
 ) -> ComponentExecutionResponse | HTTPValidationError | None:
     if response.status_code == 200:
         response_200 = ComponentExecutionResponse.from_dict(response.json())
@@ -51,7 +51,7 @@ def _parse_response(
 
 
 def _build_response(
-    *, client: AuthenticatedClient | Client, response: httpx.Response
+        *, client: AuthenticatedClient | Client, response: httpx.Response
 ) -> Response[ComponentExecutionResponse | HTTPValidationError]:
     return Response(
         status_code=HTTPStatus(response.status_code),
@@ -62,10 +62,10 @@ def _build_response(
 
 
 def sync_detailed(
-    alias: str,
-    *,
-    client: AuthenticatedClient,
-    body: ComponentExecutionRequest,
+        alias: str,
+        *,
+        client: AuthenticatedClient,
+        body: ComponentExecutionRequest,
 ) -> Response[ComponentExecutionResponse | HTTPValidationError]:
     """Execute Component
 
@@ -96,10 +96,10 @@ def sync_detailed(
 
 
 def sync(
-    alias: str,
-    *,
-    client: AuthenticatedClient,
-    body: ComponentExecutionRequest,
+        alias: str,
+        *,
+        client: AuthenticatedClient,
+        body: ComponentExecutionRequest,
 ) -> ComponentExecutionResponse | HTTPValidationError | None:
     """Execute Component
 
@@ -125,10 +125,10 @@ def sync(
 
 
 async def asyncio_detailed(
-    alias: str,
-    *,
-    client: AuthenticatedClient,
-    body: ComponentExecutionRequest,
+        alias: str,
+        *,
+        client: AuthenticatedClient,
+        body: ComponentExecutionRequest,
 ) -> Response[ComponentExecutionResponse | HTTPValidationError]:
     """Execute Component
 
@@ -157,10 +157,10 @@ async def asyncio_detailed(
 
 
 async def asyncio(
-    alias: str,
-    *,
-    client: AuthenticatedClient,
-    body: ComponentExecutionRequest,
+        alias: str,
+        *,
+        client: AuthenticatedClient,
+        body: ComponentExecutionRequest,
 ) -> ComponentExecutionResponse | HTTPValidationError | None:
     """Execute Component
 

@@ -11,11 +11,11 @@ This module traverses the dashboard layout tree to:
 import inspect
 from typing import Dict, Set, List, Tuple, Any
 
-from viz.core.layout import Container
 from viz.core.datasource import DataSource, ComponentSource, FunctionSource
+from viz.core.layout import Container
 from viz.inputs.base import Input
-from viz.widgets import Widget
 from viz.layout.dashboard import Dashboard
+from viz.widgets import Widget
 
 
 class ComponentExtractor:
@@ -43,11 +43,11 @@ class ComponentExtractor:
 
         # Maps for serialization
         self.component_map: Dict[type, str] = {}  # Component class → name
-        self.function_map: Dict[Any, str] = {}     # Function → name
+        self.function_map: Dict[Any, str] = {}  # Function → name
 
         # Lists of classes/functions (for serialization)
         self.components: List[Tuple[type, str]] = []  # (Component class, name)
-        self.functions: List[Tuple[Any, str]] = []     # (function, name)
+        self.functions: List[Tuple[Any, str]] = []  # (function, name)
 
     def extract(self) -> None:
         """

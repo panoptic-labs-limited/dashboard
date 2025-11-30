@@ -10,8 +10,8 @@ from ...types import Response
 
 
 def _get_kwargs(
-    dashboard_id: str,
-    input_id: str,
+        dashboard_id: str,
+        input_id: str,
 ) -> dict[str, Any]:
     _kwargs: dict[str, Any] = {
         "method": "get",
@@ -22,7 +22,7 @@ def _get_kwargs(
 
 
 def _parse_response(
-    *, client: AuthenticatedClient | Client, response: httpx.Response
+        *, client: AuthenticatedClient | Client, response: httpx.Response
 ) -> Any | HTTPValidationError | None:
     if response.status_code == 200:
         response_200 = response.json()
@@ -40,7 +40,7 @@ def _parse_response(
 
 
 def _build_response(
-    *, client: AuthenticatedClient | Client, response: httpx.Response
+        *, client: AuthenticatedClient | Client, response: httpx.Response
 ) -> Response[Any | HTTPValidationError]:
     return Response(
         status_code=HTTPStatus(response.status_code),
@@ -51,10 +51,10 @@ def _build_response(
 
 
 def sync_detailed(
-    dashboard_id: str,
-    input_id: str,
-    *,
-    client: AuthenticatedClient,
+        dashboard_id: str,
+        input_id: str,
+        *,
+        client: AuthenticatedClient,
 ) -> Response[Any | HTTPValidationError]:
     """Get Input Data
 
@@ -87,10 +87,10 @@ def sync_detailed(
 
 
 def sync(
-    dashboard_id: str,
-    input_id: str,
-    *,
-    client: AuthenticatedClient,
+        dashboard_id: str,
+        input_id: str,
+        *,
+        client: AuthenticatedClient,
 ) -> Any | HTTPValidationError | None:
     """Get Input Data
 
@@ -118,10 +118,10 @@ def sync(
 
 
 async def asyncio_detailed(
-    dashboard_id: str,
-    input_id: str,
-    *,
-    client: AuthenticatedClient,
+        dashboard_id: str,
+        input_id: str,
+        *,
+        client: AuthenticatedClient,
 ) -> Response[Any | HTTPValidationError]:
     """Get Input Data
 
@@ -152,10 +152,10 @@ async def asyncio_detailed(
 
 
 async def asyncio(
-    dashboard_id: str,
-    input_id: str,
-    *,
-    client: AuthenticatedClient,
+        dashboard_id: str,
+        input_id: str,
+        *,
+        client: AuthenticatedClient,
 ) -> Any | HTTPValidationError | None:
     """Get Input Data
 

@@ -11,7 +11,7 @@ from ...types import Response
 
 
 def _get_kwargs(
-    alias: str,
+        alias: str,
 ) -> dict[str, Any]:
     _kwargs: dict[str, Any] = {
         "method": "get",
@@ -22,7 +22,7 @@ def _get_kwargs(
 
 
 def _parse_response(
-    *, client: AuthenticatedClient | Client, response: httpx.Response
+        *, client: AuthenticatedClient | Client, response: httpx.Response
 ) -> ComponentResponse | HTTPValidationError | None:
     if response.status_code == 200:
         response_200 = ComponentResponse.from_dict(response.json())
@@ -41,7 +41,7 @@ def _parse_response(
 
 
 def _build_response(
-    *, client: AuthenticatedClient | Client, response: httpx.Response
+        *, client: AuthenticatedClient | Client, response: httpx.Response
 ) -> Response[ComponentResponse | HTTPValidationError]:
     return Response(
         status_code=HTTPStatus(response.status_code),
@@ -52,9 +52,9 @@ def _build_response(
 
 
 def sync_detailed(
-    alias: str,
-    *,
-    client: AuthenticatedClient,
+        alias: str,
+        *,
+        client: AuthenticatedClient,
 ) -> Response[ComponentResponse | HTTPValidationError]:
     """Get Component
 
@@ -83,9 +83,9 @@ def sync_detailed(
 
 
 def sync(
-    alias: str,
-    *,
-    client: AuthenticatedClient,
+        alias: str,
+        *,
+        client: AuthenticatedClient,
 ) -> ComponentResponse | HTTPValidationError | None:
     """Get Component
 
@@ -109,9 +109,9 @@ def sync(
 
 
 async def asyncio_detailed(
-    alias: str,
-    *,
-    client: AuthenticatedClient,
+        alias: str,
+        *,
+        client: AuthenticatedClient,
 ) -> Response[ComponentResponse | HTTPValidationError]:
     """Get Component
 
@@ -138,9 +138,9 @@ async def asyncio_detailed(
 
 
 async def asyncio(
-    alias: str,
-    *,
-    client: AuthenticatedClient,
+        alias: str,
+        *,
+        client: AuthenticatedClient,
 ) -> ComponentResponse | HTTPValidationError | None:
     """Get Component
 

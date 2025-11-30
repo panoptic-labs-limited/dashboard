@@ -13,7 +13,6 @@ if TYPE_CHECKING:
     from ..models.column_schema import ColumnSchema
     from ..models.widget_schema import WidgetSchema
 
-
 T = TypeVar("T", bound="RowSchema")
 
 

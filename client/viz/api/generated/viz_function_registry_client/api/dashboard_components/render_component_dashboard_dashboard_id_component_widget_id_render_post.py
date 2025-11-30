@@ -11,10 +11,10 @@ from ...types import Response
 
 
 def _get_kwargs(
-    dashboard_id: str,
-    widget_id: str,
-    *,
-    body: WidgetRenderRequest,
+        dashboard_id: str,
+        widget_id: str,
+        *,
+        body: WidgetRenderRequest,
 ) -> dict[str, Any]:
     headers: dict[str, Any] = {}
 
@@ -32,7 +32,7 @@ def _get_kwargs(
 
 
 def _parse_response(
-    *, client: AuthenticatedClient | Client, response: httpx.Response
+        *, client: AuthenticatedClient | Client, response: httpx.Response
 ) -> Any | HTTPValidationError | None:
     if response.status_code == 200:
         response_200 = response.json()
@@ -50,7 +50,7 @@ def _parse_response(
 
 
 def _build_response(
-    *, client: AuthenticatedClient | Client, response: httpx.Response
+        *, client: AuthenticatedClient | Client, response: httpx.Response
 ) -> Response[Any | HTTPValidationError]:
     return Response(
         status_code=HTTPStatus(response.status_code),
@@ -61,11 +61,11 @@ def _build_response(
 
 
 def sync_detailed(
-    dashboard_id: str,
-    widget_id: str,
-    *,
-    client: AuthenticatedClient,
-    body: WidgetRenderRequest,
+        dashboard_id: str,
+        widget_id: str,
+        *,
+        client: AuthenticatedClient,
+        body: WidgetRenderRequest,
 ) -> Response[Any | HTTPValidationError]:
     """Render Component
 
@@ -105,11 +105,11 @@ def sync_detailed(
 
 
 def sync(
-    dashboard_id: str,
-    widget_id: str,
-    *,
-    client: AuthenticatedClient,
-    body: WidgetRenderRequest,
+        dashboard_id: str,
+        widget_id: str,
+        *,
+        client: AuthenticatedClient,
+        body: WidgetRenderRequest,
 ) -> Any | HTTPValidationError | None:
     """Render Component
 
@@ -144,11 +144,11 @@ def sync(
 
 
 async def asyncio_detailed(
-    dashboard_id: str,
-    widget_id: str,
-    *,
-    client: AuthenticatedClient,
-    body: WidgetRenderRequest,
+        dashboard_id: str,
+        widget_id: str,
+        *,
+        client: AuthenticatedClient,
+        body: WidgetRenderRequest,
 ) -> Response[Any | HTTPValidationError]:
     """Render Component
 
@@ -186,11 +186,11 @@ async def asyncio_detailed(
 
 
 async def asyncio(
-    dashboard_id: str,
-    widget_id: str,
-    *,
-    client: AuthenticatedClient,
-    body: WidgetRenderRequest,
+        dashboard_id: str,
+        widget_id: str,
+        *,
+        client: AuthenticatedClient,
+        body: WidgetRenderRequest,
 ) -> Any | HTTPValidationError | None:
     """Render Component
 

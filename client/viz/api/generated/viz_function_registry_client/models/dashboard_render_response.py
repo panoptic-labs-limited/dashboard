@@ -10,7 +10,6 @@ if TYPE_CHECKING:
     from ..models.dashboard_render_response_input_values import DashboardRenderResponseInputValues
     from ..models.widget_render_result import WidgetRenderResult
 
-
 T = TypeVar("T", bound="DashboardRenderResponse")
 
 

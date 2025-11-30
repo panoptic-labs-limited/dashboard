@@ -70,10 +70,10 @@ class LayoutBuilder:
 
     @classmethod
     def section(
-        cls,
-        title: str | None = None,
-        collapsible: bool = False,
-        **kwargs
+            cls,
+            title: str | None = None,
+            collapsible: bool = False,
+            **kwargs
     ) -> Section:
         """
         Create a new section.
@@ -156,10 +156,10 @@ class LayoutBuilder:
 
     @classmethod
     def column(
-        cls,
-        weight: int = 1,
-        gap: str | None = None,
-        **kwargs
+            cls,
+            weight: int = 1,
+            gap: str | None = None,
+            **kwargs
     ) -> Column:
         """
         Create a column.
@@ -257,13 +257,13 @@ class LayoutBuilder:
 
     @classmethod
     def line_chart(
-        cls,
-        data_source: DataSource,
-        title: str | None = None,
-        x: str = "date",
-        y: str | list[str] = "value",
-        params: dict[str, Any] | None = None,
-        **kwargs
+            cls,
+            data_source: DataSource,
+            title: str | None = None,
+            x: str = "date",
+            y: str | list[str] = "value",
+            params: dict[str, Any] | None = None,
+            **kwargs
     ) -> LineChartWidget:
         """
         Create a line chart widget.
@@ -302,13 +302,13 @@ class LayoutBuilder:
 
     @classmethod
     def bar_chart(
-        cls,
-        data_source: DataSource,
-        title: str | None = None,
-        x: str = "category",
-        y: str | list[str] = "value",
-        params: dict[str, Any] | None = None,
-        **kwargs
+            cls,
+            data_source: DataSource,
+            title: str | None = None,
+            x: str = "category",
+            y: str | list[str] = "value",
+            params: dict[str, Any] | None = None,
+            **kwargs
     ) -> BarChartWidget:
         """
         Create a bar chart widget.
@@ -337,13 +337,13 @@ class LayoutBuilder:
 
     @classmethod
     def area_chart(
-        cls,
-        data_source: DataSource,
-        title: str | None = None,
-        x: str = "date",
-        y: str | list[str] = "value",
-        params: dict[str, Any] | None = None,
-        **kwargs
+            cls,
+            data_source: DataSource,
+            title: str | None = None,
+            x: str = "date",
+            y: str | list[str] = "value",
+            params: dict[str, Any] | None = None,
+            **kwargs
     ) -> AreaChartWidget:
         """
         Create an area chart widget.
@@ -372,12 +372,12 @@ class LayoutBuilder:
 
     @classmethod
     def table(
-        cls,
-        data_source: DataSource,
-        title: str | None = None,
-        columns: list[str] | None = None,
-        params: dict[str, Any] | None = None,
-        **kwargs
+            cls,
+            data_source: DataSource,
+            title: str | None = None,
+            columns: list[str] | None = None,
+            params: dict[str, Any] | None = None,
+            **kwargs
     ) -> TableWidget:
         """
         Create a table widget.
@@ -413,12 +413,12 @@ class LayoutBuilder:
 
     @classmethod
     def metric(
-        cls,
-        data_source: DataSource,
-        title: str | None = None,
-        value_field: str = "value",
-        params: dict[str, Any] | None = None,
-        **kwargs
+            cls,
+            data_source: DataSource,
+            title: str | None = None,
+            value_field: str = "value",
+            params: dict[str, Any] | None = None,
+            **kwargs
     ) -> MetricWidget:
         """
         Create a metric/KPI widget.
@@ -454,11 +454,11 @@ class LayoutBuilder:
 
     @classmethod
     def plotly(
-        cls,
-        data_source: ComponentSource,
-        title: str | None = None,
-        params: dict[str, Any] | None = None,
-        **kwargs
+            cls,
+            data_source: ComponentSource,
+            title: str | None = None,
+            params: dict[str, Any] | None = None,
+            **kwargs
     ) -> PlotlyWidget:
         """
         Create a server-rendered Plotly widget.

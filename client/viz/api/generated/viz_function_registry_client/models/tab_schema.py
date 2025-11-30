@@ -14,7 +14,6 @@ if TYPE_CHECKING:
     from ..models.row_schema import RowSchema
     from ..models.widget_schema import WidgetSchema
 
-
 T = TypeVar("T", bound="TabSchema")
 
 

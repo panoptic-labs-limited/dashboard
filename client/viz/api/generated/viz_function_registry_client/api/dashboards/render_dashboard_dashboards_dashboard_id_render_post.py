@@ -12,9 +12,9 @@ from ...types import Response
 
 
 def _get_kwargs(
-    dashboard_id: str,
-    *,
-    body: DashboardRenderRequest,
+        dashboard_id: str,
+        *,
+        body: DashboardRenderRequest,
 ) -> dict[str, Any]:
     headers: dict[str, Any] = {}
 
@@ -32,7 +32,7 @@ def _get_kwargs(
 
 
 def _parse_response(
-    *, client: AuthenticatedClient | Client, response: httpx.Response
+        *, client: AuthenticatedClient | Client, response: httpx.Response
 ) -> DashboardRenderResponse | HTTPValidationError | None:
     if response.status_code == 200:
         response_200 = DashboardRenderResponse.from_dict(response.json())
@@ -51,7 +51,7 @@ def _parse_response(
 
 
 def _build_response(
-    *, client: AuthenticatedClient | Client, response: httpx.Response
+        *, client: AuthenticatedClient | Client, response: httpx.Response
 ) -> Response[DashboardRenderResponse | HTTPValidationError]:
     return Response(
         status_code=HTTPStatus(response.status_code),
@@ -62,10 +62,10 @@ def _build_response(
 
 
 def sync_detailed(
-    dashboard_id: str,
-    *,
-    client: AuthenticatedClient,
-    body: DashboardRenderRequest,
+        dashboard_id: str,
+        *,
+        client: AuthenticatedClient,
+        body: DashboardRenderRequest,
 ) -> Response[DashboardRenderResponse | HTTPValidationError]:
     """Render Dashboard
 
@@ -96,10 +96,10 @@ def sync_detailed(
 
 
 def sync(
-    dashboard_id: str,
-    *,
-    client: AuthenticatedClient,
-    body: DashboardRenderRequest,
+        dashboard_id: str,
+        *,
+        client: AuthenticatedClient,
+        body: DashboardRenderRequest,
 ) -> DashboardRenderResponse | HTTPValidationError | None:
     """Render Dashboard
 
@@ -125,10 +125,10 @@ def sync(
 
 
 async def asyncio_detailed(
-    dashboard_id: str,
-    *,
-    client: AuthenticatedClient,
-    body: DashboardRenderRequest,
+        dashboard_id: str,
+        *,
+        client: AuthenticatedClient,
+        body: DashboardRenderRequest,
 ) -> Response[DashboardRenderResponse | HTTPValidationError]:
     """Render Dashboard
 
@@ -157,10 +157,10 @@ async def asyncio_detailed(
 
 
 async def asyncio(
-    dashboard_id: str,
-    *,
-    client: AuthenticatedClient,
-    body: DashboardRenderRequest,
+        dashboard_id: str,
+        *,
+        client: AuthenticatedClient,
+        body: DashboardRenderRequest,
 ) -> DashboardRenderResponse | HTTPValidationError | None:
     """Render Dashboard
 

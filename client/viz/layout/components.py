@@ -21,17 +21,6 @@ from pydantic import Field, model_validator, field_serializer
 from viz.core.layout import LeafNode
 from .enums import WidgetType
 
-# Re-export new widgets for convenience
-from viz.widgets import (
-    Widget,
-    LineChartWidget,
-    BarChartWidget,
-    AreaChartWidget,
-    TableWidget,
-    MetricWidget,
-    PlotlyWidget,
-)
-
 
 class LegacyWidget(LeafNode):
     """

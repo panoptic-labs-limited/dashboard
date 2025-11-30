@@ -14,7 +14,6 @@ if TYPE_CHECKING:
     from ..models.widget_schema_config import WidgetSchemaConfig
     from ..models.widget_schema_params import WidgetSchemaParams
 
-
 T = TypeVar("T", bound="WidgetSchema")
 
 

@@ -12,7 +12,6 @@ from ..types import UNSET, Unset
 if TYPE_CHECKING:
     from ..models.page_schema import PageSchema
 
-
 T = TypeVar("T", bound="DashboardStructure")
 
 

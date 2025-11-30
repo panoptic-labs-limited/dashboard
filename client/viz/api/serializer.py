@@ -18,6 +18,7 @@ from viz.core.component import Component
 from viz.core.datasource import DataSource, TimeseriesSource, ComponentSource, FunctionSource
 from viz.core.layout import Container
 from viz.inputs.base import Input
+from viz.layout.components import LegacyWidget
 from viz.layout.containers import Section, Row, Column, Tabs, Tab
 from viz.layout.dashboard import Dashboard, Page
 from viz.widgets import (
@@ -27,9 +28,7 @@ from viz.widgets import (
     AreaChartWidget,
     TableWidget,
     MetricWidget,
-    PlotlyWidget,
 )
-from viz.layout.components import LegacyWidget
 
 
 def serialize_data_source(source: DataSource) -> Dict[str, Any]:

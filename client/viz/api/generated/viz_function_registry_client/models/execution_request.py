@@ -11,7 +11,6 @@ from ..types import UNSET, Unset
 if TYPE_CHECKING:
     from ..models.execution_request_params import ExecutionRequestParams
 
-
 T = TypeVar("T", bound="ExecutionRequest")
 
 

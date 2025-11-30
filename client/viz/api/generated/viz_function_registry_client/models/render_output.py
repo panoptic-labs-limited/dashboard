@@ -13,7 +13,6 @@ if TYPE_CHECKING:
     from ..models.render_output_config_type_0 import RenderOutputConfigType0
     from ..models.render_output_data_type_0 import RenderOutputDataType0
 
-
 T = TypeVar("T", bound="RenderOutput")
 
 

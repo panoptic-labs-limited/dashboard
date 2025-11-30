@@ -14,7 +14,6 @@ if TYPE_CHECKING:
     from ..models.component_metadata import ComponentMetadata
     from ..models.component_parameter import ComponentParameter
 
-
 T = TypeVar("T", bound="ComponentResponse")
 
 
