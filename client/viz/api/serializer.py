@@ -5,20 +5,104 @@ This module handles the conversion of:
 - Input objects → InputSchema (for API registration)
 - Component instances → ComponentCreate schema
 - Dashboard hierarchy → DashboardStructure schema
+- DataSource objects → DataSourceSchema
+- Widget objects → WidgetSchema (various types)
 
-The serializer replaces Python object references with aliases/IDs for the registry.
+The serializer replaces Python object references with names/IDs for the registry.
 """
 
 import uuid
 from typing import Any, Dict, List
 
 from viz.core.component import Component
+from viz.core.datasource import DataSource, TimeseriesSource, ComponentSource, FunctionSource
 from viz.core.layout import Container
 from viz.inputs.base import Input
-from viz.inputs.sources import FunctionSource
-from viz.layout.components import Widget
 from viz.layout.containers import Section, Row, Column, Tabs, Tab
 from viz.layout.dashboard import Dashboard, Page
+from viz.widgets import (
+    Widget,
+    LineChartWidget,
+    BarChartWidget,
+    AreaChartWidget,
+    TableWidget,
+    MetricWidget,
+    PlotlyWidget,
+)
+from viz.layout.components import LegacyWidget
+
+
+def serialize_data_source(source: DataSource) -> Dict[str, Any]:
+    """
+    Serialize a DataSource to API schema format.
+
+    Handles all DataSource types:
+    - TimeseriesSource: {"type": "timeseries", "name": "..."}
+    - ComponentSource: {"type": "component", "name": "..."}
+    - FunctionSource: {"type": "function", "name": "..."}
+
+    Args:
+        source: DataSource instance
+
+    Returns:
+        Dictionary matching DataSourceSchema format
+    """
+    if isinstance(source, TimeseriesSource):
+        return {
+            "type": "timeseries",
+            "name": source.name
+        }
+
+    elif isinstance(source, ComponentSource):
+        # Get component name from class or string
+        if isinstance(source.component, str):
+            component_name = source.component
+        else:
+            component_name = _get_component_name(source.component)
+        return {
+            "type": "component",
+            "name": component_name
+        }
+
+    elif isinstance(source, FunctionSource):
+        # Get function name
+        if hasattr(source, 'func_name'):
+            func_name = source.func_name
+        elif hasattr(source.func, '__name__'):
+            func_name = source.func.__name__
+        else:
+            func_name = str(source.func)
+        return {
+            "type": "function",
+            "name": func_name
+        }
+
+    else:
+        raise ValueError(f"Unknown DataSource type: {type(source)}")
+
+
+def serialize_params(params: Dict[str, Any]) -> Dict[str, Any]:
+    """
+    Serialize widget/input params, handling Input references.
+
+    Args:
+        params: Dictionary of parameter name to value (may include Input refs)
+
+    Returns:
+        Serialized params with Input references replaced
+    """
+    serialized = {}
+    for param_name, param_value in params.items():
+        if isinstance(param_value, Input):
+            # Reference to an input (for cascading/binding)
+            serialized[param_name] = {
+                "type": "input",
+                "input_id": param_value.id
+            }
+        else:
+            # Literal value
+            serialized[param_name] = param_value
+    return serialized
 
 
 def serialize_input(input_obj: Input) -> Dict[str, Any]:
@@ -27,8 +111,8 @@ def serialize_input(input_obj: Input) -> Dict[str, Any]:
 
     Converts Input instances to flat dictionaries suitable for API registration.
     - Flattens all fields to top level (no nested config)
-    - Converts FunctionSource to {"type": "function", "alias": "..."}
-    - Handles cascading input params
+    - Serializes DataSource with serialize_data_source()
+    - Serializes params with serialize_params()
 
     Args:
         input_obj: Input instance (Select, DateInput, etc.)
@@ -42,33 +126,18 @@ def serialize_input(input_obj: Input) -> Dict[str, Any]:
     # Ensure type is "input" for layout purposes (not the specific input_type like "select")
     data["type"] = "input"
 
-    # Handle FunctionSource in source field
-    if input_obj.source and isinstance(input_obj.source, FunctionSource):
-        source = input_obj.source
-        data["source"] = {
-            "type": "function",
-            "alias": source.func_id if hasattr(source, 'func_id') else source.func.__name__,
-        }
+    # Serialize source if present
+    if input_obj.source is not None:
+        data["source"] = serialize_data_source(input_obj.source)
 
-        # Serialize params (handle Input references)
-        if source.params:
-            serialized_params = {}
-            for param_name, param_value in source.params.items():
-                if isinstance(param_value, Input):
-                    # Reference to another input (cascading)
-                    serialized_params[param_name] = {
-                        "type": "input",
-                        "id": param_value.id
-                    }
-                else:
-                    # Literal value
-                    serialized_params[param_name] = param_value
-            data["source"]["params"] = serialized_params
+    # Serialize params (may contain Input references)
+    if input_obj.params:
+        data["params"] = serialize_params(input_obj.params)
 
     return data
 
 
-def serialize_component(component_class: type, alias: str) -> Dict[str, Any]:
+def serialize_component(component_class: type, name: str) -> Dict[str, Any]:
     """
     Serialize a Component class to ComponentCreate schema.
 
@@ -76,19 +145,19 @@ def serialize_component(component_class: type, alias: str) -> Dict[str, Any]:
 
     Args:
         component_class: Component class (Type[Component])
-        alias: Unique identifier for this component
+        name: Unique identifier for this component
 
     Returns:
         Dictionary matching ComponentCreate schema
     """
     return {
-        "alias": alias,
+        "name": name,
         "class_name": component_class.get_class_name(),
         "source_code": component_class.get_source_code(),
         "description": component_class.__doc__.strip() if component_class.__doc__ else None,
         "parameters": _extract_component_parameters(component_class),
         "metadata": {
-            "name": component_class.__name__,
+            "class_name": component_class.__name__,
             "version": "1.0.0",
             "tags": []
         },
@@ -134,66 +203,123 @@ def serialize_widget(widget: Widget, input_map: Dict[str, str]) -> Dict[str, Any
     """
     Serialize a Widget to API schema format.
 
-    Converts Widget with Component class/alias to schema with component_alias and
-    parameter bindings.
+    Handles both new Widget types (with data_source) and LegacyWidget (with component).
 
     Args:
-        widget: Widget instance
+        widget: Widget instance (LineChartWidget, PlotlyWidget, LegacyWidget, etc.)
         input_map: Mapping of Input objects to their IDs
 
     Returns:
         Dictionary matching WidgetSchema format
     """
+    # Handle LegacyWidget separately (backward compatibility)
+    if isinstance(widget, LegacyWidget):
+        return _serialize_legacy_widget(widget, input_map)
+
+    # Get widget type from the concrete class
+    widget_type = getattr(widget, 'type', 'widget')
+
     data = {
         "type": "widget",
         "id": widget.id,
-        "widget_type": widget.widget_type,
+        "widget_type": widget_type,
+        "title": widget.title,
+        "description": widget.description,
+    }
+
+    # Serialize data_source
+    data["data_source"] = serialize_data_source(widget.data_source)
+
+    # Serialize params (may contain Input references)
+    if widget.params:
+        data["params"] = serialize_params(widget.params)
+
+    # Add widget-specific config based on widget type
+    config = _extract_widget_config(widget)
+    if config:
+        data["config"] = config
+
+    return data
+
+
+def _extract_widget_config(widget: Widget) -> Dict[str, Any]:
+    """Extract widget-specific configuration fields."""
+    config = {}
+
+    if isinstance(widget, (LineChartWidget, BarChartWidget, AreaChartWidget)):
+        # Chart widgets have x, y, series, etc.
+        if hasattr(widget, 'x') and widget.x:
+            config["x"] = widget.x
+        if hasattr(widget, 'y') and widget.y:
+            config["y"] = widget.y
+        if hasattr(widget, 'series') and widget.series:
+            config["series"] = widget.series
+        if hasattr(widget, 'color') and widget.color:
+            config["color"] = widget.color
+
+    elif isinstance(widget, TableWidget):
+        # Table widgets have columns, pagination, etc.
+        if hasattr(widget, 'columns') and widget.columns:
+            config["columns"] = widget.columns
+        if hasattr(widget, 'page_size'):
+            config["page_size"] = widget.page_size
+        if hasattr(widget, 'sortable'):
+            config["sortable"] = widget.sortable
+        if hasattr(widget, 'filterable'):
+            config["filterable"] = widget.filterable
+
+    elif isinstance(widget, MetricWidget):
+        # Metric widgets have value_field, comparison, etc.
+        if hasattr(widget, 'value_field') and widget.value_field:
+            config["value_field"] = widget.value_field
+        if hasattr(widget, 'format') and widget.format:
+            config["format"] = widget.format
+        if hasattr(widget, 'comparison_value') and widget.comparison_value is not None:
+            config["comparison_value"] = widget.comparison_value
+        if hasattr(widget, 'comparison_label') and widget.comparison_label:
+            config["comparison_label"] = widget.comparison_label
+
+    # PlotlyWidget doesn't have additional config - the render() produces the figure
+
+    return config
+
+
+def _serialize_legacy_widget(widget: LegacyWidget, input_map: Dict[str, str]) -> Dict[str, Any]:
+    """Serialize a LegacyWidget (backward compatibility)."""
+    data = {
+        "type": "widget",
+        "id": widget.id,
+        "widget_type": widget.widget_type.value if hasattr(widget.widget_type, 'value') else str(widget.widget_type),
         "title": widget.title,
         "description": widget.description,
         "config": widget.config or {}
     }
 
-    # Get component alias from either class or string
-    component_alias = None
+    # Get component name from either class or string
+    component_name = None
     if widget.component is not None:
         if isinstance(widget.component, str):
-            # String alias provided directly
-            component_alias = widget.component
+            component_name = widget.component
         else:
-            # Component class provided - extract alias
-            component_alias = _get_component_alias(widget.component)
+            component_name = _get_component_name(widget.component)
 
-    if component_alias:
-        data["component_alias"] = component_alias
-
-        # Serialize widget params (which may contain Input bindings)
-        params = {}
-        for param_name, param_value in widget.params.items():
-            if isinstance(param_value, Input):
-                # Parameter bound to an input
-                params[param_name] = {
-                    "type": "input",
-                    "input_id": param_value.id
-                }
-            else:
-                # Literal value
-                params[param_name] = param_value
-
-        data["params"] = params
+    if component_name:
+        data["component_name"] = component_name
+        data["params"] = serialize_params(widget.params)
 
     return data
 
 
-def _get_component_alias(component_class: type) -> str:
-    """Get component alias, using __id__ if available, otherwise convert class name to snake_case."""
-    # Check for explicit __id__ attribute first
-    if hasattr(component_class, '__id__'):
-        return component_class.__id__
+def _get_component_name(component_class: type) -> str:
+    """Get component name, using __component_name__ if available, otherwise convert class name to snake_case."""
+    # Check for explicit __component_name__ attribute first
+    if hasattr(component_class, '__component_name__'):
+        return component_class.__component_name__
 
     # Fallback: convert class name to snake_case
     import re
-    name = component_class.__name__
-    s1 = re.sub('(.)([A-Z][a-z]+)', r'\1_\2', name)
+    class_name = component_class.__name__
+    s1 = re.sub('(.)([A-Z][a-z]+)', r'\1_\2', class_name)
     return re.sub('([a-z0-9])([A-Z])', r'\1_\2', s1).lower()
 
 
@@ -244,8 +370,8 @@ def _build_input_map(node: Any) -> Dict[str, str]:
         if isinstance(n, Container) and hasattr(n, 'children'):
             for child in n.children:
                 traverse(child)
-        # Note: Widgets use component_alias (string), not embedded Component instances
-        # No need to check n.component since it doesn't exist
+        # Note: Widget.data_source contains DataSource objects (not embedded components)
+        # Components/functions are extracted separately by ComponentExtractor
 
     traverse(node)
     return input_map
@@ -267,11 +393,15 @@ def _serialize_node(node: Any, input_map: Dict[str, str]) -> Dict[str, Any]:
     """
     Serialize any layout node to schema format.
 
-    Handles: Section, Row, Column, Tabs, Tab, Widget, Input
+    Handles: Section, Row, Column, Tabs, Tab, Widget, LegacyWidget, Input
     Auto-generates IDs for containers if not present.
     """
     if isinstance(node, Input):
         return serialize_input(node)
+
+    # Check LegacyWidget first (before Widget, since LegacyWidget is not a subclass)
+    elif isinstance(node, LegacyWidget):
+        return serialize_widget(node, input_map)
 
     elif isinstance(node, Widget):
         return serialize_widget(node, input_map)

@@ -120,15 +120,15 @@ class RegistryClient:
                     f"[cyan]Registering {len(functions)} function(s)...",
                     total=len(functions)
                 )
-                for func, alias in functions:
+                for func, name in functions:
                     try:
-                        result = self._register_function(func, alias)
-                        results["functions"].append({"alias": alias, "status": "success"})
-                        console.print(f"  [green]✓[/green] Function: {alias}")
+                        result = self._register_function(func, name)
+                        results["functions"].append({"name": name, "status": "success"})
+                        console.print(f"  [green]✓[/green] Function: {name}")
                         progress.advance(task)
                     except Exception as e:
-                        results["errors"].append({"type": "function", "alias": alias, "error": str(e)})
-                        console.print(f"  [red]✗[/red] Function: {alias} - {e}")
+                        results["errors"].append({"type": "function", "name": name, "error": str(e)})
+                        console.print(f"  [red]✗[/red] Function: {name} - {e}")
                         progress.advance(task)
 
             # Components
@@ -138,15 +138,15 @@ class RegistryClient:
                     f"[cyan]Registering {len(components)} component(s)...",
                     total=len(components)
                 )
-                for component, alias in components:
+                for component, name in components:
                     try:
-                        result = self._register_component(component, alias)
-                        results["components"].append({"alias": alias, "status": "success"})
-                        console.print(f"  [green]✓[/green] Component: {alias}")
+                        result = self._register_component(component, name)
+                        results["components"].append({"name": name, "status": "success"})
+                        console.print(f"  [green]✓[/green] Component: {name}")
                         progress.advance(task)
                     except Exception as e:
-                        results["errors"].append({"type": "component", "alias": alias, "error": str(e)})
-                        console.print(f"  [red]✗[/red] Component: {alias} - {e}")
+                        results["errors"].append({"type": "component", "name": name, "error": str(e)})
+                        console.print(f"  [red]✗[/red] Component: {name} - {e}")
                         progress.advance(task)
 
         # Register dashboard
@@ -162,43 +162,43 @@ class RegistryClient:
 
         return results
 
-    def _register_function(self, func: Any, alias: str) -> Dict[str, Any]:
+    def _register_function(self, func: Any, name: str) -> Dict[str, Any]:
         """
         Register a function with the registry (PUT for idempotent update).
 
         Args:
             func: Function object
-            alias: Function alias
+            name: Function name
 
         Returns:
             Registration response
         """
-        function_data = serialize_function(func, alias)
+        function_data = serialize_function(func, name)
 
         response = self.client.put(
-            f"{self.base_url}/functions/{alias}",
+            f"{self.base_url}/functions/{name}",
             json=function_data,
             headers=self._get_headers()
         )
         response.raise_for_status()
         return response.json()
 
-    def _register_component(self, component_class: type, alias: str) -> Dict[str, Any]:
+    def _register_component(self, component_class: type, name: str) -> Dict[str, Any]:
         """
         Register a component with the registry (PUT for upsert).
 
         Args:
             component_class: Component class (Type[Component])
-            alias: Component alias
+            name: Component name
 
         Returns:
             Registration response
         """
-        component_data = serialize_component(component_class, alias)
+        component_data = serialize_component(component_class, name)
 
         # Try PUT first (update existing), fallback to POST (create new)
         response = self.client.put(
-            f"{self.base_url}/components/{alias}",
+            f"{self.base_url}/components/{name}",
             json=component_data,
             headers=self._get_headers()
         )

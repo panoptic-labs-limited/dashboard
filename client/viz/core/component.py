@@ -1,4 +1,10 @@
-"""Base Component class for creating dashboard components."""
+"""
+Component classes for data loading and rendering.
+
+Components are the primary way to define data pipelines:
+- Component: Base class with load() and transform() for data-only components
+- RenderableComponent: Extends Component with render() for server-side visualization
+"""
 
 import inspect
 from abc import ABC, abstractmethod
@@ -9,35 +15,33 @@ from pydantic import BaseModel, ConfigDict
 
 class Component(BaseModel, ABC):
     """
-    Base class for all dashboard components using Pydantic.
+    Base class for data-only components.
 
-    Users extend this class, define parameters as Pydantic fields,
-    and implement three methods:
-    - load(): Fetch/load data from a source
-    - transform(): Process/transform the loaded data
-    - render(): Create visualization from transformed data
+    Components define a data pipeline with:
+    - load(): Fetch data from databases, APIs, files, etc.
+    - transform(): Process/reshape data for consumption
 
-    Pydantic provides automatic validation, serialization, and type checking
-    for component parameters.
+    Use Component when the frontend will handle rendering (frontend-native widgets).
+    For server-side rendering, use RenderableComponent instead.
 
     Example:
-        class SalesChart(Component):
-            # Parameters as Pydantic fields (automatically validated)
-            start_date: str
+        class SalesLoader(Component):
             region: str
+            start_date: str
 
             def load(self):
-                return db.query(f"SELECT * FROM sales WHERE date >= '{self.start_date}' AND region = '{self.region}'")
+                return db.query(f"SELECT * FROM sales WHERE region = '{self.region}'")
 
             def transform(self, data):
-                return aggregate_by_product(data)
+                return aggregate_by_month(data)
 
-            def render(self, data):
-                import plotly.express as px
-                return px.bar(data, x="product", y="sales")
-
-        # Usage:
-        chart = SalesChart(start_date="2024-01-01", region="North")
+        # Use with frontend-native widget
+        LineChartWidget(
+            data_source=ComponentSource(component=SalesLoader),
+            params={"region": "North", "start_date": "2024-01-01"},
+            x="month",
+            y="revenue"
+        )
     """
 
     model_config = ConfigDict(
@@ -76,25 +80,6 @@ class Component(BaseModel, ABC):
 
         Returns:
             Processed data ready for rendering
-        """
-        pass
-
-    @abstractmethod
-    def render(self, data: Any) -> Any:
-        """
-        Render the final visualization.
-
-        This method should return one of:
-        - Plotly Figure (recommended): px.bar(...) or go.Figure(...)
-        - Altair Chart: alt.Chart(...).mark_bar()
-        - Vega-Lite spec: {"mark": "bar", ...}
-        - Custom dict: {"type": "custom", "data": ...}
-
-        Args:
-            data: Output from transform() method
-
-        Returns:
-            Visualization object or spec
         """
         pass
 
@@ -145,12 +130,62 @@ class Component(BaseModel, ABC):
         return params
 
 
+class RenderableComponent(Component, ABC):
+    """
+    Component with server-side rendering capability.
+
+    Extends Component with a render() method that produces visualization output
+    (typically Plotly JSON). Use with PlotlyWidget for full server-side control.
+
+    Example:
+        class SalesChart(RenderableComponent):
+            region: str
+
+            def load(self):
+                return db.query(f"SELECT * FROM sales WHERE region = '{self.region}'")
+
+            def transform(self, data):
+                return aggregate_by_product(data)
+
+            def render(self, data):
+                import plotly.express as px
+                return px.bar(data, x="product", y="sales")
+
+        # Use with PlotlyWidget
+        PlotlyWidget(
+            data_source=ComponentSource(component=SalesChart),
+            params={"region": region_input}
+        )
+    """
+
+    @abstractmethod
+    def render(self, data: Any) -> Any:
+        """
+        Render the final visualization.
+
+        This method should return one of:
+        - Plotly Figure (recommended): px.bar(...) or go.Figure(...)
+        - Altair Chart: alt.Chart(...).mark_bar()
+        - Vega-Lite spec: {"mark": "bar", ...}
+        - Custom dict: {"type": "custom", "data": ...}
+
+        Args:
+            data: Output from transform() method
+
+        Returns:
+            Visualization object or spec
+        """
+        pass
+
+
 class DataSourceComponent(Component):
     """
-    Simplified component for selector data sources.
+    Simplified component for data sources.
 
     Only requires implementing load() method.
-    Transform and render are no-ops (pass-through).
+    Transform is a pass-through by default.
+
+    Useful for simple data fetching without transformation logic.
 
     Example:
         class AvailableDates(DataSourceComponent):
@@ -167,8 +202,4 @@ class DataSourceComponent(Component):
 
     def transform(self, data: Any) -> Any:
         """Pass-through transform."""
-        return data
-
-    def render(self, data: Any) -> Any:
-        """Pass-through render."""
         return data

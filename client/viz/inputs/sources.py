@@ -1,49 +1,20 @@
 """Data sources for inputs.
 
-Sources define where input configuration comes from.
-Currently supports function-based sources for dynamic configuration.
+DEPRECATED: This module is deprecated. Import from viz.core.datasource instead.
+
+This module re-exports FunctionSource from viz.core.datasource for backward
+compatibility. New code should import directly from viz.core.datasource.
 """
 
-from typing import Generic, TypeVar, Callable, Any, Literal
+import warnings
 
-from pydantic import BaseModel, Field
+# Re-export FunctionSource from new location for backward compatibility
+from viz.core.datasource import FunctionSource
 
-T = TypeVar('T')
+warnings.warn(
+    "viz.inputs.sources is deprecated. Import FunctionSource from viz.core.datasource instead.",
+    DeprecationWarning,
+    stacklevel=2
+)
 
-
-class FunctionSource(BaseModel, Generic[T]):
-    """
-    Function-based data source for dynamic input configuration.
-
-    The function is executed server-side and can depend on other inputs
-    via the params mapping.
-
-    Examples:
-        # Simple function
-        FunctionSource(func=get_regions)
-
-        # With parameters from other inputs
-        FunctionSource(
-            func=get_regions_for_country,
-            params={"country": "country"}  # Maps to "country" input
-        )
-
-        # With mixed static and dynamic params
-        FunctionSource(
-            func=get_cities,
-            params={
-                "country": "country",      # From input
-                "min_population": 100000   # Static value
-            }
-        )
-    """
-
-    type: Literal["function"] = "function"
-    func: Callable[..., T] = Field(..., description="Function returning config data")
-    params: dict[str, Any] = Field(
-        default_factory=dict,
-        description="Parameters mapping (param_name -> input_name or static value)"
-    )
-
-    class Config:
-        arbitrary_types_allowed = True  # Allow Callable type
+__all__ = ["FunctionSource"]

@@ -3,12 +3,12 @@
 from __future__ import annotations
 
 import uuid
-from typing import TypeVar, Generic, Type, ClassVar
+from typing import Any, TypeVar, Generic, Type, ClassVar
 
 from pydantic import BaseModel, Field, model_validator
 
+from viz.core.datasource import DataSource
 from viz.core.layout import LeafNode
-from .sources import FunctionSource
 
 # Generic type variable for config models
 TConfig = TypeVar('TConfig', bound=BaseModel)
@@ -23,7 +23,11 @@ class Input(LeafNode, Generic[TConfig]):
 
     Configuration can be provided via:
     1. Top-level fields (static) - fields like options, default, min_value, etc.
-    2. source field (dynamic) - FunctionSource for server-side execution
+    2. source + params (dynamic) - DataSource for server-side data fetching
+
+    The source/params pattern mirrors widgets:
+    - source: WHERE to get data (TimeseriesSource, ComponentSource, FunctionSource)
+    - params: HOW to query the source (can reference other Inputs for cascading)
 
     Subclasses must:
     - Set __config_class__ to their config model type
@@ -58,12 +62,16 @@ class Input(LeafNode, Generic[TConfig]):
     help_text: str | None = Field(None, description="Help text or tooltip")
     placeholder: str | None = Field(None, description="Placeholder text")
 
-    # Source for dynamic configuration
+    # Dynamic data source (optional)
     # When None, use top-level fields (static configuration)
-    # When FunctionSource, execute function for dynamic configuration
-    source: FunctionSource[TConfig | None] = Field(
+    # When set, execute source with params for dynamic configuration
+    source: DataSource | None = Field(
         None,
-        description="Optional FunctionSource for dynamic configuration"
+        description="Optional DataSource for dynamic options/configuration"
+    )
+    params: dict[str, Any] = Field(
+        default_factory=dict,
+        description="Parameters for the data source (can reference other Inputs)"
     )
 
     @model_validator(mode='after')

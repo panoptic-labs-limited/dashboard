@@ -8,10 +8,17 @@ for building dashboard layouts.
 from typing import Any
 
 from viz.core.context import current_context, add_to_context
-from viz.layout.components import Widget
+from viz.core.datasource import DataSource, ComponentSource
 from viz.layout.containers import Row, Column, Tab, Tabs, Section
 from viz.layout.dashboard import Page
-from viz.layout.enums import WidgetType
+from viz.widgets import (
+    LineChartWidget,
+    BarChartWidget,
+    AreaChartWidget,
+    TableWidget,
+    MetricWidget,
+    PlotlyWidget,
+)
 
 
 class LayoutBuilder:
@@ -244,49 +251,257 @@ class LayoutBuilder:
         cls._add_to_context(input_instance)
         return input_instance
 
+    # -------------------------------------------------------------------------
+    # Widget Factory Methods
+    # -------------------------------------------------------------------------
+
     @classmethod
-    def widget(
+    def line_chart(
         cls,
-        widget_type: WidgetType,
+        data_source: DataSource,
         title: str | None = None,
-        component: Any | None = None,
-        params: dict[str, Any | None] = None,
+        x: str = "date",
+        y: str | list[str] = "value",
+        params: dict[str, Any] | None = None,
         **kwargs
-    ) -> Widget:
+    ) -> LineChartWidget:
         """
-        Create a widget.
+        Create a line chart widget.
 
         Args:
-            widget_type: Type of widget
+            data_source: DataSource for the chart data
             title: Optional widget title
-            component: Component class (Type[Component]) or alias (str)
-            params: Component parameters
-            **kwargs: Additional fields (description, config, etc.)
+            x: Column name for x-axis
+            y: Column name(s) for y-axis
+            params: Parameters for the data source (can include Input refs)
+            **kwargs: Additional fields (description, color, series, etc.)
 
         Returns:
-            Widget instance
+            LineChartWidget instance
 
         Example:
-            >>> widget = LayoutBuilder.widget(
-            ...     widget_type=WidgetType.CHART,
-            ...     title="Sales Chart",
-            ...     component=MyComponent,  # Pass class not instance
-            ...     params={"region": region_input}
+            >>> stocks = TimeseriesSource(name="market.stocks")
+            >>> chart = L.line_chart(
+            ...     data_source=stocks,
+            ...     title="Stock Price",
+            ...     x="date",
+            ...     y="close",
+            ...     params={"symbol": symbol_input}
             ... )
-
-        Note:
-            If called within a context manager, automatically adds to parent.
         """
-        widget = Widget(
-            widget_type=widget_type,
+        widget = LineChartWidget(
+            data_source=data_source,
             title=title,
-            component=component,
+            x=x,
+            y=y,
             params=params or {},
             **kwargs
         )
-        parent = cls._current_context()
-        if parent is not None:
-            parent.add(widget)
+        cls._add_to_context(widget)
+        return widget
+
+    @classmethod
+    def bar_chart(
+        cls,
+        data_source: DataSource,
+        title: str | None = None,
+        x: str = "category",
+        y: str | list[str] = "value",
+        params: dict[str, Any] | None = None,
+        **kwargs
+    ) -> BarChartWidget:
+        """
+        Create a bar chart widget.
+
+        Args:
+            data_source: DataSource for the chart data
+            title: Optional widget title
+            x: Column name for x-axis (categories)
+            y: Column name(s) for y-axis (values)
+            params: Parameters for the data source
+            **kwargs: Additional fields (orientation, color, etc.)
+
+        Returns:
+            BarChartWidget instance
+        """
+        widget = BarChartWidget(
+            data_source=data_source,
+            title=title,
+            x=x,
+            y=y,
+            params=params or {},
+            **kwargs
+        )
+        cls._add_to_context(widget)
+        return widget
+
+    @classmethod
+    def area_chart(
+        cls,
+        data_source: DataSource,
+        title: str | None = None,
+        x: str = "date",
+        y: str | list[str] = "value",
+        params: dict[str, Any] | None = None,
+        **kwargs
+    ) -> AreaChartWidget:
+        """
+        Create an area chart widget.
+
+        Args:
+            data_source: DataSource for the chart data
+            title: Optional widget title
+            x: Column name for x-axis
+            y: Column name(s) for y-axis
+            params: Parameters for the data source
+            **kwargs: Additional fields (stacked, color, etc.)
+
+        Returns:
+            AreaChartWidget instance
+        """
+        widget = AreaChartWidget(
+            data_source=data_source,
+            title=title,
+            x=x,
+            y=y,
+            params=params or {},
+            **kwargs
+        )
+        cls._add_to_context(widget)
+        return widget
+
+    @classmethod
+    def table(
+        cls,
+        data_source: DataSource,
+        title: str | None = None,
+        columns: list[str] | None = None,
+        params: dict[str, Any] | None = None,
+        **kwargs
+    ) -> TableWidget:
+        """
+        Create a table widget.
+
+        Args:
+            data_source: DataSource for the table data
+            title: Optional widget title
+            columns: Column names to display (None = auto from data)
+            params: Parameters for the data source
+            **kwargs: Additional fields (page_size, sortable, filterable, etc.)
+
+        Returns:
+            TableWidget instance
+
+        Example:
+            >>> data = ComponentSource(component=SalesData)
+            >>> table = L.table(
+            ...     data_source=data,
+            ...     title="Sales Data",
+            ...     columns=["date", "product", "revenue"],
+            ...     page_size=20
+            ... )
+        """
+        widget = TableWidget(
+            data_source=data_source,
+            title=title,
+            columns=columns,
+            params=params or {},
+            **kwargs
+        )
+        cls._add_to_context(widget)
+        return widget
+
+    @classmethod
+    def metric(
+        cls,
+        data_source: DataSource,
+        title: str | None = None,
+        value_field: str = "value",
+        params: dict[str, Any] | None = None,
+        **kwargs
+    ) -> MetricWidget:
+        """
+        Create a metric/KPI widget.
+
+        Args:
+            data_source: DataSource for the metric data
+            title: Optional widget title
+            value_field: Field name containing the metric value
+            params: Parameters for the data source
+            **kwargs: Additional fields (format, comparison_value, etc.)
+
+        Returns:
+            MetricWidget instance
+
+        Example:
+            >>> revenue = TimeseriesSource(name="metrics.revenue")
+            >>> kpi = L.metric(
+            ...     data_source=revenue,
+            ...     title="Total Revenue",
+            ...     value_field="total",
+            ...     format="${value:,.0f}"
+            ... )
+        """
+        widget = MetricWidget(
+            data_source=data_source,
+            title=title,
+            value_field=value_field,
+            params=params or {},
+            **kwargs
+        )
+        cls._add_to_context(widget)
+        return widget
+
+    @classmethod
+    def plotly(
+        cls,
+        data_source: ComponentSource,
+        title: str | None = None,
+        params: dict[str, Any] | None = None,
+        **kwargs
+    ) -> PlotlyWidget:
+        """
+        Create a server-rendered Plotly widget.
+
+        Uses a RenderableComponent that implements load(), transform(), and render()
+        to produce a Plotly figure on the server.
+
+        Args:
+            data_source: ComponentSource with a RenderableComponent
+            title: Optional widget title
+            params: Parameters for the component
+            **kwargs: Additional fields (description, etc.)
+
+        Returns:
+            PlotlyWidget instance
+
+        Example:
+            >>> class SalesChart(RenderableComponent):
+            ...     region: str
+            ...
+            ...     def load(self):
+            ...         return db.query(...)
+            ...
+            ...     def transform(self, data):
+            ...         return aggregate(data)
+            ...
+            ...     def render(self, data):
+            ...         import plotly.express as px
+            ...         return px.bar(data, x="product", y="sales")
+            ...
+            >>> chart = L.plotly(
+            ...     data_source=ComponentSource(component=SalesChart),
+            ...     title="Sales by Product",
+            ...     params={"region": region_input}
+            ... )
+        """
+        widget = PlotlyWidget(
+            data_source=data_source,
+            title=title,
+            params=params or {},
+            **kwargs
+        )
+        cls._add_to_context(widget)
         return widget
 
 

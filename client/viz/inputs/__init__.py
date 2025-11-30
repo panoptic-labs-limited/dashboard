@@ -48,8 +48,8 @@ from .numeric import (
     RangeSlider,
     NumericRange,
 )
-# Sources
-from .sources import FunctionSource
+# Re-export FunctionSource from core for backward compatibility
+from viz.core.datasource import FunctionSource
 # Text inputs and configs
 from .text import (
     # Config models

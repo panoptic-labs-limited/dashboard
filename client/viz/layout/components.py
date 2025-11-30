@@ -1,27 +1,49 @@
 """
-Leaf components (Widget).
+Leaf components (Widgets).
 
-These are terminal nodes in the layout tree that don't contain children.
+This module re-exports widget classes from viz.widgets for backward compatibility.
+New code should import directly from viz.widgets.
+
+Widget Types:
+- Frontend-native: LineChartWidget, BarChartWidget, AreaChartWidget, TableWidget, MetricWidget
+- Server-rendered: PlotlyWidget
+
+Legacy Widget class is deprecated - use specific widget types instead.
 """
 
 from __future__ import annotations
 
-from typing import Literal, Any, Union, TYPE_CHECKING
+import warnings
+from typing import Literal, Any, Union
 
 from pydantic import Field, model_validator, field_serializer
 
 from viz.core.layout import LeafNode
 from .enums import WidgetType
 
-if TYPE_CHECKING:
-    pass
+# Re-export new widgets for convenience
+from viz.widgets import (
+    Widget,
+    LineChartWidget,
+    BarChartWidget,
+    AreaChartWidget,
+    TableWidget,
+    MetricWidget,
+    PlotlyWidget,
+)
 
 
-class Widget(LeafNode):
+class LegacyWidget(LeafNode):
     """
-    Leaf node representing a visualization or content widget.
+    Legacy widget class - DEPRECATED.
 
-    Examples: charts, tables, metrics, images
+    Use specific widget types instead:
+    - LineChartWidget, BarChartWidget, AreaChartWidget for charts
+    - TableWidget for data tables
+    - MetricWidget for KPIs
+    - PlotlyWidget for custom server-rendered visualizations
+
+    This class is kept for backward compatibility only.
     """
 
     type: Literal["widget"] = "widget"
@@ -29,12 +51,21 @@ class Widget(LeafNode):
     title: str | None = None
     description: str | None = None
 
-    # Component reference - either a class or string alias
-    # Type[Component] for local components (will be auto-registered)
-    # str for pre-registered components (referenced by alias)
-    # Note: Using Union[type, str, None] to avoid forward reference issues with Type[Component]
+    # Component reference - either a class or string name
     component: Union[type, str, None] = Field(default=None, repr=False)
     params: dict[str, Any] = Field(default_factory=dict)
+
+    # Widget-specific configuration
+    config: dict[str, Any] = Field(default_factory=dict)
+
+    def __init__(self, **data):
+        warnings.warn(
+            "LegacyWidget is deprecated. Use specific widget types: "
+            "LineChartWidget, BarChartWidget, TableWidget, MetricWidget, or PlotlyWidget",
+            DeprecationWarning,
+            stacklevel=2
+        )
+        super().__init__(**data)
 
     @model_validator(mode='after')
     def validate_component(self):
@@ -47,6 +78,3 @@ class Widget(LeafNode):
     def serialize_component(self, component: Union[type, str, None], _info):
         """Exclude component from serialization - it's handled separately by the serializer."""
         return None
-
-    # Widget-specific configuration
-    config: dict[str, Any] = Field(default_factory=dict)

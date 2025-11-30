@@ -2,9 +2,9 @@
 Rich Example Dashboard using Plotly Built-in Datasets
 
 This example showcases the Viz framework's capabilities:
-- Multiple components with load/transform/render pipeline
+- Multiple RenderableComponents with load/transform/render pipeline
 - Various input types (Select, DateRange, Slider, etc.)
-- Data sources with cascading inputs
+- ComponentSource for Plotly widgets
 - Rich visualizations using Plotly Express
 
 To serve this dashboard:
@@ -18,10 +18,9 @@ import plotly.express as px
 from pydantic import Field
 
 from viz import (
-    Component, L, Dashboard,
+    RenderableComponent, L, Dashboard, ComponentSource,
     Select, Slider, MultiSelect, Toggle
 )
-from viz.layout import WidgetType
 
 
 # ==============================================================================
@@ -56,13 +55,13 @@ def get_continents():
 # Components (with load/transform/render pipeline)
 # ==============================================================================
 
-class GapminderTrends(Component):
+class GapminderTrends(RenderableComponent):
     """
     Show GDP per capita and life expectancy trends over time.
 
     Demonstrates: Multi-series line charts, filtering by continent
     """
-    __id__ = "gapminder_trends"
+    __component_name__ = "gapminder_trends"
 
     continent: str = "Asia"
     show_population: bool = False
@@ -139,13 +138,13 @@ class GapminderTrends(Component):
         return fig
 
 
-class CountryComparison(Component):
+class CountryComparison(RenderableComponent):
     """
     Compare multiple countries across metrics.
 
     Demonstrates: Multi-country comparison, bar charts
     """
-    __id__ = "country_comparison"
+    __component_name__ = "country_comparison"
 
     countries: list[str] = Field(default_factory=lambda: ["United States", "China", "India"])
     year: int = 2007
@@ -185,13 +184,13 @@ class CountryComparison(Component):
         return fig
 
 
-class IrisClassification(Component):
+class IrisClassification(RenderableComponent):
     """
     Visualize Iris dataset with scatter plots.
 
     Demonstrates: Scatter plots, species classification
     """
-    __id__ = "iris_classification"
+    __component_name__ = "iris_classification"
 
     x_axis: str = "sepal_length"
     y_axis: str = "sepal_width"
@@ -230,13 +229,13 @@ class IrisClassification(Component):
         return fig
 
 
-class TipsAnalysis(Component):
+class TipsAnalysis(RenderableComponent):
     """
     Restaurant tips analysis.
 
     Demonstrates: Box plots, categorical analysis
     """
-    __id__ = "tips_analysis"
+    __component_name__ = "tips_analysis"
 
     groupby: str = "day"
     min_tip: float = 0.0
@@ -263,13 +262,13 @@ class TipsAnalysis(Component):
         return fig
 
 
-class StockPriceChart(Component):
+class StockPriceChart(RenderableComponent):
     """
     Stock price trends over time.
 
     Demonstrates: Time series, multiple stocks
     """
-    __id__ = "stock_prices"
+    __component_name__ = "stock_prices"
 
     stocks: list[str] = Field(default_factory=lambda: ["GOOG", "AAPL"])
 
@@ -335,10 +334,9 @@ with dashboard.page(id="gapminder", title="Gapminder Analysis", icon="🌍"):
 
             # Chart
             with L.column(weight=3):
-                L.widget(
-                    widget_type=WidgetType.CHART,
+                L.plotly(
+                    data_source=ComponentSource(component=GapminderTrends),
                     title="Trends Over Time",
-                    component=GapminderTrends,
                     params={
                         "continent": continent_input,
                         "show_population": show_pop_input
@@ -386,10 +384,9 @@ with dashboard.page(id="gapminder", title="Gapminder Analysis", icon="🌍"):
 
             # Chart
             with L.column(weight=2):
-                L.widget(
-                    widget_type=WidgetType.CHART,
+                L.plotly(
+                    data_source=ComponentSource(component=CountryComparison),
                     title="Country Metrics",
-                    component=CountryComparison,
                     params={
                         "countries": countries_input,
                         "year": year_input,
@@ -433,10 +430,9 @@ with dashboard.page(id="iris", title="Iris Dataset", icon="🌸"):
 
             # Chart
             with L.column(weight=3):
-                L.widget(
-                    widget_type=WidgetType.CHART,
+                L.plotly(
+                    data_source=ComponentSource(component=IrisClassification),
                     title="Species Classification",
-                    component=IrisClassification,
                     params={
                         "x_axis": x_axis_input,
                         "y_axis": y_axis_input
@@ -477,10 +473,9 @@ with dashboard.page(id="tips", title="Restaurant Tips", icon="💵"):
 
             # Chart
             with L.column(weight=3):
-                L.widget(
-                    widget_type=WidgetType.CHART,
+                L.plotly(
+                    data_source=ComponentSource(component=TipsAnalysis),
                     title="Tip Distribution",
-                    component=TipsAnalysis,
                     params={
                         "groupby": groupby_input,
                         "min_tip": min_tip_input
@@ -512,10 +507,9 @@ with dashboard.page(id="stocks", title="Stock Prices", icon="📈"):
 
             # Chart
             with L.column(weight=3):
-                L.widget(
-                    widget_type=WidgetType.CHART,
+                L.plotly(
+                    data_source=ComponentSource(component=StockPriceChart),
                     title="Price Trends",
-                    component=StockPriceChart,
                     params={
                         "stocks": stocks_input
                     }

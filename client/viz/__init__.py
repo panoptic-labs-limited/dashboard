@@ -6,15 +6,21 @@ __version__ = "0.1.0"
 from .api import serialize_dashboard, serialize_component, serialize_input, ComponentExtractor
 # Builder utilities
 from .builder import LayoutBuilder, L
-# Core components
-from .core import Component, DataSourceComponent
+# Core components and data sources
+from .core import (
+    Component,
+    RenderableComponent,
+    DataSourceComponent,
+    DataSource,
+    TimeseriesSource,
+    ComponentSource,
+    FunctionSource,
+)
 # Inputs
 from .inputs import (
     # Base
     Option,
     Input,
-    # Sources
-    FunctionSource,
     # Config models
     SelectConfig,
     DateConfig,
@@ -44,14 +50,31 @@ from .inputs import (
 )
 # Layout components
 from .layout import (
-    Dashboard, Page, Section, Row, Column, Widget,
-    Tabs, Tab, WidgetType
+    Dashboard, Page, Section, Row, Column,
+    Tabs, Tab, WidgetType,
+    # Widget types (deprecated - use viz.widgets directly)
+    Widget,
+)
+# Widget types (new)
+from .widgets import (
+    LineChartWidget,
+    BarChartWidget,
+    AreaChartWidget,
+    TableWidget,
+    MetricWidget,
+    PlotlyWidget,
 )
 
 __all__ = [
-    # Core
+    # Core - Components
     "Component",
+    "RenderableComponent",
     "DataSourceComponent",
+    # Core - Data Sources
+    "DataSource",
+    "TimeseriesSource",
+    "ComponentSource",
+    "FunctionSource",
     # API utilities
     "serialize_dashboard",
     "serialize_component",
@@ -63,19 +86,24 @@ __all__ = [
     "Section",
     "Row",
     "Column",
-    "Widget",
     "Tabs",
     "Tab",
+    # Widgets (new typed widgets)
+    "Widget",
+    "LineChartWidget",
+    "BarChartWidget",
+    "AreaChartWidget",
+    "TableWidget",
+    "MetricWidget",
+    "PlotlyWidget",
     # Builder
     "LayoutBuilder",
     "L",
-    # Enums
+    # Enums (deprecated)
     "WidgetType",
     # Inputs - Base
     "Option",
     "Input",
-    # Inputs - Sources
-    "FunctionSource",
     # Inputs - Config (commonly used)
     "SelectConfig",
     "DateConfig",
