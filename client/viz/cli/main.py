@@ -7,22 +7,20 @@ Usage:
     streamviz list
 """
 
-import os
+import importlib.util
 import sys
 import time
-import importlib.util
 from pathlib import Path
 from typing import Optional
 
 import click
 from rich.console import Console
 from rich.panel import Panel
-from watchdog.observers import Observer
 from watchdog.events import FileSystemEventHandler
+from watchdog.observers import Observer
 
-from viz.layout.dashboard import Dashboard
 from viz.api.registry import RegistryClient
-
+from viz.layout.dashboard import Dashboard
 
 console = Console()
 

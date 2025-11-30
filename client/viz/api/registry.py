@@ -6,16 +6,15 @@ Users should register dashboards via `streamviz serve` command, not by calling
 these functions directly.
 """
 
-from typing import Optional, Dict, Any, List, Tuple
+from typing import Optional, Dict, Any
+
 import httpx
 from rich.console import Console
 from rich.progress import Progress, SpinnerColumn, TextColumn
 
 from viz.layout.dashboard import Dashboard
-from viz.core.component import Component
+from .extractor import ComponentExtractor, serialize_function
 from .serializer import serialize_dashboard, serialize_component
-from .extractor import ComponentExtractor, serialize_function, extract_function_code
-
 
 console = Console()
 

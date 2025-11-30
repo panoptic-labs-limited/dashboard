@@ -3,18 +3,18 @@
 from __future__ import annotations
 
 import uuid
-from typing import Optional, TypeVar, Generic, Type, ClassVar
+from typing import TypeVar, Generic, Type, ClassVar
 
 from pydantic import BaseModel, Field, model_validator
 
-from viz.core.layout import LayoutNode
+from viz.core.layout import LeafNode
 from .sources import FunctionSource
 
 # Generic type variable for config models
 TConfig = TypeVar('TConfig', bound=BaseModel)
 
 
-class Input(LayoutNode, Generic[TConfig]):
+class Input(LeafNode, Generic[TConfig]):
     """
     Base class for all input types.
 
@@ -30,7 +30,7 @@ class Input(LayoutNode, Generic[TConfig]):
     - Declare config fields as top-level properties (for type hints)
     - Set input_type as a Literal for the specific input type
 
-    Extends LayoutNode to integrate inputs directly into the layout tree.
+    Extends LeafNode as inputs are terminal nodes in the layout tree.
     """
 
     model_config = {

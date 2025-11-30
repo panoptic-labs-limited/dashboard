@@ -5,9 +5,9 @@ Provides convenient factory methods and fluent interface
 for building dashboard layouts.
 """
 
-from typing import Any, Optional
+from typing import Any
 
-from viz.layout.base import Container
+from viz.core.context import current_context, add_to_context
 from viz.layout.components import Widget
 from viz.layout.containers import Row, Column, Tab, Tabs, Section
 from viz.layout.dashboard import Page
@@ -17,30 +17,29 @@ from viz.layout.enums import WidgetType
 class LayoutBuilder:
     """Fluent builder for creating layouts."""
 
-    # Context stack for automatic parent tracking
-    _context_stack: list['Container'] = []
-
+    # Delegate to core/context module for context management
+    # These are kept for backward compatibility but now just wrap the core functions
     @classmethod
-    def _current_context(cls) -> Optional['Container']:
+    def _current_context(cls):
         """Get the current context container."""
-        return cls._context_stack[-1] if cls._context_stack else None
+        return current_context()
 
     @classmethod
-    def _push_context(cls, container: 'Container'):
+    def _push_context(cls, container):
         """Push a container onto the context stack."""
-        cls._context_stack.append(container)
+        from viz.core.context import push_context
+        push_context(container)
 
     @classmethod
-    def _pop_context(cls) -> Optional['Container']:
+    def _pop_context(cls):
         """Pop a container from the context stack."""
-        return cls._context_stack.pop() if cls._context_stack else None
+        from viz.core.context import pop_context
+        return pop_context()
 
     @classmethod
     def _add_to_context(cls, child):
         """Add a child to the current context container if one exists."""
-        parent = cls._current_context()
-        if parent is not None:
-            parent.add(child)
+        add_to_context(child)
 
     @classmethod
     def page(cls, title: str, description: str | None = None, **kwargs) -> Page:

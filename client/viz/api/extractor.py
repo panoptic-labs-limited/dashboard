@@ -8,16 +8,14 @@ This module traverses the dashboard layout tree to:
 - Build mappings of objects to their aliases
 """
 
-from typing import Dict, Set, List, Tuple, Any
 import inspect
+from typing import Dict, Set, List, Tuple, Any
 
+from viz.core.layout import Container
 from viz.inputs.base import Input
 from viz.inputs.sources import FunctionSource
-from viz.core.component import Component
-from viz.layout.dashboard import Dashboard
-from viz.layout.containers import Section, Row, Column, Tabs, Tab
 from viz.layout.components import Widget
-from viz.layout.base import Container
+from viz.layout.dashboard import Dashboard
 
 
 class ComponentExtractor:

@@ -11,7 +11,7 @@ from typing import Union
 
 from pydantic import Field
 
-from .base import Container, LeafNode
+from viz.core.layout import Container, LeafNode
 
 # Type alias for standard layout children
 LayoutChild = Union['Row', 'Column', LeafNode]

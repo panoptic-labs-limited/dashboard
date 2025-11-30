@@ -10,10 +10,10 @@ from typing import Literal, Union
 
 from pydantic import field_validator
 
-from .base import Container
+from viz.core.layout import Container
+from viz.inputs.base import Input
 from .components import Widget
 from .containers import Section, Row, Column, Tabs
-from viz.inputs.base import Input
 
 
 class Page(Container[Union[Section, Row, Column, Tabs, Widget, Input]]):

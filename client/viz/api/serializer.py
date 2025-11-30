@@ -9,17 +9,16 @@ This module handles the conversion of:
 The serializer replaces Python object references with aliases/IDs for the registry.
 """
 
-from typing import Any, Dict, List, Union
 import uuid
-import inspect
+from typing import Any, Dict, List
 
+from viz.core.component import Component
+from viz.core.layout import Container
 from viz.inputs.base import Input
 from viz.inputs.sources import FunctionSource
-from viz.core.component import Component
-from viz.layout.dashboard import Dashboard, Page
-from viz.layout.containers import Section, Row, Column, Tabs, Tab
 from viz.layout.components import Widget
-from viz.layout.base import Container
+from viz.layout.containers import Section, Row, Column, Tabs, Tab
+from viz.layout.dashboard import Dashboard, Page
 
 
 def serialize_input(input_obj: Input) -> Dict[str, Any]:

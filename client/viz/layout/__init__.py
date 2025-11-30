@@ -4,8 +4,8 @@ Dashboard Layout Framework
 Type-safe, hierarchical layout system using Pydantic.
 """
 
-# Base classes
-from .base import Container
+# Base classes (re-exported from core for convenience)
+from viz.core.layout import Container
 # Components (leaf nodes)
 from .components import Widget
 # Containers
