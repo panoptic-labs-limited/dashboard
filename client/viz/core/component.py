@@ -105,7 +105,7 @@ class Component(BaseModel, ABC):
         params = {}
 
         # Get fields from Pydantic model
-        for field_name, field_info in cls.model_fields.items():
+        for field_name, field_info in cls.model_fields.items():  # type: ignore[union-attr]
             param_info = {
                 "name": field_name,
                 "required": field_info.is_required(),
