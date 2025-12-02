@@ -16,8 +16,6 @@ from viz.widgets import (
     MetricWidget,
     PlotlyWidget,
 )
-# Legacy widget (deprecated)
-from .components import LegacyWidget
 # Containers
 from .containers import (
     Row,
@@ -44,7 +42,6 @@ __all__ = [
     "TableWidget",
     "MetricWidget",
     "PlotlyWidget",
-    "LegacyWidget",
 
     # Containers
     "Row",

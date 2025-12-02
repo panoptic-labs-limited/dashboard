@@ -18,7 +18,6 @@ from viz.core.component import Component
 from viz.core.datasource import DataSource, TimeseriesSource, ComponentSource, FunctionSource
 from viz.core.layout import Container
 from viz.inputs.base import Input
-from viz.layout.components import LegacyWidget
 from viz.layout.containers import Section, Row, Column, Tabs, Tab
 from viz.layout.dashboard import Dashboard, Page
 from viz.widgets import (
@@ -202,19 +201,13 @@ def serialize_widget(widget: Widget, input_map: Dict[str, str]) -> Dict[str, Any
     """
     Serialize a Widget to API schema format.
 
-    Handles both new Widget types (with data_source) and LegacyWidget (with component).
-
     Args:
-        widget: Widget instance (LineChartWidget, PlotlyWidget, LegacyWidget, etc.)
+        widget: Widget instance (LineChartWidget, PlotlyWidget, etc.)
         input_map: Mapping of Input objects to their IDs
 
     Returns:
         Dictionary matching WidgetSchema format
     """
-    # Handle LegacyWidget separately (backward compatibility)
-    if isinstance(widget, LegacyWidget):
-        return _serialize_legacy_widget(widget, input_map)
-
     # Get widget type from the concrete class
     widget_type = getattr(widget, 'type', 'widget')
 
@@ -281,32 +274,6 @@ def _extract_widget_config(widget: Widget) -> Dict[str, Any]:
     # PlotlyWidget doesn't have additional config - the render() produces the figure
 
     return config
-
-
-def _serialize_legacy_widget(widget: LegacyWidget, input_map: Dict[str, str]) -> Dict[str, Any]:
-    """Serialize a LegacyWidget (backward compatibility)."""
-    data = {
-        "type": "widget",
-        "id": widget.id,
-        "widget_type": widget.widget_type.value if hasattr(widget.widget_type, 'value') else str(widget.widget_type),
-        "title": widget.title,
-        "description": widget.description,
-        "config": widget.config or {}
-    }
-
-    # Get component name from either class or string
-    component_name = None
-    if widget.component is not None:
-        if isinstance(widget.component, str):
-            component_name = widget.component
-        else:
-            component_name = _get_component_name(widget.component)
-
-    if component_name:
-        data["component_name"] = component_name
-        data["params"] = serialize_params(widget.params)
-
-    return data
 
 
 def _get_component_name(component_class: type) -> str:
@@ -392,15 +359,11 @@ def _serialize_node(node: Any, input_map: Dict[str, str]) -> Dict[str, Any]:
     """
     Serialize any layout node to schema format.
 
-    Handles: Section, Row, Column, Tabs, Tab, Widget, LegacyWidget, Input
+    Handles: Section, Row, Column, Tabs, Tab, Widget, Input
     Auto-generates IDs for containers if not present.
     """
     if isinstance(node, Input):
         return serialize_input(node)
-
-    # Check LegacyWidget first (before Widget, since LegacyWidget is not a subclass)
-    elif isinstance(node, LegacyWidget):
-        return serialize_widget(node, input_map)
 
     elif isinstance(node, Widget):
         return serialize_widget(node, input_map)

@@ -12,7 +12,7 @@ from pydantic import field_validator
 
 from viz.core.layout import Container
 from viz.inputs.base import Input
-from .components import Widget
+from viz.widgets import Widget
 from .containers import Section, Row, Column, Tabs
 
 
