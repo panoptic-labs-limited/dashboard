@@ -1,0 +1,456 @@
+// Common types shared between Dashboard Service and Component Registry
+syntax = "proto3";
+
+package viz.common;
+
+option java_package = "com.viz.proto";
+option java_multiple_files = true;
+
+// =============================================================================
+// Core Value Types
+// =============================================================================
+
+// Generic value that can hold different types
+message Value {
+  oneof kind {
+    string string_value = 1;
+    double number_value = 2;
+    bool bool_value = 3;
+    ListValue list_value = 4;
+    MapValue map_value = 5;
+    NullValue null_value = 6;
+  }
+}
+
+message ListValue {
+  repeated Value values = 1;
+}
+
+message MapValue {
+  map<string, Value> fields = 1;
+}
+
+enum NullValue {
+  NULL_VALUE = 0;
+}
+
+// =============================================================================
+// Parameter Values (for widget/input params)
+// =============================================================================
+
+// A parameter value - either a literal or a reference to an input
+message ParamValue {
+  oneof kind {
+    Value literal = 1;        // Literal value
+    string input_ref = 2;     // Reference to an input by ID (for reactive binding)
+  }
+}
+
+// =============================================================================
+// Data Sources
+// =============================================================================
+
+// Where data comes from for widgets and inputs
+message DataSource {
+  oneof source {
+    TimeseriesSource timeseries = 1;
+    ComponentSource component = 2;
+  }
+}
+
+// Reference to a timeseries data source (external data)
+message TimeseriesSource {
+  string name = 1;  // e.g., "market.stocks", "metrics.cpu"
+}
+
+// Reference to a component
+// If class_name is present, this is a local component that needs registration.
+// If class_name is absent, this is an external component (already registered).
+message ComponentSource {
+  string name = 1;  // Component name (e.g., "gapminder_trends")
+
+  // Only set for local components (class was provided in Python)
+  // Dashboard Service uses this to know it needs to register from source_file
+  optional string class_name = 2;  // Python class name (e.g., "GapminderTrends")
+}
+
+// =============================================================================
+// Component Types (used by Component Registry)
+// =============================================================================
+
+// Component type determines which methods are called during execution
+enum ComponentType {
+  COMPONENT_TYPE_UNSPECIFIED = 0;
+  COMPONENT_TYPE_BASIC = 1;         // load() only
+  COMPONENT_TYPE_TRANSFORMABLE = 2; // load() + transform()
+  COMPONENT_TYPE_RENDERABLE = 3;    // load() + transform() + render()
+}
+
+// Parameter definition for a component (returned by Component Registry)
+message ParameterDef {
+  string name = 1;              // Parameter name
+  string type = 2;              // Type string (e.g., "str", "int", "list[str]")
+  bool required = 3;            // Whether parameter is required
+  optional string default_json = 4;  // JSON-encoded default value (if not required)
+  optional string description = 5;   // Optional description
+}
+
+// =============================================================================
+// Options (for choice inputs)
+// =============================================================================
+
+// A selectable option for dropdowns, radio buttons, etc.
+message Option {
+  Value value = 1;           // The actual value
+  string label = 2;          // Display label
+  bool selected = 3;         // Pre-selected state
+  bool disabled = 4;         // Disabled state
+  optional string icon = 5;  // Optional icon identifier
+  optional string group = 6; // Group name for grouped options
+}
+
+// =============================================================================
+// Inputs
+// =============================================================================
+
+// Base input fields shared by all input types
+message InputBase {
+  string id = 1;                      // Unique identifier
+  string name = 2;                    // Parameter name (used in bindings)
+  optional string label = 3;          // Display label
+  bool required = 4;                  // Whether input is required
+  bool disabled = 5;                  // Whether input is disabled
+  optional string help_text = 6;      // Help text or tooltip
+  optional string placeholder = 7;   // Placeholder text
+
+  // Optional dynamic source (if not set, use static config)
+  optional DataSource source = 8;
+  map<string, ParamValue> params = 9; // Params for the source
+}
+
+// Union of all input types
+message Input {
+  string type = 1;  // Discriminator: "select", "multi_select", "slider", etc.
+  InputBase base = 2;
+
+  oneof config {
+    SelectInput select = 10;
+    MultiSelectInput multi_select = 11;
+    RadioGroupInput radio_group = 12;
+    CheckboxInput checkbox = 13;
+    CheckboxGroupInput checkbox_group = 14;
+    ToggleInput toggle = 15;
+    TextInputInput text_input = 16;
+    TextAreaInput text_area = 17;
+    SearchInputInput search_input = 18;
+    NumericInputInput numeric_input = 19;
+    SliderInput slider = 20;
+    RangeSliderInput range_slider = 21;
+    NumericRangeInput numeric_range = 22;
+    DateInputInput date_input = 23;
+    DateRangeInputInput date_range = 24;
+    TimeInputInput time_input = 25;
+    DateTimeInputInput date_time = 26;
+    RelativeDateInputInput relative_date = 27;
+  }
+}
+
+// --- Choice Inputs ---
+
+message SelectInput {
+  repeated Option options = 1;
+  optional Value default = 2;
+  bool searchable = 3;
+  bool clear_button = 4;
+}
+
+message MultiSelectInput {
+  repeated Option options = 1;
+  repeated Value default = 2;
+  optional int32 max_selections = 3;
+  bool searchable = 4;
+}
+
+message RadioGroupInput {
+  repeated Option options = 1;
+  optional Value default = 2;
+  string layout = 3;  // "vertical" or "horizontal"
+}
+
+message CheckboxInput {
+  optional bool default = 1;
+}
+
+message CheckboxGroupInput {
+  repeated Option options = 1;
+  repeated Value default = 2;
+  string layout = 3;  // "vertical", "horizontal", or "grid"
+  optional int32 columns = 4;
+}
+
+message ToggleInput {
+  optional bool default = 1;
+  optional string on_label = 2;
+  optional string off_label = 3;
+}
+
+// --- Text Inputs ---
+
+message TextInputInput {
+  optional string default = 1;
+  optional int32 min_length = 2;
+  optional int32 max_length = 3;
+  optional string pattern = 4;  // Regex pattern
+}
+
+message TextAreaInput {
+  optional string default = 1;
+  optional int32 min_length = 2;
+  optional int32 max_length = 3;
+  optional int32 rows = 4;
+  bool resizable = 5;
+}
+
+message SearchInputInput {
+  optional string default = 1;
+  optional int32 debounce_ms = 2;
+}
+
+// --- Numeric Inputs ---
+
+message NumericInputInput {
+  optional double min_value = 1;
+  optional double max_value = 2;
+  optional double step = 3;
+  optional double default = 4;
+  optional string prefix = 5;
+  optional string suffix = 6;
+}
+
+message SliderInput {
+  double min_value = 1;
+  double max_value = 2;
+  optional double step = 3;
+  optional double default = 4;
+  bool show_value = 5;
+  bool show_ticks = 6;
+}
+
+message RangeSliderInput {
+  double min_value = 1;
+  double max_value = 2;
+  optional double step = 3;
+  optional double default_min = 4;
+  optional double default_max = 5;
+  bool show_values = 6;
+}
+
+message NumericRangeInput {
+  optional double min_value = 1;
+  optional double max_value = 2;
+  optional double step = 3;
+  optional double default_min = 4;
+  optional double default_max = 5;
+  optional string prefix = 6;
+  optional string suffix = 7;
+}
+
+// --- Date/Time Inputs ---
+
+message DateInputInput {
+  optional string default = 1;      // ISO date string
+  optional string min_date = 2;
+  optional string max_date = 3;
+  optional string format = 4;       // Display format
+}
+
+message DateRangeInputInput {
+  optional string default_start = 1;
+  optional string default_end = 2;
+  optional string min_date = 3;
+  optional string max_date = 4;
+  optional string format = 5;
+}
+
+message TimeInputInput {
+  optional string default = 1;      // HH:MM or HH:MM:SS
+  optional string min_time = 2;
+  optional string max_time = 3;
+  optional int32 step_minutes = 4;
+}
+
+message DateTimeInputInput {
+  optional string default = 1;      // ISO datetime string
+  optional string min_datetime = 2;
+  optional string max_datetime = 3;
+  optional string date_format = 4;
+  optional string time_format = 5;
+}
+
+message RelativeDateInputInput {
+  optional string default = 1;      // e.g., "-7d", "-1m", "today"
+  repeated string presets = 2;      // Available preset options
+}
+
+// =============================================================================
+// Widgets
+// =============================================================================
+
+// Base widget fields shared by all widget types
+message WidgetBase {
+  string id = 1;
+  optional string title = 2;
+  optional string description = 3;
+  DataSource data_source = 4;
+  map<string, ParamValue> params = 5;
+}
+
+// Union of all widget types
+message Widget {
+  string type = 1;  // Discriminator: "line_chart", "bar_chart", "plotly", etc.
+  WidgetBase base = 2;
+
+  oneof config {
+    LineChartWidget line_chart = 10;
+    BarChartWidget bar_chart = 11;
+    AreaChartWidget area_chart = 12;
+    TableWidget table = 13;
+    MetricWidget metric = 14;
+    PlotlyWidget plotly = 15;
+  }
+}
+
+// --- Chart Widgets (frontend-native) ---
+
+message LineChartWidget {
+  string x = 1;               // X-axis field
+  string y = 2;               // Y-axis field
+  optional string series = 3; // Field for multiple series
+  optional string color = 4;  // Color field or static color
+}
+
+message BarChartWidget {
+  string x = 1;
+  string y = 2;
+  optional string series = 3;
+  optional string color = 4;
+  bool stacked = 5;
+  bool horizontal = 6;
+}
+
+message AreaChartWidget {
+  string x = 1;
+  string y = 2;
+  optional string series = 3;
+  optional string color = 4;
+  bool stacked = 5;
+}
+
+// --- Table Widget ---
+
+message TableWidget {
+  repeated TableColumn columns = 1;
+  int32 page_size = 2;
+  bool sortable = 3;
+  bool filterable = 4;
+}
+
+message TableColumn {
+  string field = 1;
+  string header = 2;
+  optional string format = 3;
+  bool sortable = 4;
+  bool filterable = 5;
+  optional int32 width = 6;
+}
+
+// --- Metric Widget ---
+
+message MetricWidget {
+  string value_field = 1;
+  optional string format = 2;            // e.g., ",.2f", "$,.0f"
+  optional double comparison_value = 3;
+  optional string comparison_label = 4;
+}
+
+// --- Plotly Widget (server-rendered) ---
+
+message PlotlyWidget {
+  // No additional config - the RenderableComponent produces the figure
+  // The component's render() method returns Plotly JSON
+}
+
+// =============================================================================
+// Layout Containers
+// =============================================================================
+
+// A node in the layout tree
+message LayoutNode {
+  string type = 1;  // Discriminator
+
+  oneof node {
+    Section section = 10;
+    Row row = 11;
+    Column column = 12;
+    Tabs tabs = 13;
+    Tab tab = 14;
+    Widget widget = 15;
+    Input input = 16;
+  }
+}
+
+message Section {
+  string id = 1;
+  optional string title = 2;
+  bool collapsible = 3;
+  bool collapsed = 4;
+  repeated LayoutNode children = 5;
+}
+
+message Row {
+  string id = 1;
+  optional string gap = 2;
+  optional string align = 3;
+  repeated LayoutNode children = 4;
+}
+
+message Column {
+  string id = 1;
+  int32 weight = 2;
+  optional string gap = 3;
+  repeated LayoutNode children = 4;
+}
+
+message Tabs {
+  string id = 1;
+  optional string default_tab = 2;
+  repeated Tab tabs = 3;  // Use Tab directly, not LayoutNode
+}
+
+message Tab {
+  string id = 1;
+  string title = 2;
+  optional string icon = 3;
+  bool disabled = 4;
+  repeated LayoutNode children = 5;
+}
+
+// =============================================================================
+// Page and Dashboard
+// =============================================================================
+
+message Page {
+  string id = 1;
+  string title = 2;
+  optional string description = 3;
+  optional string icon = 4;
+  repeated LayoutNode children = 5;
+}
+
+message Dashboard {
+  string id = 1;
+  string title = 2;
+  optional string description = 3;
+  string version = 4;
+  repeated Page pages = 5;
+}

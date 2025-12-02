@@ -61,7 +61,7 @@ class GapminderTrends(RenderableComponent):
 
     Demonstrates: Multi-series line charts, filtering by continent
     """
-    __component_name__ = "gapminder_trends"
+    name = "gapminder_trends"
 
     continent: str = "Asia"
     show_population: bool = False
@@ -144,7 +144,7 @@ class CountryComparison(RenderableComponent):
 
     Demonstrates: Multi-country comparison, bar charts
     """
-    __component_name__ = "country_comparison"
+    name = "country_comparison"
 
     countries: list[str] = Field(default_factory=lambda: ["United States", "China", "India"])
     year: int = 2007
@@ -190,7 +190,7 @@ class IrisClassification(RenderableComponent):
 
     Demonstrates: Scatter plots, species classification
     """
-    __component_name__ = "iris_classification"
+    name = "iris_classification"
 
     x_axis: str = "sepal_length"
     y_axis: str = "sepal_width"
@@ -235,7 +235,7 @@ class TipsAnalysis(RenderableComponent):
 
     Demonstrates: Box plots, categorical analysis
     """
-    __component_name__ = "tips_analysis"
+    name = "tips_analysis"
 
     groupby: str = "day"
     min_tip: float = 0.0
@@ -268,7 +268,7 @@ class StockPriceChart(RenderableComponent):
 
     Demonstrates: Time series, multiple stocks
     """
-    __component_name__ = "stock_prices"
+    name = "stock_prices"
 
     stocks: list[str] = Field(default_factory=lambda: ["GOOG", "AAPL"])
 

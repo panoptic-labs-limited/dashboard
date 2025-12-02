@@ -1,0 +1,263 @@
+// Dashboard Service API - Orchestration, storage, permissions
+syntax = "proto3";
+
+package viz.dashboard;
+
+import "common.proto";
+
+option java_package = "com.viz.dashboard.proto";
+option java_multiple_files = true;
+
+// =============================================================================
+// Dashboard Service
+// =============================================================================
+
+service DashboardService {
+  // --- Registration ---
+
+  // Register a new dashboard (or update existing)
+  // Stores structure, forwards components to Component Registry
+  rpc RegisterDashboard(RegisterDashboardRequest) returns (RegisterDashboardResponse);
+
+  // --- Retrieval ---
+
+  // Get a dashboard by ID
+  rpc GetDashboard(GetDashboardRequest) returns (GetDashboardResponse);
+
+  // List all dashboards (with optional filtering)
+  rpc ListDashboards(ListDashboardsRequest) returns (ListDashboardsResponse);
+
+  // Get dashboard metadata without full structure
+  rpc GetDashboardMetadata(GetDashboardMetadataRequest) returns (DashboardMetadata);
+
+  // --- Execution (proxied to Component Registry) ---
+
+  // Execute a component and return data
+  rpc ExecuteComponent(ExecuteComponentRequest) returns (ExecuteComponentResponse);
+
+  // Execute a component and return rendered Plotly figure
+  rpc RenderComponent(RenderComponentRequest) returns (RenderComponentResponse);
+
+  // --- Versioning ---
+
+  // List versions of a dashboard
+  rpc ListDashboardVersions(ListDashboardVersionsRequest) returns (ListDashboardVersionsResponse);
+
+  // Get a specific version of a dashboard
+  rpc GetDashboardVersion(GetDashboardVersionRequest) returns (GetDashboardResponse);
+
+  // --- Permissions ---
+
+  // Update dashboard permissions
+  rpc UpdatePermissions(UpdatePermissionsRequest) returns (UpdatePermissionsResponse);
+
+  // Check if user has access to dashboard
+  rpc CheckAccess(CheckAccessRequest) returns (CheckAccessResponse);
+}
+
+// =============================================================================
+// Registration Messages
+// =============================================================================
+
+message RegisterDashboardRequest {
+  // Dashboard structure (layout tree with pages, sections, widgets, inputs)
+  // Dashboard Service traverses this to find all DataSources
+  viz.common.Dashboard dashboard = 1;
+
+  // Python source file containing all component code
+  // Dashboard Service forwards this to Component Registry for local components
+  // (those with class_name set in their ComponentSource)
+  bytes source_file = 2;
+
+  // Optional: specify behavior for existing dashboard
+  UpdateBehavior update_behavior = 3;
+}
+
+enum UpdateBehavior {
+  UPDATE_BEHAVIOR_UNSPECIFIED = 0;
+  UPDATE_BEHAVIOR_CREATE_VERSION = 1;  // Create new version (default)
+  UPDATE_BEHAVIOR_OVERWRITE = 2;       // Overwrite current version
+  UPDATE_BEHAVIOR_FAIL_IF_EXISTS = 3;  // Fail if dashboard exists
+}
+
+message RegisterDashboardResponse {
+  string dashboard_id = 1;
+  string version = 2;
+
+  // Components registered with Component Registry
+  repeated RegisteredComponent registered_components = 3;
+
+  // Any warnings (e.g., component already exists)
+  repeated string warnings = 4;
+}
+
+message RegisteredComponent {
+  string name = 1;
+  string version = 2;
+  bool created = 3;  // true if newly created, false if already existed
+}
+
+// =============================================================================
+// Retrieval Messages
+// =============================================================================
+
+message GetDashboardRequest {
+  string dashboard_id = 1;
+  optional string version = 2;  // If not specified, returns latest
+}
+
+message GetDashboardResponse {
+  viz.common.Dashboard dashboard = 1;
+  DashboardMetadata metadata = 2;
+}
+
+message ListDashboardsRequest {
+  // Filtering
+  optional string owner = 1;
+  repeated string tags = 2;
+
+  // Pagination
+  int32 page_size = 10;
+  string page_token = 11;
+}
+
+message ListDashboardsResponse {
+  repeated DashboardMetadata dashboards = 1;
+  string next_page_token = 2;
+}
+
+message GetDashboardMetadataRequest {
+  string dashboard_id = 1;
+}
+
+message DashboardMetadata {
+  string id = 1;
+  string title = 2;
+  optional string description = 3;
+  string version = 4;
+  string created_at = 5;   // ISO timestamp
+  string updated_at = 6;   // ISO timestamp
+  string owner = 7;
+  repeated string tags = 8;
+
+  // Component names used by this dashboard
+  repeated string component_names = 9;
+}
+
+// =============================================================================
+// Execution Messages (Proxied to Component Registry)
+// =============================================================================
+
+message ExecuteComponentRequest {
+  string dashboard_id = 1;       // For permission checking
+  string component_name = 2;
+  map<string, viz.common.Value> params = 3;
+
+  // Optional: specify component version
+  optional string component_version = 4;
+}
+
+message ExecuteComponentResponse {
+  // JSON-encoded data (DataFrame, dict, list, etc.)
+  bytes data_json = 1;
+
+  // Execution metadata
+  ExecutionMetadata metadata = 2;
+}
+
+message RenderComponentRequest {
+  string dashboard_id = 1;       // For permission checking
+  string component_name = 2;
+  map<string, viz.common.Value> params = 3;
+
+  // Optional: specify component version
+  optional string component_version = 4;
+}
+
+message RenderComponentResponse {
+  // Plotly figure JSON
+  bytes plotly_json = 1;
+
+  // Execution metadata
+  ExecutionMetadata metadata = 2;
+}
+
+message ExecutionMetadata {
+  int64 execution_time_ms = 1;
+  string component_version = 2;
+  optional string cache_status = 3;  // "hit", "miss", "bypass"
+}
+
+// =============================================================================
+// Versioning Messages
+// =============================================================================
+
+message ListDashboardVersionsRequest {
+  string dashboard_id = 1;
+  int32 page_size = 2;
+  string page_token = 3;
+}
+
+message ListDashboardVersionsResponse {
+  repeated DashboardVersionInfo versions = 1;
+  string next_page_token = 2;
+}
+
+message DashboardVersionInfo {
+  string version = 1;
+  string created_at = 2;
+  string created_by = 3;
+  optional string message = 4;  // Version message/description
+}
+
+message GetDashboardVersionRequest {
+  string dashboard_id = 1;
+  string version = 2;
+}
+
+// =============================================================================
+// Permission Messages
+// =============================================================================
+
+message UpdatePermissionsRequest {
+  string dashboard_id = 1;
+  repeated PermissionGrant grants = 2;
+  repeated PermissionRevoke revokes = 3;
+}
+
+message PermissionGrant {
+  oneof principal {
+    string user_id = 1;
+    string group_id = 2;
+  }
+  PermissionLevel level = 3;
+}
+
+message PermissionRevoke {
+  oneof principal {
+    string user_id = 1;
+    string group_id = 2;
+  }
+}
+
+enum PermissionLevel {
+  PERMISSION_LEVEL_UNSPECIFIED = 0;
+  PERMISSION_LEVEL_VIEW = 1;     // Can view dashboard and execute components
+  PERMISSION_LEVEL_EDIT = 2;     // Can modify dashboard structure
+  PERMISSION_LEVEL_ADMIN = 3;    // Can manage permissions
+}
+
+message UpdatePermissionsResponse {
+  bool success = 1;
+}
+
+message CheckAccessRequest {
+  string dashboard_id = 1;
+  string user_id = 2;
+  PermissionLevel required_level = 3;
+}
+
+message CheckAccessResponse {
+  bool allowed = 1;
+  PermissionLevel user_level = 2;
+}

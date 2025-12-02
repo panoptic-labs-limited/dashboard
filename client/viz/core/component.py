@@ -12,7 +12,7 @@ Also provides:
 
 import inspect
 from abc import ABC, abstractmethod
-from typing import Any, Callable, Dict, cast, get_type_hints
+from typing import Any, Callable, ClassVar, Dict, cast, get_type_hints
 
 from pydantic import BaseModel, ConfigDict
 
@@ -24,12 +24,13 @@ class Component(BaseModel, ABC):
     Components fetch data via the load() method. This is the simplest form,
     suitable for data sources that don't need transformation.
 
-    Example:
-        class AvailableDates(Component):
-            def load(self):
-                return ["2024-01-01", "2024-01-02", "2024-01-03"]
+    Subclasses must define:
+    - name: ClassVar[str] - unique identifier for the component
+    - load() method - fetches and returns data
 
+    Example:
         class RegionOptions(Component):
+            name = "region_options"
             country: str
 
             def load(self):
@@ -47,6 +48,9 @@ class Component(BaseModel, ABC):
         arbitrary_types_allowed=True,  # Allow non-Pydantic types in methods
         extra='forbid',  # Prevent extra fields
     )
+
+    # Required: unique component name
+    name: ClassVar[str]
 
     @abstractmethod
     def load(self) -> Any:
@@ -71,7 +75,7 @@ class Component(BaseModel, ABC):
 
     @classmethod
     def get_class_name(cls) -> str:
-        """Get the name of this component class."""
+        """Get the Python class name."""
         return cls.__name__
 
     @classmethod
@@ -206,7 +210,8 @@ class RenderableComponent(TransformableComponent, ABC):
         pass
 
 
-def component(func: Callable[..., Any]) -> type["Component"]:
+def component(func: Callable[..., Any] | None = None, *, name: str | None = None) -> type["Component"] | Callable[
+    [Callable[..., Any]], type["Component"]]:
     """
     Decorator to convert a function into a Component class.
 
@@ -215,18 +220,19 @@ def component(func: Callable[..., Any]) -> type["Component"]:
 
     Args:
         func: Function to wrap as a component
+        name: Optional explicit component name (defaults to function name)
 
     Returns:
         A Component subclass
 
     Examples:
-        # Simple function with no parameters
+        # Simple function (name derived from function name)
         @component
         def get_available_dates():
             return ["2024-01-01", "2024-01-02", "2024-01-03"]
 
-        # Function with parameters
-        @component
+        # With explicit name
+        @component(name="regions")
         def get_regions(country: str):
             return fetch_regions(country)
 
@@ -242,9 +248,20 @@ def component(func: Callable[..., Any]) -> type["Component"]:
             params={"country": country_input}
         )
     """
+
+    def decorator(fn: Callable[..., Any]) -> type["Component"]:
+        return _create_component_class(fn, name or fn.__name__)
+
+    # Handle both @component and @component(name="...")
+    if func is not None:
+        return decorator(func)
+    return decorator
+
+
+def _create_component_class(func: Callable[..., Any], component_name: str) -> type["Component"]:
+    """Create a Component class from a function."""
     # Get function signature
     sig = inspect.signature(func)
-    func_name = func.__name__
     func_module = getattr(func, '__module__', __name__)
 
     # Try to get type hints, fall back to Any for untyped params
@@ -281,7 +298,7 @@ def component(func: Callable[..., Any]) -> type["Component"]:
     # Build class dict
     class_dict: Dict[str, Any] = {
         '__module__': func_module,
-        '__component_name__': func_name,
+        'name': component_name,
         '__doc__': func.__doc__,
         '_source_func': func,  # Keep reference to original function
         '__annotations__': annotations,
@@ -293,9 +310,11 @@ def component(func: Callable[..., Any]) -> type["Component"]:
         class_dict[field_name] = default_value
 
     # Create the class dynamically
+    # Convert function name to PascalCase for class name (get_available_dates -> GetAvailableDates)
+    class_name = ''.join(word.title() for word in func.__name__.split('_'))
     component_class = cast(
         type[Component],
-        type(func_name, (Component,), class_dict)
+        type(class_name, (Component,), class_dict)
     )
 
     # Rebuild the model to pick up annotations properly

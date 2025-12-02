@@ -1,7 +1,5 @@
 """Comprehensive input components for dashboards."""
 
-# Re-export FunctionSource from core for backward compatibility
-from viz.core.datasource import FunctionSource
 # Base classes
 from .base import Input
 # Choice-based inputs and configs
@@ -66,9 +64,6 @@ __all__ = [
     # Base classes
     "Option",
     "Input",
-
-    # Sources
-    "FunctionSource",
 
     # Config models
     "SelectConfig",

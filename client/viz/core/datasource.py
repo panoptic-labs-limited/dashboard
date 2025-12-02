@@ -7,18 +7,17 @@ comes from, while params (specified at widget/input level) define HOW to query i
 Supported sources:
 - TimeseriesSource: Data from Timeseries Service (by name)
 - ComponentSource: Data from a Component's load/transform
-- FunctionSource: Data from a simple callable
 """
 
 from __future__ import annotations
 
 from abc import ABC
-from typing import Callable, Any, Literal, TYPE_CHECKING
+from typing import TYPE_CHECKING, Literal, Union
 
-from pydantic import BaseModel, Field, ConfigDict
+from pydantic import BaseModel, Field, ConfigDict, computed_field
 
 if TYPE_CHECKING:
-    pass
+    from viz.core.component import Component
 
 
 class DataSource(BaseModel, ABC):
@@ -75,19 +74,23 @@ class ComponentSource(DataSource):
     For regular Component (data only), use with frontend-native widgets.
 
     Examples:
-        # With Component class
+        # With Component class (local - will be registered)
         ComponentSource(component=SalesLoader)
 
-        # With registered component name
+        # With registered component name (external - already registered)
         ComponentSource(component="sales_loader")
+
+    Serialization:
+        - Local component: {"type": "component", "name": "sales_loader", "class_name": "SalesLoader"}
+        - External component: {"type": "component", "name": "sales_loader"}
     """
 
     type: Literal["component"] = "component"
-    # Component class or registered name
-    # Using Any to avoid Pydantic issues with Union[type, str]
-    component: Any = Field(
+
+    component: Union[type[Component], str] = Field(
         ...,
-        description="Component class or registered component name"
+        description="Component class or registered component name",
+        exclude=True,  # Don't include raw component in serialization
     )
 
     model_config = ConfigDict(
@@ -95,26 +98,20 @@ class ComponentSource(DataSource):
         arbitrary_types_allowed=True,
     )
 
+    @computed_field
+    def name(self) -> str:
+        """Component name (derived from component)."""
+        if isinstance(self.component, str):
+            return self.component
+        if not hasattr(self.component, 'name'):
+            raise ValueError(
+                f"Component class {self.component.__name__} must define 'name' ClassVar"
+            )
+        return self.component.name
 
-class FunctionSource(DataSource):
-    """
-    Data source from a simple callable function.
-
-    The function is executed server-side to produce data. Useful for
-    simple data fetching without needing a full Component class.
-
-    Examples:
-        # Simple function
-        FunctionSource(func=get_available_regions)
-    """
-
-    type: Literal["function"] = "function"
-    func: Callable[..., Any] = Field(
-        ...,
-        description="Callable that returns data"
-    )
-
-    model_config = ConfigDict(
-        extra='forbid',
-        arbitrary_types_allowed=True,
-    )
+    @computed_field
+    def class_name(self) -> str | None:
+        """Python class name (only set for local components)."""
+        if isinstance(self.component, str):
+            return None
+        return self.component.__name__

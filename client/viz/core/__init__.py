@@ -7,7 +7,7 @@ from .component import (
     component,  # Decorator
 )
 from .context import push_context, pop_context, current_context, add_to_context
-from .datasource import DataSource, TimeseriesSource, ComponentSource, FunctionSource
+from .datasource import DataSource, TimeseriesSource, ComponentSource
 from .layout import LayoutNode, LeafNode, Container
 
 __all__ = [
@@ -20,7 +20,6 @@ __all__ = [
     "DataSource",
     "TimeseriesSource",
     "ComponentSource",
-    "FunctionSource",
     # Layout base classes
     "LayoutNode",
     "LeafNode",

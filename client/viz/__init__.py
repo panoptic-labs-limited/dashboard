@@ -15,7 +15,6 @@ from .core import (
     DataSource,
     TimeseriesSource,
     ComponentSource,
-    FunctionSource,
 )
 # Inputs
 from .inputs import (
@@ -76,7 +75,6 @@ __all__ = [
     "DataSource",
     "TimeseriesSource",
     "ComponentSource",
-    "FunctionSource",
     # API utilities
     "serialize_dashboard",
     "serialize_component",

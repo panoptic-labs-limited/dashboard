@@ -1,0 +1,325 @@
+// Component Registry Service API - Code storage and sandboxed execution
+// This service is dashboard-agnostic - it stores and executes Python components.
+// Can be used directly or through the Dashboard Service.
+syntax = "proto3";
+
+package viz.component;
+
+import "common.proto";
+
+option java_package = "com.viz.component.proto";
+option java_multiple_files = true;
+
+// =============================================================================
+// Component Registry Service
+// =============================================================================
+
+service ComponentRegistry {
+  // --- Registration ---
+
+  // Register components from a source file
+  rpc RegisterComponents(RegisterComponentsRequest) returns (RegisterComponentsResponse);
+
+  // --- Execution ---
+
+  // Execute a component's load() method (and optionally transform())
+  // Returns JSON-encoded data
+  rpc ExecuteComponent(ExecuteComponentRequest) returns (ExecuteComponentResponse);
+
+  // Execute a RenderableComponent's full pipeline (load → transform → render)
+  // Returns Plotly figure JSON
+  rpc RenderComponent(RenderComponentRequest) returns (RenderComponentResponse);
+
+  // --- Metadata ---
+
+  // Get component metadata (parameters, type, version)
+  rpc GetComponentMetadata(GetComponentMetadataRequest) returns (GetComponentMetadataResponse);
+
+  // List all components (with optional filtering)
+  rpc ListComponents(ListComponentsRequest) returns (ListComponentsResponse);
+
+  // --- Versioning ---
+
+  // List versions of a component
+  rpc ListComponentVersions(ListComponentVersionsRequest) returns (ListComponentVersionsResponse);
+
+  // --- Permissions ---
+
+  // Set permissions for components (called by Dashboard Service or directly)
+  rpc SetPermissions(SetPermissionsRequest) returns (SetPermissionsResponse);
+
+  // --- Health ---
+
+  // Check if registry is healthy
+  rpc HealthCheck(HealthCheckRequest) returns (HealthCheckResponse);
+}
+
+// =============================================================================
+// Registration Messages
+// =============================================================================
+
+message RegisterComponentsRequest {
+  // Python source file containing component classes
+  bytes source_file = 1;
+
+  // Class names to register from the source file
+  // Component Registry parses the source to extract full metadata
+  repeated string class_names = 2;
+
+  // Optional: source file hash for deduplication
+  optional string source_hash = 3;
+
+  // Optional: namespace for grouping components
+  optional string namespace = 4;
+}
+
+message RegisterComponentsResponse {
+  // Status for each component
+  repeated ComponentRegistrationResult results = 1;
+
+  // Source file version (for caching)
+  string source_version = 2;
+}
+
+message ComponentRegistrationResult {
+  string name = 1;
+  string version = 2;
+  RegistrationStatus status = 3;
+  optional string error = 4;  // If status is ERROR
+
+  // Full parameter info extracted from source (may differ from CLI metadata)
+  repeated viz.common.ParameterDef parameters = 5;
+}
+
+enum RegistrationStatus {
+  REGISTRATION_STATUS_UNSPECIFIED = 0;
+  REGISTRATION_STATUS_CREATED = 1;    // New component registered
+  REGISTRATION_STATUS_UPDATED = 2;    // Existing component updated
+  REGISTRATION_STATUS_UNCHANGED = 3;  // Component unchanged (same hash)
+  REGISTRATION_STATUS_ERROR = 4;      // Registration failed
+}
+
+// =============================================================================
+// Execution Messages
+// =============================================================================
+
+message ExecuteComponentRequest {
+  string component_name = 1;
+  map<string, viz.common.Value> params = 2;
+
+  // Optional: specific version
+  optional string version = 3;
+
+  // Execution options
+  ExecutionOptions options = 4;
+}
+
+message ExecuteComponentResponse {
+  oneof result {
+    bytes data_json = 1;   // JSON-encoded result (DataFrame, dict, list)
+    ExecutionError error = 2;
+  }
+
+  ExecutionMetadata metadata = 3;
+}
+
+message RenderComponentRequest {
+  string component_name = 1;
+  map<string, viz.common.Value> params = 2;
+
+  // Optional: specific version
+  optional string version = 3;
+
+  // Execution options
+  ExecutionOptions options = 4;
+}
+
+message RenderComponentResponse {
+  oneof result {
+    bytes plotly_json = 1;  // Plotly figure JSON
+    ExecutionError error = 2;
+  }
+
+  ExecutionMetadata metadata = 3;
+}
+
+message ExecutionOptions {
+  // Timeout override (default from component config)
+  optional int32 timeout_seconds = 1;
+
+  // Memory limit override (default from component config)
+  optional int32 memory_limit_mb = 2;
+
+  // Skip cache
+  bool bypass_cache = 3;
+}
+
+message ExecutionError {
+  ErrorCode code = 1;
+  string message = 2;
+  optional string traceback = 3;  // Python traceback if available
+}
+
+enum ErrorCode {
+  ERROR_CODE_UNSPECIFIED = 0;
+  ERROR_CODE_NOT_FOUND = 1;         // Component not found
+  ERROR_CODE_INVALID_PARAMS = 2;    // Missing or invalid parameters
+  ERROR_CODE_EXECUTION_FAILED = 3;  // Error during execution
+  ERROR_CODE_TIMEOUT = 4;           // Execution timed out
+  ERROR_CODE_MEMORY_EXCEEDED = 5;   // Memory limit exceeded
+  ERROR_CODE_PERMISSION_DENIED = 6; // Caller lacks permission
+  ERROR_CODE_INTERNAL = 7;          // Internal registry error
+}
+
+message ExecutionMetadata {
+  int64 execution_time_ms = 1;
+  string component_version = 2;
+  string cache_status = 3;  // "hit", "miss", "bypass"
+
+  // Resource usage
+  optional int64 memory_used_bytes = 4;
+  optional int64 cpu_time_ms = 5;
+}
+
+// =============================================================================
+// Metadata Messages
+// =============================================================================
+
+message GetComponentMetadataRequest {
+  string component_name = 1;
+  optional string version = 2;  // If not specified, returns latest
+}
+
+message GetComponentMetadataResponse {
+  string name = 1;
+  string class_name = 2;
+  viz.common.ComponentType type = 3;
+  repeated viz.common.ParameterDef parameters = 4;
+
+  string version = 5;
+  string created_at = 6;
+  string updated_at = 7;
+
+  // Execution limits
+  int32 timeout_seconds = 8;
+  int32 memory_limit_mb = 9;
+
+  // Optional description from docstring
+  optional string description = 10;
+
+  // Optional namespace
+  optional string namespace = 11;
+}
+
+message ListComponentsRequest {
+  // Filtering
+  optional viz.common.ComponentType type = 1;
+  optional string name_prefix = 2;
+  optional string namespace = 3;
+
+  // Pagination
+  int32 page_size = 10;
+  string page_token = 11;
+}
+
+message ListComponentsResponse {
+  repeated ComponentSummary components = 1;
+  string next_page_token = 2;
+}
+
+message ComponentSummary {
+  string name = 1;
+  viz.common.ComponentType type = 2;
+  string version = 3;
+  int32 parameter_count = 4;
+  string updated_at = 5;
+  optional string namespace = 6;
+}
+
+// =============================================================================
+// Versioning Messages
+// =============================================================================
+
+message ListComponentVersionsRequest {
+  string component_name = 1;
+  int32 page_size = 2;
+  string page_token = 3;
+}
+
+message ListComponentVersionsResponse {
+  repeated ComponentVersionInfo versions = 1;
+  string next_page_token = 2;
+}
+
+message ComponentVersionInfo {
+  string version = 1;
+  string created_at = 2;
+  string source_hash = 3;
+}
+
+// =============================================================================
+// Permission Messages
+// =============================================================================
+
+message SetPermissionsRequest {
+  // Component(s) to set permissions for
+  repeated string component_names = 1;
+
+  // Permissions to grant
+  repeated PermissionEntry permissions = 2;
+
+  // If true, replace all existing permissions; if false, merge
+  bool replace = 3;
+}
+
+message PermissionEntry {
+  // Principal (user ID, group ID, or service account)
+  string principal = 1;
+
+  // What they can do
+  ComponentPermission permission = 2;
+}
+
+enum ComponentPermission {
+  COMPONENT_PERMISSION_UNSPECIFIED = 0;
+  COMPONENT_PERMISSION_EXECUTE = 1;  // Can execute the component
+  COMPONENT_PERMISSION_READ = 2;     // Can read metadata/source
+  COMPONENT_PERMISSION_WRITE = 3;    // Can update the component
+  COMPONENT_PERMISSION_ADMIN = 4;    // Can manage permissions
+}
+
+message SetPermissionsResponse {
+  bool success = 1;
+  optional string error = 2;
+}
+
+// =============================================================================
+// Health Messages
+// =============================================================================
+
+message HealthCheckRequest {
+  bool include_details = 1;
+}
+
+message HealthCheckResponse {
+  HealthStatus status = 1;
+  optional string message = 2;
+
+  // Detailed status (if requested)
+  optional HealthDetails details = 3;
+}
+
+enum HealthStatus {
+  HEALTH_STATUS_UNSPECIFIED = 0;
+  HEALTH_STATUS_HEALTHY = 1;
+  HEALTH_STATUS_DEGRADED = 2;
+  HEALTH_STATUS_UNHEALTHY = 3;
+}
+
+message HealthDetails {
+  int64 registered_components = 1;
+  int64 active_executions = 2;
+  int64 cache_size_bytes = 3;
+  double cache_hit_rate = 4;
+  string uptime = 5;
+}
