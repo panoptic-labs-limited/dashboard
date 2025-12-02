@@ -4,7 +4,6 @@ from .component import (
     Component,
     TransformableComponent,
     RenderableComponent,
-    DataSourceComponent,  # Backwards compatibility alias for Component
     component,  # Decorator
 )
 from .context import push_context, pop_context, current_context, add_to_context
@@ -16,7 +15,6 @@ __all__ = [
     "Component",
     "TransformableComponent",
     "RenderableComponent",
-    "DataSourceComponent",  # Backwards compatibility alias
     "component",  # Decorator
     # Data sources
     "DataSource",

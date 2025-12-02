@@ -206,10 +206,6 @@ class RenderableComponent(TransformableComponent, ABC):
         pass
 
 
-# Backwards compatibility alias
-DataSourceComponent = Component
-
-
 def component(func: Callable[..., Any]) -> type["Component"]:
     """
     Decorator to convert a function into a Component class.

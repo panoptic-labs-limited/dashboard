@@ -11,7 +11,6 @@ from .core import (
     Component,
     TransformableComponent,
     RenderableComponent,
-    DataSourceComponent,  # Backwards compatibility alias
     component,  # Decorator
     DataSource,
     TimeseriesSource,
@@ -72,7 +71,6 @@ __all__ = [
     "Component",
     "TransformableComponent",
     "RenderableComponent",
-    "DataSourceComponent",  # Backwards compatibility alias
     "component",  # Decorator
     # Core - Data Sources
     "DataSource",
