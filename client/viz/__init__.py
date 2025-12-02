@@ -9,8 +9,9 @@ from .builder import LayoutBuilder, L
 # Core components and data sources
 from .core import (
     Component,
+    TransformableComponent,
     RenderableComponent,
-    DataSourceComponent,
+    DataSourceComponent,  # Backwards compatibility alias
     component,  # Decorator
     DataSource,
     TimeseriesSource,
@@ -69,8 +70,9 @@ from .widgets import (
 __all__ = [
     # Core - Components
     "Component",
+    "TransformableComponent",
     "RenderableComponent",
-    "DataSourceComponent",
+    "DataSourceComponent",  # Backwards compatibility alias
     "component",  # Decorator
     # Core - Data Sources
     "DataSource",

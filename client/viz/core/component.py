@@ -1,47 +1,45 @@
 """
 Component classes for data loading and rendering.
 
-Components are the primary way to define data pipelines:
-- Component: Base class with load() and transform() for data-only components
-- RenderableComponent: Extends Component with render() for server-side visualization
-- @component: Decorator to convert a function into a DataSourceComponent
+Component hierarchy:
+- Component: Base class with load() for simple data fetching
+- TransformableComponent: Adds transform() for data processing
+- RenderableComponent: Adds render() for server-side visualization
+
+Also provides:
+- @component: Decorator to convert a function into a Component
 """
 
 import inspect
 from abc import ABC, abstractmethod
 from typing import Any, Callable, Dict, cast, get_type_hints
 
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import BaseModel, ConfigDict
 
 
 class Component(BaseModel, ABC):
     """
-    Base class for data-only components.
+    Base class for data components.
 
-    Components define a data pipeline with:
-    - load(): Fetch data from databases, APIs, files, etc.
-    - transform(): Process/reshape data for consumption
-
-    Use Component when the frontend will handle rendering (frontend-native widgets).
-    For server-side rendering, use RenderableComponent instead.
+    Components fetch data via the load() method. This is the simplest form,
+    suitable for data sources that don't need transformation.
 
     Example:
-        class SalesLoader(Component):
-            region: str
-            start_date: str
+        class AvailableDates(Component):
+            def load(self):
+                return ["2024-01-01", "2024-01-02", "2024-01-03"]
+
+        class RegionOptions(Component):
+            country: str
 
             def load(self):
-                return db.query(f"SELECT * FROM sales WHERE region = '{self.region}'")
+                return fetch_regions(self.country)
 
-            def transform(self, data):
-                return aggregate_by_month(data)
-
-        # Use with frontend-native widget
-        LineChartWidget(
-            data_source=ComponentSource(component=SalesLoader),
-            params={"region": "North", "start_date": "2024-01-01"},
-            x="month",
-            y="revenue"
+        # Use with ComponentSource
+        Select(
+            name="region",
+            source=ComponentSource(component=RegionOptions),
+            params={"country": country_input}
         )
     """
 
@@ -63,24 +61,6 @@ class Component(BaseModel, ABC):
 
         Returns:
             Raw data in any format
-        """
-        pass
-
-    @abstractmethod
-    def transform(self, data: Any) -> Any:
-        """
-        Transform/process the loaded data.
-
-        This method should:
-        - Clean, filter, aggregate, or reshape data
-        - Prepare data for visualization
-        - Return processed data
-
-        Args:
-            data: Output from load() method
-
-        Returns:
-            Processed data ready for rendering
         """
         pass
 
@@ -131,12 +111,59 @@ class Component(BaseModel, ABC):
         return params
 
 
-class RenderableComponent(Component, ABC):
+class TransformableComponent(Component, ABC):
+    """
+    Component with data transformation capability.
+
+    Extends Component with a transform() method for processing loaded data.
+    Use when you need to clean, filter, aggregate, or reshape data.
+
+    Example:
+        class SalesData(TransformableComponent):
+            region: str
+            start_date: str
+
+            def load(self):
+                return db.query(f"SELECT * FROM sales WHERE region = '{self.region}'")
+
+            def transform(self, data):
+                return aggregate_by_month(data)
+
+        # Use with frontend-native widget
+        LineChartWidget(
+            data_source=ComponentSource(component=SalesData),
+            params={"region": "North", "start_date": "2024-01-01"},
+            x="month",
+            y="revenue"
+        )
+    """
+
+    @abstractmethod
+    def transform(self, data: Any) -> Any:
+        """
+        Transform/process the loaded data.
+
+        This method should:
+        - Clean, filter, aggregate, or reshape data
+        - Prepare data for visualization
+        - Return processed data
+
+        Args:
+            data: Output from load() method
+
+        Returns:
+            Processed data ready for rendering
+        """
+        pass
+
+
+class RenderableComponent(TransformableComponent, ABC):
     """
     Component with server-side rendering capability.
 
-    Extends Component with a render() method that produces visualization output
-    (typically Plotly JSON). Use with PlotlyWidget for full server-side control.
+    Extends TransformableComponent with a render() method that produces
+    visualization output (typically Plotly JSON). Use with PlotlyWidget
+    for full server-side control.
 
     Example:
         class SalesChart(RenderableComponent):
@@ -179,36 +206,13 @@ class RenderableComponent(Component, ABC):
         pass
 
 
-class DataSourceComponent(Component):
+# Backwards compatibility alias
+DataSourceComponent = Component
+
+
+def component(func: Callable[..., Any]) -> type["Component"]:
     """
-    Simplified component for data sources.
-
-    Only requires implementing load() method.
-    Transform is a pass-through by default.
-
-    Useful for simple data fetching without transformation logic.
-
-    Example:
-        class AvailableDates(DataSourceComponent):
-            def load(self):
-                return ["2024-01-01", "2024-01-02", "2024-01-03"]
-
-        # Or with parameters:
-        class RegionOptions(DataSourceComponent):
-            country: str
-
-            def load(self):
-                return fetch_regions(self.country)
-    """
-
-    def transform(self, data: Any) -> Any:
-        """Pass-through transform."""
-        return data
-
-
-def component(func: Callable[..., Any]) -> type["DataSourceComponent"]:
-    """
-    Decorator to convert a function into a DataSourceComponent class.
+    Decorator to convert a function into a Component class.
 
     The function's parameters become fields on the generated component class,
     and the function body becomes the load() method.
@@ -217,7 +221,7 @@ def component(func: Callable[..., Any]) -> type["DataSourceComponent"]:
         func: Function to wrap as a component
 
     Returns:
-        A DataSourceComponent subclass
+        A Component subclass
 
     Examples:
         # Simple function with no parameters
@@ -248,6 +252,7 @@ def component(func: Callable[..., Any]) -> type["DataSourceComponent"]:
     func_module = getattr(func, '__module__', __name__)
 
     # Try to get type hints, fall back to Any for untyped params
+    # noinspection PyBroadException
     try:
         hints = get_type_hints(func)
     except Exception:  # noqa: BLE001
@@ -272,7 +277,7 @@ def component(func: Callable[..., Any]) -> type["DataSourceComponent"]:
     _param_names = list(sig.parameters.keys())
 
     # Create the load method that calls the original function with self's fields
-    def load_method(self: "DataSourceComponent") -> Any:
+    def load_method(self: "Component") -> Any:
         # Build kwargs from instance fields
         kwargs = {p: getattr(self, p) for p in _param_names}
         return _func(**kwargs)
@@ -293,8 +298,8 @@ def component(func: Callable[..., Any]) -> type["DataSourceComponent"]:
 
     # Create the class dynamically
     component_class = cast(
-        type[DataSourceComponent],
-        type(func_name, (DataSourceComponent,), class_dict)
+        type[Component],
+        type(func_name, (Component,), class_dict)
     )
 
     # Rebuild the model to pick up annotations properly
