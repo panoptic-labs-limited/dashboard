@@ -9,7 +9,7 @@ Components are the primary way to define data pipelines:
 
 import inspect
 from abc import ABC, abstractmethod
-from typing import Any, Callable, Dict, get_type_hints
+from typing import Any, Callable, Dict, cast, get_type_hints
 
 from pydantic import BaseModel, ConfigDict, Field
 
@@ -206,7 +206,7 @@ class DataSourceComponent(Component):
         return data
 
 
-def component(func: Callable[..., Any]) -> type[DataSourceComponent]:
+def component(func: Callable[..., Any]) -> type["DataSourceComponent"]:
     """
     Decorator to convert a function into a DataSourceComponent class.
 
@@ -245,38 +245,41 @@ def component(func: Callable[..., Any]) -> type[DataSourceComponent]:
     # Get function signature
     sig = inspect.signature(func)
     func_name = func.__name__
+    func_module = getattr(func, '__module__', __name__)
 
     # Try to get type hints, fall back to Any for untyped params
     try:
         hints = get_type_hints(func)
-    except Exception:
+    except Exception:  # noqa: BLE001
         hints = {}
 
     # Build field definitions for Pydantic model
     annotations: Dict[str, Any] = {}
     field_defaults: Dict[str, Any] = {}
 
-    for param_name, param in sig.parameters.items():
+    for name, param in sig.parameters.items():
         # Get type annotation (default to Any)
-        param_type = hints.get(param_name, Any)
-        annotations[param_name] = param_type
+        param_type = hints.get(name, Any)
+        annotations[name] = param_type
 
         # Handle default values
         if param.default is not inspect.Parameter.empty:
-            field_defaults[param_name] = param.default
+            field_defaults[name] = param.default
         # If no default, field is required (Pydantic handles this automatically)
 
+    # Capture func and sig in closure for load_method
+    _func = func
+    _param_names = list(sig.parameters.keys())
+
     # Create the load method that calls the original function with self's fields
-    def load_method(self):
+    def load_method(self: "DataSourceComponent") -> Any:
         # Build kwargs from instance fields
-        kwargs = {}
-        for param_name in sig.parameters:
-            kwargs[param_name] = getattr(self, param_name)
-        return func(**kwargs)
+        kwargs = {p: getattr(self, p) for p in _param_names}
+        return _func(**kwargs)
 
     # Build class dict
-    class_dict = {
-        '__module__': func.__module__,
+    class_dict: Dict[str, Any] = {
+        '__module__': func_module,
         '__component_name__': func_name,
         '__doc__': func.__doc__,
         '_source_func': func,  # Keep reference to original function
@@ -289,10 +292,9 @@ def component(func: Callable[..., Any]) -> type[DataSourceComponent]:
         class_dict[field_name] = default_value
 
     # Create the class dynamically
-    component_class = type(
-        func_name,  # Use function name as class name
-        (DataSourceComponent,),
-        class_dict
+    component_class = cast(
+        type[DataSourceComponent],
+        type(func_name, (DataSourceComponent,), class_dict)
     )
 
     # Rebuild the model to pick up annotations properly
