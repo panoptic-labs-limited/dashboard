@@ -51,8 +51,8 @@ from .inputs import (
 # Layout components
 from .layout import (
     Dashboard, Page, Section, Row, Column,
-    Tabs, Tab, WidgetType,
-    # Widget types (deprecated - use viz.widgets directly)
+    Tabs, Tab,
+    # Widget base class
     Widget,
 )
 # Widget types (new)
@@ -99,8 +99,6 @@ __all__ = [
     # Builder
     "LayoutBuilder",
     "L",
-    # Enums (deprecated)
-    "WidgetType",
     # Inputs - Base
     "Option",
     "Input",

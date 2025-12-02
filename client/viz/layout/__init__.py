@@ -6,8 +6,8 @@ Type-safe, hierarchical layout system using Pydantic.
 
 # Base classes (re-exported from core for convenience)
 from viz.core.layout import Container
-# Widgets (re-exported from viz.widgets)
-from .components import (
+# Widgets (from viz.widgets)
+from viz.widgets import (
     Widget,
     LineChartWidget,
     BarChartWidget,
@@ -15,8 +15,9 @@ from .components import (
     TableWidget,
     MetricWidget,
     PlotlyWidget,
-    LegacyWidget,
 )
+# Legacy widget (deprecated)
+from .components import LegacyWidget
 # Containers
 from .containers import (
     Row,
@@ -30,15 +31,10 @@ from .dashboard import (
     Page,
     Dashboard,
 )
-# Enums (WidgetType is deprecated but kept for backward compatibility)
-from .enums import WidgetType
 
 __all__ = [
     # Base classes
     "Container",
-
-    # Enums (deprecated)
-    "WidgetType",
 
     # Widgets
     "Widget",
