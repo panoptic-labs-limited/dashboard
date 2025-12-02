@@ -15,8 +15,8 @@ from typing import Dict, Set, List, Tuple, Any
 
 from viz.core.datasource import DataSource, ComponentSource
 from viz.core.layout import Container
+from viz.dashboard import Dashboard
 from viz.inputs.base import Input
-from viz.layout.dashboard import Dashboard
 from viz.widgets import Widget
 
 
@@ -61,6 +61,12 @@ class ComponentExtractor:
 
     def _traverse(self, node: Any) -> None:
         """Recursively traverse layout tree and extract components."""
+
+        # Handle Dashboard (has pages, not children)
+        if isinstance(node, Dashboard):
+            for page in node.pages:
+                self._traverse(page)
+            return
 
         # Handle Inputs (check for DataSource)
         if isinstance(node, Input):

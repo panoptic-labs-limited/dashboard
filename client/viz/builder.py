@@ -10,7 +10,7 @@ from typing import Any
 from viz.core.context import current_context, add_to_context
 from viz.core.datasource import DataSource, ComponentSource
 from viz.layout.containers import Row, Column, Tab, Tabs, Section
-from viz.layout.dashboard import Page
+from viz.layout.page import Page
 from viz.widgets import (
     LineChartWidget,
     BarChartWidget,

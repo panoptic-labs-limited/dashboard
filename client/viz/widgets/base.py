@@ -8,22 +8,21 @@ Each widget has a data source and optional parameters for querying that source.
 from __future__ import annotations
 
 from abc import ABC
-from typing import Any
 
 from pydantic import Field
 
 from viz.core.datasource import DataSource
-from viz.core.layout import LeafNode
+from viz.core.layout import ParameterizedNode
 
 
-class Widget(LeafNode, ABC):
+class Widget(ParameterizedNode, ABC):
     """
     Abstract base class for all widgets.
 
     Widgets combine a DataSource (where data comes from) with visualization
-    configuration. The `params` field provides parameters for the data source
-    at the point of use, allowing the same DataSource to be reused with
-    different parameters.
+    configuration. The `params` field (inherited from ParameterizedNode)
+    provides parameters for the data source at the point of use, allowing
+    the same DataSource to be reused with different parameters.
 
     Subclasses define specific visualization types:
     - Frontend-native: LineChartWidget, BarChartWidget, TableWidget, MetricWidget
@@ -45,7 +44,3 @@ class Widget(LeafNode, ABC):
     description: str | None = Field(None, description="Widget description")
 
     data_source: DataSource = Field(..., description="Data source for this widget")
-    params: dict[str, Any] = Field(
-        default_factory=dict,
-        description="Parameters for the data source (can reference Inputs)"
-    )

@@ -11,9 +11,11 @@ and input components inherit from:
 from __future__ import annotations
 
 import uuid
-from typing import TypeVar, Generic, Iterator
+from typing import Any, TypeVar, Generic, Iterator
 
-from pydantic import BaseModel, Field, ConfigDict
+from pydantic import BaseModel, Field, ConfigDict, field_serializer
+
+from viz.core.reference import NamedReference
 
 
 class LayoutNode(BaseModel):
@@ -50,6 +52,33 @@ class LeafNode(LayoutNode):
     """
 
     pass
+
+
+class ParameterizedNode(LeafNode):
+    """
+    Base class for leaf nodes that accept parameters.
+
+    Provides the params field and serialization logic for converting
+    NamedReference instances to {ref: name} format.
+
+    Extended by Widget and Input.
+    """
+
+    params: dict[str, Any] = Field(
+        default_factory=dict,
+        description="Parameters (can reference Inputs via NamedReference)"
+    )
+
+    @field_serializer('params')
+    def serialize_params(self, params: dict[str, Any]) -> dict[str, Any]:
+        """Serialize params, converting NamedReference instances to {ref: name}."""
+        serialized = {}
+        for key, value in params.items():
+            if isinstance(value, NamedReference):
+                serialized[key] = {"ref": value.name}
+            else:
+                serialized[key] = value
+        return serialized
 
 
 # Type variable for Container's children

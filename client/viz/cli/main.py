@@ -2,8 +2,8 @@
 Streamviz CLI - Streamlit-like interface for dashboard development.
 
 Usage:
-    streamviz serve dashboard.py
-    streamviz validate dashboard.py
+    streamviz serve page.py
+    streamviz validate page.py
     streamviz list
 """
 
@@ -20,7 +20,7 @@ from watchdog.events import FileSystemEventHandler
 from watchdog.observers import Observer
 
 from viz.api.registry import RegistryClient
-from viz.layout.dashboard import Dashboard
+from viz.dashboard import Dashboard
 
 console = Console()
 
@@ -102,7 +102,7 @@ def validate_dashboard(dashboard: Dashboard) -> bool:
     if not dashboard.title:
         errors.append("Dashboard must have a title")
 
-    if not dashboard.children:
+    if not dashboard.pages:
         errors.append("Dashboard must have at least one page")
 
     # Check for duplicate IDs

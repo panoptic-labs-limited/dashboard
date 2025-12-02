@@ -12,7 +12,7 @@ import httpx
 from rich.console import Console
 from rich.progress import Progress, SpinnerColumn, TextColumn
 
-from viz.layout.dashboard import Dashboard
+from viz.dashboard import Dashboard
 from .extractor import ComponentExtractor, serialize_function
 from .serializer import serialize_dashboard, serialize_component
 

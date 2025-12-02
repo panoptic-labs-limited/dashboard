@@ -24,11 +24,8 @@ from .containers import (
     Tabs,
     Section,
 )
-# Dashboard and Page
-from .dashboard import (
-    Page,
-    Dashboard,
-)
+# Page
+from .page import Page
 
 __all__ = [
     # Base classes
@@ -50,7 +47,6 @@ __all__ = [
     "Tabs",
     "Section",
 
-    # Dashboard
+    # Page
     "Page",
-    "Dashboard",
 ]

@@ -17,9 +17,10 @@ from pydantic_core import PydanticUndefined
 
 from viz.core.component import Component
 from viz.core.layout import Container
+from viz.dashboard import Dashboard
 from viz.inputs.base import Input
 from viz.layout.containers import Section, Row, Column, Tabs, Tab
-from viz.layout.dashboard import Dashboard, Page
+from viz.layout.page import Page
 from viz.widgets import Widget
 
 
@@ -153,7 +154,7 @@ def serialize_dashboard(dashboard: Dashboard) -> Dict[str, Any]:
         "title": dashboard.title,
         "description": dashboard.description,
         "version": dashboard.version,
-        "pages": [_serialize_page(page) for page in dashboard.children]
+        "pages": [_serialize_page(page) for page in dashboard.pages]
     }
 
 

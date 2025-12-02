@@ -2,19 +2,19 @@
 
 from __future__ import annotations
 
-import uuid
-from typing import Any, TypeVar, Generic, Type, ClassVar
+from typing import TypeVar, Generic, Type, ClassVar
 
 from pydantic import BaseModel, Field, model_validator
 
 from viz.core.datasource import DataSource
-from viz.core.layout import LeafNode
+from viz.core.layout import ParameterizedNode
+from viz.core.reference import NamedReference
 
 # Generic type variable for config models
 TConfig = TypeVar('TConfig', bound=BaseModel)
 
 
-class Input(LeafNode, Generic[TConfig]):
+class Input(NamedReference, ParameterizedNode, Generic[TConfig]):
     """
     Base class for all input types.
 
@@ -26,7 +26,7 @@ class Input(LeafNode, Generic[TConfig]):
     2. source + params (dynamic) - DataSource for server-side data fetching
 
     The source/params pattern mirrors widgets:
-    - source: WHERE to get data (TimeseriesSource, ComponentSource, FunctionSource)
+    - source: WHERE to get data (TimeseriesSource, ComponentSource)
     - params: HOW to query the source (can reference other Inputs for cascading)
 
     Subclasses must:
@@ -34,7 +34,7 @@ class Input(LeafNode, Generic[TConfig]):
     - Declare config fields as top-level properties (for type hints)
     - Set input_type as a Literal for the specific input type
 
-    Extends LeafNode as inputs are terminal nodes in the layout tree.
+    Extends ParameterizedNode for params support and NamedReference for ref serialization.
     """
 
     model_config = {
@@ -49,11 +49,7 @@ class Input(LeafNode, Generic[TConfig]):
     # Subclasses set input_type which gets synced to type
     type: str = Field("input", description="Discriminator for union types")
 
-    # We override the id default to use "input_" prefix
-    id: str = Field(default_factory=lambda: f"input_{uuid.uuid4().hex[:8]}")
-
-    # Core fields
-    name: str = Field(..., description="Parameter name (used in component bindings)")
+    # Core fields (name is inherited from NamedReference)
     label: str | None = Field(None, description="Display label")
 
     # Optional fields
@@ -69,10 +65,7 @@ class Input(LeafNode, Generic[TConfig]):
         None,
         description="Optional DataSource for dynamic options/configuration"
     )
-    params: dict[str, Any] = Field(
-        default_factory=dict,
-        description="Parameters for the data source (can reference other Inputs)"
-    )
+    # params is inherited from ParameterizedNode
 
     @model_validator(mode='after')
     def auto_generate_label(self):

@@ -48,9 +48,11 @@ from .inputs import (
     DateTimeInput,
     RelativeDateInput,
 )
+# Dashboard (top-level config, not a layout container)
+from .dashboard import Dashboard
 # Layout components
 from .layout import (
-    Dashboard, Page, Section, Row, Column,
+    Page, Section, Row, Column,
     Tabs, Tab,
     # Widget base class
     Widget,
