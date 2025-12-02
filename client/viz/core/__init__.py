@@ -1,6 +1,6 @@
 """Core components for the Viz client library."""
 
-from .component import Component, RenderableComponent, DataSourceComponent
+from .component import Component, RenderableComponent, DataSourceComponent, component
 from .context import push_context, pop_context, current_context, add_to_context
 from .datasource import DataSource, TimeseriesSource, ComponentSource, FunctionSource
 from .layout import LayoutNode, LeafNode, Container
@@ -10,6 +10,7 @@ __all__ = [
     "Component",
     "RenderableComponent",
     "DataSourceComponent",
+    "component",  # Decorator
     # Data sources
     "DataSource",
     "TimeseriesSource",

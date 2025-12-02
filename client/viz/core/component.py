@@ -4,13 +4,14 @@ Component classes for data loading and rendering.
 Components are the primary way to define data pipelines:
 - Component: Base class with load() and transform() for data-only components
 - RenderableComponent: Extends Component with render() for server-side visualization
+- @component: Decorator to convert a function into a DataSourceComponent
 """
 
 import inspect
 from abc import ABC, abstractmethod
-from typing import Any, Dict
+from typing import Any, Callable, Dict, get_type_hints
 
-from pydantic import BaseModel, ConfigDict
+from pydantic import BaseModel, ConfigDict, Field
 
 
 class Component(BaseModel, ABC):
@@ -203,3 +204,98 @@ class DataSourceComponent(Component):
     def transform(self, data: Any) -> Any:
         """Pass-through transform."""
         return data
+
+
+def component(func: Callable[..., Any]) -> type[DataSourceComponent]:
+    """
+    Decorator to convert a function into a DataSourceComponent class.
+
+    The function's parameters become fields on the generated component class,
+    and the function body becomes the load() method.
+
+    Args:
+        func: Function to wrap as a component
+
+    Returns:
+        A DataSourceComponent subclass
+
+    Examples:
+        # Simple function with no parameters
+        @component
+        def get_available_dates():
+            return ["2024-01-01", "2024-01-02", "2024-01-03"]
+
+        # Function with parameters
+        @component
+        def get_regions(country: str):
+            return fetch_regions(country)
+
+        # Function with default parameters
+        @component
+        def get_products(category: str = "all", limit: int = 100):
+            return fetch_products(category, limit)
+
+        # Use with ComponentSource
+        Select(
+            name="region",
+            source=ComponentSource(component=get_regions),
+            params={"country": country_input}
+        )
+    """
+    # Get function signature
+    sig = inspect.signature(func)
+    func_name = func.__name__
+
+    # Try to get type hints, fall back to Any for untyped params
+    try:
+        hints = get_type_hints(func)
+    except Exception:
+        hints = {}
+
+    # Build field definitions for Pydantic model
+    annotations: Dict[str, Any] = {}
+    field_defaults: Dict[str, Any] = {}
+
+    for param_name, param in sig.parameters.items():
+        # Get type annotation (default to Any)
+        param_type = hints.get(param_name, Any)
+        annotations[param_name] = param_type
+
+        # Handle default values
+        if param.default is not inspect.Parameter.empty:
+            field_defaults[param_name] = param.default
+        # If no default, field is required (Pydantic handles this automatically)
+
+    # Create the load method that calls the original function with self's fields
+    def load_method(self):
+        # Build kwargs from instance fields
+        kwargs = {}
+        for param_name in sig.parameters:
+            kwargs[param_name] = getattr(self, param_name)
+        return func(**kwargs)
+
+    # Build class dict
+    class_dict = {
+        '__module__': func.__module__,
+        '__component_name__': func_name,
+        '__doc__': func.__doc__,
+        '_source_func': func,  # Keep reference to original function
+        '__annotations__': annotations,
+        'load': load_method,
+    }
+
+    # Add field defaults
+    for field_name, default_value in field_defaults.items():
+        class_dict[field_name] = default_value
+
+    # Create the class dynamically
+    component_class = type(
+        func_name,  # Use function name as class name
+        (DataSourceComponent,),
+        class_dict
+    )
+
+    # Rebuild the model to pick up annotations properly
+    component_class.model_rebuild()
+
+    return component_class

@@ -11,6 +11,7 @@ from .core import (
     Component,
     RenderableComponent,
     DataSourceComponent,
+    component,  # Decorator
     DataSource,
     TimeseriesSource,
     ComponentSource,
@@ -70,6 +71,7 @@ __all__ = [
     "Component",
     "RenderableComponent",
     "DataSourceComponent",
+    "component",  # Decorator
     # Core - Data Sources
     "DataSource",
     "TimeseriesSource",
