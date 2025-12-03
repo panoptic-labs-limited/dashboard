@@ -54,8 +54,7 @@ class RelativeDateConfig(BaseModel):
 class DateInput(DateConfig, Input[DateConfig]):
     """Date picker input."""
 
-    __config_class__ = DateConfig
-    input_type: Literal["date"] = "date"
+    type: Literal["date"] = "date"
 
     # Display options (config fields inherited from DateConfig)
     format: str = Field("YYYY-MM-DD", description="Display format")
@@ -65,8 +64,7 @@ class DateInput(DateConfig, Input[DateConfig]):
 class DateRangeInput(DateRangeConfig, Input[DateRangeConfig]):
     """Date range picker."""
 
-    __config_class__ = DateRangeConfig
-    input_type: Literal["date_range"] = "date_range"
+    type: Literal["date_range"] = "date_range"
 
     # Display options (config fields inherited from DateRangeConfig)
     format: str = Field("YYYY-MM-DD", description="Display format")
@@ -76,8 +74,7 @@ class DateRangeInput(DateRangeConfig, Input[DateRangeConfig]):
 class TimeInput(TimeConfig, Input[TimeConfig]):
     """Time picker input."""
 
-    __config_class__ = TimeConfig
-    input_type: Literal["time"] = "time"
+    type: Literal["time"] = "time"
 
     # Display options (config fields inherited from TimeConfig)
     format_24h: bool = Field(True, description="Use 24-hour format")
@@ -86,8 +83,7 @@ class TimeInput(TimeConfig, Input[TimeConfig]):
 class DateTimeInput(DateTimeConfig, Input[DateTimeConfig]):
     """Combined date and time picker."""
 
-    __config_class__ = DateTimeConfig
-    input_type: Literal["datetime"] = "datetime"
+    type: Literal["datetime"] = "datetime"
 
     # Display options (config fields inherited from DateTimeConfig)
     format: str = Field("YYYY-MM-DD HH:mm", description="Display format")
@@ -97,5 +93,4 @@ class DateTimeInput(DateTimeConfig, Input[DateTimeConfig]):
 class RelativeDateInput(RelativeDateConfig, Input[RelativeDateConfig]):
     """Relative date range selector (last 7 days, etc.)."""
 
-    __config_class__ = RelativeDateConfig
-    input_type: Literal["relative_date"] = "relative_date"
+    type: Literal["relative_date"] = "relative_date"

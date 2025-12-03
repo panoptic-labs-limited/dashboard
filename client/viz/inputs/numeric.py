@@ -50,8 +50,7 @@ class NumericRangeConfig(BaseModel):
 class NumericInput(NumericInputConfig, Input[NumericInputConfig]):
     """Numeric input with constraints."""
 
-    __config_class__ = NumericInputConfig
-    input_type: Literal["numeric_input"] = "numeric_input"
+    type: Literal["numeric_input"] = "numeric_input"
 
     # Display options (config fields inherited from NumericInputConfig)
     prefix: str | None = Field(None, description="Prefix text (e.g., '$')")
@@ -61,8 +60,7 @@ class NumericInput(NumericInputConfig, Input[NumericInputConfig]):
 class Slider(SliderConfig, Input[SliderConfig]):
     """Visual slider for single value."""
 
-    __config_class__ = SliderConfig
-    input_type: Literal["slider"] = "slider"
+    type: Literal["slider"] = "slider"
 
     # Display options (config fields inherited from SliderConfig)
     show_value: bool = Field(True, description="Show current value")
@@ -72,8 +70,7 @@ class Slider(SliderConfig, Input[SliderConfig]):
 class RangeSlider(RangeSliderConfig, Input[RangeSliderConfig]):
     """Visual slider for range (min/max)."""
 
-    __config_class__ = RangeSliderConfig
-    input_type: Literal["range_slider"] = "range_slider"
+    type: Literal["range_slider"] = "range_slider"
 
     # Display options (config fields inherited from RangeSliderConfig)
     show_values: bool = Field(True, description="Show current values")
@@ -82,8 +79,7 @@ class RangeSlider(RangeSliderConfig, Input[RangeSliderConfig]):
 class NumericRange(NumericRangeConfig, Input[NumericRangeConfig]):
     """Two numeric inputs for min/max range."""
 
-    __config_class__ = NumericRangeConfig
-    input_type: Literal["numeric_range"] = "numeric_range"
+    type: Literal["numeric_range"] = "numeric_range"
 
     # Display options (config fields inherited from NumericRangeConfig)
     prefix: str | None = Field(None, description="Prefix text")

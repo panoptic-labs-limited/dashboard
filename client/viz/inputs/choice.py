@@ -118,8 +118,7 @@ class Select(SelectConfig, Input[SelectConfig]):
         )
     """
 
-    __config_class__ = SelectConfig
-    input_type: Literal["select"] = "select"
+    type: Literal["select"] = "select"
 
     # Display options (config fields inherited from SelectConfig)
     searchable: bool = Field(False, description="Enable search/filter in dropdown")
@@ -158,8 +157,7 @@ class MultiSelect(MultiSelectConfig, Input[MultiSelectConfig]):
         )
     """
 
-    __config_class__ = MultiSelectConfig
-    input_type: Literal["multi_select"] = "multi_select"
+    type: Literal["multi_select"] = "multi_select"
 
     # Config fields
     options: list[Option | None] = None
@@ -203,8 +201,7 @@ class RadioGroup(RadioGroupConfig, Input[RadioGroupConfig]):
         )
     """
 
-    __config_class__ = RadioGroupConfig
-    input_type: Literal["radio"] = "radio"
+    type: Literal["radio"] = "radio"
 
     # Config fields
     options: list[Option | None] = None
@@ -242,8 +239,7 @@ class Checkbox(CheckboxConfig, Input[CheckboxConfig]):
         )
     """
 
-    __config_class__ = CheckboxConfig
-    input_type: Literal["checkbox"] = "checkbox"
+    type: Literal["checkbox"] = "checkbox"
 
     @field_validator('default')
     @classmethod
@@ -269,8 +265,7 @@ class CheckboxGroup(CheckboxGroupConfig, Input[CheckboxGroupConfig]):
         )
     """
 
-    __config_class__ = CheckboxGroupConfig
-    input_type: Literal["checkbox_group"] = "checkbox_group"
+    type: Literal["checkbox_group"] = "checkbox_group"
 
     # Config fields
     options: list[Option | None] = None
@@ -319,8 +314,7 @@ class Toggle(ToggleConfig, Input[ToggleConfig]):
         )
     """
 
-    __config_class__ = ToggleConfig
-    input_type: Literal["toggle"] = "toggle"
+    type: Literal["toggle"] = "toggle"
 
     @field_validator('default')
     @classmethod

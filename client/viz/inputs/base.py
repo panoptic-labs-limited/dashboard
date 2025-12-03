@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from typing import TypeVar, Generic, Type, ClassVar
+from typing import TypeVar, Generic
 
 from pydantic import BaseModel, Field, model_validator
 
@@ -30,9 +30,8 @@ class Input(NamedReference, ParameterizedNode, Generic[TConfig]):
     - params: HOW to query the source (can reference other Inputs for cascading)
 
     Subclasses must:
-    - Set __config_class__ to their config model type
-    - Declare config fields as top-level properties (for type hints)
-    - Set input_type as a Literal for the specific input type
+    - Set type as a Literal for the specific input type (e.g., type: Literal["select"] = "select")
+    - Declare config fields as top-level properties
 
     Extends ParameterizedNode for params support and NamedReference for ref serialization.
     """
@@ -42,11 +41,7 @@ class Input(NamedReference, ParameterizedNode, Generic[TConfig]):
         'validate_assignment': True,
     }
 
-    # Config class reference (set by subclasses)
-    __config_class__: ClassVar[Type[BaseModel]]
-
-    # Override LayoutNode's 'type' field to make it optional with a default
-    # Subclasses set input_type which gets synced to type
+    # Subclasses override with Literal type (e.g., type: Literal["select"] = "select")
     type: str = Field("input", description="Discriminator for union types")
 
     # Core fields (name is inherited from NamedReference)
@@ -72,14 +67,6 @@ class Input(NamedReference, ParameterizedNode, Generic[TConfig]):
         """Auto-generate label from name if not provided."""
         if self.label is None:
             self.label = self.name.replace('_', ' ').title()
-        return self
-
-    @model_validator(mode='after')
-    def sync_type_field(self):
-        """Sync input_type to type field for LayoutNode discriminator."""
-        if hasattr(self, 'input_type'):
-            # Use object.__setattr__ to bypass validation and avoid recursion
-            object.__setattr__(self, 'type', self.input_type)
         return self
 
     def to_dict(self) -> dict:
