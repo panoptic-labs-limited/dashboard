@@ -7,7 +7,7 @@ holds metadata and a collection of pages.
 
 from __future__ import annotations
 
-from pydantic import BaseModel, Field, field_validator, ConfigDict
+from pydantic import BaseModel, Field, ConfigDict
 
 from viz.layout.page import Page
 
@@ -31,15 +31,7 @@ class Dashboard(BaseModel):
     description: str | None = Field(None, description="Dashboard description")
     version: str = Field("1.0.0", description="Dashboard version")
 
-    pages: list[Page] = Field(default_factory=list, description="Dashboard pages")
-
-    @field_validator('pages')
-    @classmethod
-    def validate_has_pages(cls, v: list[Page]) -> list[Page]:
-        """Ensure dashboard has at least one page."""
-        if not v:
-            raise ValueError("Dashboard must have at least one page")
-        return v
+    pages: list[Page] = Field(default_factory=list, min_length=1, description="Dashboard pages")
 
     def page(self, title: str, description: str | None = None, **kwargs) -> Page:
         """

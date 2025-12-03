@@ -13,7 +13,7 @@ from __future__ import annotations
 import uuid
 from typing import Any, TypeVar, Generic, Iterator
 
-from pydantic import BaseModel, Field, ConfigDict, field_serializer
+from pydantic import BaseModel, Field, ConfigDict, field_serializer, SerializeAsAny
 
 from viz.core.reference import NamedReference
 
@@ -98,7 +98,7 @@ class Container(LayoutNode, Generic[T]):
     - Indexing
     """
 
-    children: list[T] = Field(default_factory=list)
+    children: list[SerializeAsAny[T]] = Field(default_factory=list)
 
     def add(self, child: T) -> Container[T]:
         """Add a child component."""
