@@ -14,10 +14,10 @@ and source file collection.
 from typing import Dict, Set, List, Tuple, Any
 
 from viz.core.datasource import DataSource, ComponentSource
-from viz.core.layout import Container
+from viz.core.layout import BaseContainer
 from viz.dashboard import Dashboard
-from viz.inputs.base import Input
-from viz.widgets import Widget
+from viz.inputs.base import BaseInput
+from viz.widgets import BaseWidget
 
 
 class ComponentExtractor:
@@ -69,17 +69,17 @@ class ComponentExtractor:
             return
 
         # Handle Inputs (check for DataSource)
-        if isinstance(node, Input):
+        if isinstance(node, BaseInput):
             self._extract_from_data_source(node.source)
             self._extract_from_params(node.params)
 
         # Handle Widgets (check for DataSource)
-        elif isinstance(node, Widget):
+        elif isinstance(node, BaseWidget):
             self._extract_from_data_source(node.data_source)
             self._extract_from_params(node.params)
 
         # Recursively traverse containers
-        if isinstance(node, Container) and hasattr(node, 'children'):
+        if isinstance(node, BaseContainer) and hasattr(node, 'children'):
             for child in node.children:
                 self._traverse(child)
 
@@ -99,7 +99,7 @@ class ComponentExtractor:
             return
 
         for param_value in params.values():
-            if isinstance(param_value, Input):
+            if isinstance(param_value, BaseInput):
                 # Recursively extract from cascaded inputs
                 self._extract_from_data_source(param_value.source)
                 self._extract_from_params(param_value.params)

@@ -11,13 +11,13 @@ from typing import Union
 
 from pydantic import Field
 
-from viz.core.layout import Container, LeafNode
+from viz.core.layout import BaseContainer, LeafNode
 
 # Type alias for standard layout children
 LayoutChild = Union['Row', 'Column', LeafNode]
 
 
-class Row(Container[LayoutChild]):
+class Row(BaseContainer[LayoutChild]):
     """
     Horizontal layout container.
 
@@ -30,7 +30,7 @@ class Row(Container[LayoutChild]):
     align: Literal["start", "center", "end", "stretch"] | None = None
 
 
-class Column(Container[LayoutChild]):
+class Column(BaseContainer[LayoutChild]):
     """
     Vertical layout container.
 
@@ -46,7 +46,7 @@ class Column(Container[LayoutChild]):
     gap: str | None = Field(None, description="Gap between children (CSS)")
 
 
-class Tab(Container[LayoutChild]):
+class Tab(BaseContainer[LayoutChild]):
     """
     Individual tab within a Tabs container.
 
@@ -59,7 +59,7 @@ class Tab(Container[LayoutChild]):
     disabled: bool = False
 
 
-class Tabs(Container[Tab]):
+class Tabs(BaseContainer[Tab]):
     """
     Tab container holding multiple Tab components.
 
@@ -73,7 +73,7 @@ class Tabs(Container[Tab]):
     )
 
 
-class Section(Container[Union[Row, Column, Tabs, LeafNode]]):
+class Section(BaseContainer[Union[Row, Column, Tabs, LeafNode]]):
     """
     Section for organizing content within a Page.
 

@@ -11,7 +11,7 @@ Widget Types:
 - Server-rendered: PlotlyWidget (uses RenderableComponent)
 """
 
-from .base import Widget
+from .base import BaseWidget
 from .charts import LineChartWidget, BarChartWidget, AreaChartWidget
 from .metric import MetricWidget
 from .plotly import PlotlyWidget
@@ -19,7 +19,7 @@ from .table import TableWidget
 
 __all__ = [
     # Base
-    "Widget",
+    "BaseWidget",
     # Charts (frontend-native)
     "LineChartWidget",
     "BarChartWidget",

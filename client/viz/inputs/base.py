@@ -14,7 +14,7 @@ from viz.core.reference import NamedReference
 TConfig = TypeVar('TConfig', bound=BaseModel)
 
 
-class Input(NamedReference, ParameterizedNode, Generic[TConfig]):
+class BaseInput(NamedReference, ParameterizedNode, Generic[TConfig]):
     """
     Base class for all input types.
 

@@ -15,7 +15,7 @@ from viz.core.datasource import DataSource
 from viz.core.layout import ParameterizedNode
 
 
-class Widget(ParameterizedNode, ABC):
+class BaseWidget(ParameterizedNode, ABC):
     """
     Abstract base class for all widgets.
 

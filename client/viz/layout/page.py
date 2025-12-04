@@ -6,13 +6,13 @@ from __future__ import annotations
 
 from typing import Literal, Union
 
-from viz.core.layout import Container
-from viz.inputs.base import Input
-from viz.widgets import Widget
+from viz.core.layout import BaseContainer
+from viz.inputs.base import BaseInput
+from viz.widgets import BaseWidget
 from .containers import Section, Row, Column, Tabs
 
 
-class Page(Container[Union[Section, Row, Column, Tabs, Widget, Input]]):
+class Page(BaseContainer[Union[Section, Row, Column, Tabs, BaseWidget, BaseInput]]):
     """
     Page container representing a dashboard page/view.
 

@@ -5,10 +5,10 @@ Type-safe, hierarchical layout system using Pydantic.
 """
 
 # Base classes (re-exported from core for convenience)
-from viz.core.layout import Container
+from viz.core.layout import BaseContainer
 # Widgets (from viz.widgets)
 from viz.widgets import (
-    Widget,
+    BaseWidget,
     LineChartWidget,
     BarChartWidget,
     AreaChartWidget,
@@ -29,10 +29,10 @@ from .page import Page
 
 __all__ = [
     # Base classes
-    "Container",
+    "BaseContainer",
 
     # Widgets
-    "Widget",
+    "BaseWidget",
     "LineChartWidget",
     "BarChartWidget",
     "AreaChartWidget",

@@ -5,7 +5,7 @@ This module contains the foundational classes that all layout
 and input components inherit from:
 - LayoutNode: Base class for all nodes
 - LeafNode: Base class for nodes without children (Widget, Input)
-- Container: Base class for nodes with children (Row, Column, etc.)
+- BaseContainer: Base class for nodes with children (Row, Column, etc.)
 """
 
 from __future__ import annotations
@@ -81,11 +81,11 @@ class ParameterizedNode(LeafNode):
         return serialized
 
 
-# Type variable for Container's children
+# Type variable for BaseContainer's children
 T = TypeVar('T', bound=LayoutNode)
 
 
-class Container(LayoutNode, Generic[T]):
+class BaseContainer(LayoutNode, Generic[T]):
     """
     Generic container that can hold children of type T.
 
@@ -100,17 +100,17 @@ class Container(LayoutNode, Generic[T]):
 
     children: list[SerializeAsAny[T]] = Field(default_factory=list)
 
-    def add(self, child: T) -> Container[T]:
+    def add(self, child: T) -> BaseContainer[T]:
         """Add a child component."""
         self.children.append(child)
         return self
 
-    def remove(self, child: T) -> Container[T]:
+    def remove(self, child: T) -> BaseContainer[T]:
         """Remove a child component."""
         self.children.remove(child)
         return self
 
-    def clear(self) -> Container[T]:
+    def clear(self) -> BaseContainer[T]:
         """Remove all children."""
         self.children.clear()
         return self
@@ -127,7 +127,7 @@ class Container(LayoutNode, Generic[T]):
         """Get child by index."""
         return self.children[index]
 
-    def __enter__(self) -> Container[T]:
+    def __enter__(self) -> BaseContainer[T]:
         """
         Context manager entry.
 

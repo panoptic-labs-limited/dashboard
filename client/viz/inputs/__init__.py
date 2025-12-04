@@ -1,7 +1,7 @@
 """Comprehensive input components for dashboards."""
 
 # Base classes
-from .base import Input
+from .base import BaseInput
 # Choice-based inputs and configs
 from .choice import (
     # Config models
@@ -63,7 +63,7 @@ from .text import (
 __all__ = [
     # Base classes
     "Option",
-    "Input",
+    "BaseInput",
 
     # Config models
     "SelectConfig",

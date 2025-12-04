@@ -10,10 +10,10 @@ from typing import Literal
 
 from pydantic import Field
 
-from .base import Widget
+from .base import BaseWidget
 
 
-class TableWidget(Widget):
+class TableWidget(BaseWidget):
     """
     Frontend-native data table.
 

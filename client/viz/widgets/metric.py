@@ -11,10 +11,10 @@ from typing import Literal
 
 from pydantic import Field
 
-from .base import Widget
+from .base import BaseWidget
 
 
-class MetricWidget(Widget):
+class MetricWidget(BaseWidget):
     """
     Frontend-native metric/KPI display.
 

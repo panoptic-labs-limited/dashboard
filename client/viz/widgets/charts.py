@@ -11,10 +11,10 @@ from typing import Literal
 
 from pydantic import Field
 
-from .base import Widget
+from .base import BaseWidget
 
 
-class LineChartWidget(Widget):
+class LineChartWidget(BaseWidget):
     """
     Frontend-native line chart.
 
@@ -45,7 +45,7 @@ class LineChartWidget(Widget):
     show_points: bool = Field(False, description="Show data points on line")
 
 
-class BarChartWidget(Widget):
+class BarChartWidget(BaseWidget):
     """
     Frontend-native bar chart.
 
@@ -78,7 +78,7 @@ class BarChartWidget(Widget):
     )
 
 
-class AreaChartWidget(Widget):
+class AreaChartWidget(BaseWidget):
     """
     Frontend-native area chart.
 

@@ -184,6 +184,7 @@ class RenderableComponent(TransformableComponent, ABC):
                 return px.bar(data, x="product", y="sales")
 
         # Use with PlotlyWidget
+
         PlotlyWidget(
             data_source=ComponentSource(component=SalesChart),
             params={"region": region_input}

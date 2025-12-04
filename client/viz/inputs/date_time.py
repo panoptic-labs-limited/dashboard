@@ -4,7 +4,7 @@ from typing import Literal
 
 from pydantic import Field, BaseModel
 
-from .base import Input
+from .base import BaseInput
 
 
 # ==============================================================================
@@ -51,7 +51,7 @@ class RelativeDateConfig(BaseModel):
 # Input Classes
 # ==============================================================================
 
-class DateInput(DateConfig, Input[DateConfig]):
+class DateInput(DateConfig, BaseInput[DateConfig]):
     """Date picker input."""
 
     type: Literal["date"] = "date"
@@ -61,7 +61,7 @@ class DateInput(DateConfig, Input[DateConfig]):
     first_day_of_week: Literal[0, 1] = Field(0, description="0=Sunday, 1=Monday")
 
 
-class DateRangeInput(DateRangeConfig, Input[DateRangeConfig]):
+class DateRangeInput(DateRangeConfig, BaseInput[DateRangeConfig]):
     """Date range picker."""
 
     type: Literal["date_range"] = "date_range"
@@ -71,7 +71,7 @@ class DateRangeInput(DateRangeConfig, Input[DateRangeConfig]):
     max_days: int | None = Field(None, description="Maximum days in range")
 
 
-class TimeInput(TimeConfig, Input[TimeConfig]):
+class TimeInput(TimeConfig, BaseInput[TimeConfig]):
     """Time picker input."""
 
     type: Literal["time"] = "time"
@@ -80,7 +80,7 @@ class TimeInput(TimeConfig, Input[TimeConfig]):
     format_24h: bool = Field(True, description="Use 24-hour format")
 
 
-class DateTimeInput(DateTimeConfig, Input[DateTimeConfig]):
+class DateTimeInput(DateTimeConfig, BaseInput[DateTimeConfig]):
     """Combined date and time picker."""
 
     type: Literal["datetime"] = "datetime"
@@ -90,7 +90,7 @@ class DateTimeInput(DateTimeConfig, Input[DateTimeConfig]):
     format_24h: bool = Field(True, description="Use 24-hour format")
 
 
-class RelativeDateInput(RelativeDateConfig, Input[RelativeDateConfig]):
+class RelativeDateInput(RelativeDateConfig, BaseInput[RelativeDateConfig]):
     """Relative date range selector (last 7 days, etc.)."""
 
     type: Literal["relative_date"] = "relative_date"

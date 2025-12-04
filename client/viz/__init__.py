@@ -20,7 +20,7 @@ from .core import (
 from .inputs import (
     # Base
     Option,
-    Input,
+    BaseInput,
     # Config models
     SelectConfig,
     DateConfig,
@@ -55,7 +55,7 @@ from .layout import (
     Page, Section, Row, Column,
     Tabs, Tab,
     # Widget base class
-    Widget,
+    BaseWidget,
 )
 # Widget types (new)
 from .widgets import (
@@ -91,7 +91,7 @@ __all__ = [
     "Tabs",
     "Tab",
     # Widgets (new typed widgets)
-    "Widget",
+    "BaseWidget",
     "LineChartWidget",
     "BarChartWidget",
     "AreaChartWidget",
@@ -103,7 +103,7 @@ __all__ = [
     "L",
     # Inputs - Base
     "Option",
-    "Input",
+    "BaseInput",
     # Inputs - Config (commonly used)
     "SelectConfig",
     "DateConfig",

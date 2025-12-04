@@ -12,10 +12,10 @@ from typing import Literal
 from pydantic import Field
 
 from viz.core.datasource import ComponentSource
-from .base import Widget
+from .base import BaseWidget
 
 
-class PlotlyWidget(Widget):
+class PlotlyWidget(BaseWidget):
     """
     Server-rendered Plotly visualization.
 

@@ -16,12 +16,12 @@ from typing import Any, Dict, List
 from pydantic_core import PydanticUndefined
 
 from viz.core.component import Component
-from viz.core.layout import Container
+from viz.core.layout import BaseContainer
 from viz.dashboard import Dashboard
-from viz.inputs.base import Input
+from viz.inputs.base import BaseInput
 from viz.layout.containers import Section, Row, Column, Tabs, Tab
 from viz.layout.page import Page
-from viz.widgets import Widget
+from viz.widgets import BaseWidget
 
 
 def serialize_params(params: Dict[str, Any]) -> Dict[str, Any]:
@@ -36,7 +36,7 @@ def serialize_params(params: Dict[str, Any]) -> Dict[str, Any]:
     """
     serialized = {}
     for param_name, param_value in params.items():
-        if isinstance(param_value, Input):
+        if isinstance(param_value, BaseInput):
             # Reference to an input (for reactive binding)
             serialized[param_name] = {"input_ref": param_value.id}
         else:
@@ -45,7 +45,7 @@ def serialize_params(params: Dict[str, Any]) -> Dict[str, Any]:
     return serialized
 
 
-def serialize_input(input_obj: Input) -> Dict[str, Any]:
+def serialize_input(input_obj: BaseInput) -> Dict[str, Any]:
     """
     Serialize an Input object to API schema format.
 
@@ -60,9 +60,9 @@ def serialize_input(input_obj: Input) -> Dict[str, Any]:
     return data
 
 
-def serialize_widget(widget: Widget) -> Dict[str, Any]:
+def serialize_widget(widget: BaseWidget) -> Dict[str, Any]:
     """
-    Serialize a Widget to API schema format.
+    Serialize a BaseWidget to API schema format.
 
     Uses Pydantic model_dump() and handles params serialization.
     """
@@ -174,12 +174,12 @@ def _serialize_node(node: Any) -> Dict[str, Any]:
     """
     Serialize any layout node to schema format.
 
-    Handles: Section, Row, Column, Tabs, Tab, Widget, Input
+    Handles: Section, Row, Column, Tabs, Tab, BaseWidget, Input
     """
-    if isinstance(node, Input):
+    if isinstance(node, BaseInput):
         return serialize_input(node)
 
-    elif isinstance(node, Widget):
+    elif isinstance(node, BaseWidget):
         return serialize_widget(node)
 
     elif isinstance(node, Section):

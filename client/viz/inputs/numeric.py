@@ -4,7 +4,7 @@ from typing import Literal
 
 from pydantic import Field, BaseModel
 
-from .base import Input
+from .base import BaseInput
 
 
 # ==============================================================================
@@ -47,7 +47,7 @@ class NumericRangeConfig(BaseModel):
 # Input Classes
 # ==============================================================================
 
-class NumericInput(NumericInputConfig, Input[NumericInputConfig]):
+class NumericInput(NumericInputConfig, BaseInput[NumericInputConfig]):
     """Numeric input with constraints."""
 
     type: Literal["numeric_input"] = "numeric_input"
@@ -57,7 +57,7 @@ class NumericInput(NumericInputConfig, Input[NumericInputConfig]):
     suffix: str | None = Field(None, description="Suffix text (e.g., '%')")
 
 
-class Slider(SliderConfig, Input[SliderConfig]):
+class Slider(SliderConfig, BaseInput[SliderConfig]):
     """Visual slider for single value."""
 
     type: Literal["slider"] = "slider"
@@ -67,7 +67,7 @@ class Slider(SliderConfig, Input[SliderConfig]):
     show_ticks: bool = Field(False, description="Show tick marks")
 
 
-class RangeSlider(RangeSliderConfig, Input[RangeSliderConfig]):
+class RangeSlider(RangeSliderConfig, BaseInput[RangeSliderConfig]):
     """Visual slider for range (min/max)."""
 
     type: Literal["range_slider"] = "range_slider"
@@ -76,7 +76,7 @@ class RangeSlider(RangeSliderConfig, Input[RangeSliderConfig]):
     show_values: bool = Field(True, description="Show current values")
 
 
-class NumericRange(NumericRangeConfig, Input[NumericRangeConfig]):
+class NumericRange(NumericRangeConfig, BaseInput[NumericRangeConfig]):
     """Two numeric inputs for min/max range."""
 
     type: Literal["numeric_range"] = "numeric_range"
