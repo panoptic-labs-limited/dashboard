@@ -198,7 +198,7 @@ def extract_component_parameters(source_code: str, class_name: str) -> list:
 
 
 def generate_unique_id(prefix: str = "") -> str:
-    """Generate a unique ID for layout nodes."""
+    """Generate a unique ID for containers nodes."""
     import uuid
     unique = str(uuid.uuid4())[:8]
     return f"{prefix}_{unique}" if prefix else unique

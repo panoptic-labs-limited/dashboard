@@ -3,9 +3,9 @@ Simple Sales Dashboard Example
 
 Demonstrates:
 - Component definition with dataclass pattern
-- Dashboard structure with new Pydantic layout system
-- Context manager API for intuitive layout building (Streamlit-style)
-- Type-safe layout construction with enums
+- Dashboard structure with new Pydantic containers system
+- Context manager API for intuitive containers building (Streamlit-style)
+- Type-safe containers construction with enums
 - Registration with the function registry
 """
 
@@ -134,11 +134,11 @@ def main():
 
     # Create dashboard structure using context manager API
     print("\nBuilding dashboard structure...")
-    from viz.layout import Dashboard
+    from viz.containers import Dashboard
 
     dashboard = Dashboard(
         title="Sales Analytics Dashboard",
-        description="Simple sales dashboard demonstrating new Viz Pydantic layout system"
+        description="Simple sales dashboard demonstrating new Viz Pydantic containers system"
     )
 
     with dashboard.page(title="Overview", description="Sales overview and metrics"):

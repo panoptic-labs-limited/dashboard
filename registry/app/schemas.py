@@ -371,7 +371,7 @@ class CheckboxGroupSchema(InputBase):
     options: Optional[List[Option]] = None
     default: Optional[List[Any]] = None
     layout: str = Field("vertical", description="Layout: vertical, horizontal, grid")
-    columns: Optional[int] = Field(None, description="Number of columns for grid layout")
+    columns: Optional[int] = Field(None, description="Number of columns for grid containers")
 
 
 class ToggleSchema(InputBase):
@@ -465,8 +465,8 @@ InputSchema = Union[
 # ============================================================================
 
 class LayoutNodeBase(BaseModel):
-    """Base schema for layout nodes."""
-    id: str = Field(..., description="Unique ID for this layout node")
+    """Base schema for containers nodes."""
+    id: str = Field(..., description="Unique ID for this containers node")
     type: LayoutType
 
 
@@ -488,7 +488,7 @@ class WidgetSchema(LayoutNodeBase):
 
 
 class ColumnSchema(LayoutNodeBase):
-    """Column layout container."""
+    """Column containers container."""
     type: LayoutType = LayoutType.COLUMN
     weight: int = Field(1, description="Relative width weight (like CSS flex-grow)", ge=1)
     gap: Optional[str] = Field(None, description="Gap between children (CSS)")
@@ -496,7 +496,7 @@ class ColumnSchema(LayoutNodeBase):
 
 
 class RowSchema(LayoutNodeBase):
-    """Row layout container."""
+    """Row containers container."""
     type: LayoutType = LayoutType.ROW
     gap: Optional[str] = Field(None, description="Gap between children (CSS)")
     align: Optional[str] = None  # "start", "center", "end", "stretch"

@@ -24,9 +24,9 @@ class PageSchema:
     """Page (tab) in a dashboard.
 
     Attributes:
-        id (str): Unique ID for this layout node
+        id (str): Unique ID for this containers node
         title (str):
-        type_ (LayoutType | Unset): Types of layout components.
+        type_ (LayoutType | Unset): Types of containers components.
         description (None | str | Unset):
         icon (None | str | Unset):
         children (list[ColumnSchema | RowSchema | SectionSchema | TabsSchema | WidgetSchema] | Unset):

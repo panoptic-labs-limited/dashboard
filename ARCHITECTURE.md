@@ -593,7 +593,7 @@ client = RegistryClient(
 )
 register_component(SalesChart, alias="sales_chart", client=client)
 
-# Create dashboard (layout components coming soon)
+# Create dashboard (containers components coming soon)
 dashboard = Dashboard(
     name="sales_dashboard",
     title="Sales Analytics Dashboard"

@@ -62,7 +62,7 @@ class RenderOutputType(str, Enum):
 
 
 class LayoutType(str, Enum):
-    """Types of layout components."""
+    """Types of containers components."""
     DASHBOARD = "dashboard"
     PAGE = "page"
     SECTION = "section"

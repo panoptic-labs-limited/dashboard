@@ -1,7 +1,7 @@
 """
 Dashboard - top-level configuration for a dashboard application.
 
-Dashboard is not a layout container; it's a configuration object that
+Dashboard is not a containers container; it's a configuration object that
 holds metadata and a collection of pages.
 """
 
@@ -9,7 +9,7 @@ from __future__ import annotations
 
 from pydantic import BaseModel, Field, ConfigDict
 
-from viz.layout.page import Page
+from viz.containers.page import Page
 
 
 class Dashboard(BaseModel):

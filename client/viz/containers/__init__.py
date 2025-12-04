@@ -1,7 +1,7 @@
 """
 Dashboard Layout Framework
 
-Type-safe, hierarchical layout system using Pydantic.
+Type-safe, hierarchical containers system using Pydantic.
 """
 
 # Base classes (re-exported from core for convenience)

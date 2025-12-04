@@ -23,8 +23,8 @@ class SectionSchema:
     """Section containing rows and columns.
 
     Attributes:
-        id (str): Unique ID for this layout node
-        type_ (LayoutType | Unset): Types of layout components.
+        id (str): Unique ID for this containers node
+        type_ (LayoutType | Unset): Types of containers components.
         title (None | str | Unset):
         collapsible (bool | Unset):  Default: False.
         collapsed (bool | Unset):  Default: False.

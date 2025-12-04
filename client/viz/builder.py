@@ -9,8 +9,8 @@ from typing import Any
 
 from viz.core.context import current_context, add_to_context
 from viz.core.datasource import DataSource, ComponentSource
-from viz.layout.containers import Row, Column, Tab, Tabs, Section
-from viz.layout.page import Page
+from viz.containers.containers import Row, Column, Tab, Tabs, Section
+from viz.containers.page import Page
 from viz.widgets import (
     LineChartWidget,
     BarChartWidget,
@@ -229,7 +229,7 @@ class LayoutBuilder:
     @classmethod
     def input(cls, input_instance):
         """
-        Add an input to the current layout context.
+        Add an input to the current containers context.
 
         Args:
             input_instance: An input instance (Select, DateInput, etc.)

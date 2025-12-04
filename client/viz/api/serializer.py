@@ -19,8 +19,8 @@ from viz.core.component import Component
 from viz.core.layout import BaseContainer
 from viz.dashboard import Dashboard
 from viz.inputs.base import BaseInput
-from viz.layout.containers import Section, Row, Column, Tabs, Tab
-from viz.layout.page import Page
+from viz.containers.containers import Section, Row, Column, Tabs, Tab
+from viz.containers.page import Page
 from viz.widgets import BaseWidget
 
 
@@ -137,7 +137,7 @@ def serialize_dashboard(dashboard: Dashboard) -> Dict[str, Any]:
     """
     Serialize a Dashboard to DashboardStructure schema.
 
-    Recursively converts the entire layout hierarchy to JSON format.
+    Recursively converts the entire containers hierarchy to JSON format.
     Uses model_dump() where possible, with special handling for:
     - Input references in params
     - Auto-generating IDs for containers without them
@@ -172,7 +172,7 @@ def _serialize_page(page: Page) -> Dict[str, Any]:
 
 def _serialize_node(node: Any) -> Dict[str, Any]:
     """
-    Serialize any layout node to schema format.
+    Serialize any containers node to schema format.
 
     Handles: Section, Row, Column, Tabs, Tab, BaseWidget, Input
     """
@@ -222,7 +222,7 @@ def _serialize_node(node: Any) -> Dict[str, Any]:
         return _serialize_tab(node)
 
     else:
-        raise ValueError(f"Unknown layout node type: {type(node)}")
+        raise ValueError(f"Unknown containers node type: {type(node)}")
 
 
 def _serialize_tab(tab: Tab) -> Dict[str, Any]:

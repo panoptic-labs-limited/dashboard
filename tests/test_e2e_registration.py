@@ -17,7 +17,7 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).parent.parent / "client"))
 
 from viz import Component, L, Dashboard, Select, Slider, MultiSelect, Toggle
-from viz.layout import WidgetType
+from viz.containers import WidgetType
 from viz.api.registry import RegistryClient
 import plotly.express as px
 import pandas as pd

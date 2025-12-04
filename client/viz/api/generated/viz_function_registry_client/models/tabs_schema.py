@@ -20,8 +20,8 @@ class TabsSchema:
     """Tabs container holding multiple Tab components.
 
     Attributes:
-        id (str): Unique ID for this layout node
-        type_ (LayoutType | Unset): Types of layout components.
+        id (str): Unique ID for this containers node
+        type_ (LayoutType | Unset): Types of containers components.
         default_tab (None | str | Unset): ID of default active tab
         children (list[TabSchema] | Unset):
     """

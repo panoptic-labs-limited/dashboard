@@ -22,7 +22,7 @@ class DashboardStructure:
     Attributes:
         id (str): Unique ID for dashboard
         title (str):
-        type_ (LayoutType | Unset): Types of layout components.
+        type_ (LayoutType | Unset): Types of containers components.
         description (None | str | Unset):
         version (str | Unset):  Default: '1.0.0'.
         children (list[PageSchema] | Unset):

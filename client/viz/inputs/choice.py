@@ -276,7 +276,7 @@ class CheckboxGroup(CheckboxGroupConfig, BaseInput[CheckboxGroupConfig]):
         "vertical",
         description="Layout direction for checkboxes"
     )
-    columns: int | None = Field(None, description="Number of columns for grid layout")
+    columns: int | None = Field(None, description="Number of columns for grid containers")
 
     @field_validator('options', mode='before')
     @classmethod

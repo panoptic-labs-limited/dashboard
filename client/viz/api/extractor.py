@@ -1,7 +1,7 @@
 """
 Extraction logic for finding local components in a dashboard.
 
-This module traverses the dashboard layout tree to:
+This module traverses the dashboard containers tree to:
 - Extract all local Component classes from Widgets/Inputs (via ComponentSource)
 - Deduplicate components
 - Build mappings of component classes to their names
@@ -24,7 +24,7 @@ class ComponentExtractor:
     """
     Extracts local components from a dashboard for registration.
 
-    Traverses the dashboard layout tree and collects all Component classes
+    Traverses the dashboard containers tree and collects all Component classes
     that are referenced via ComponentSource (i.e., local components that
     need to be registered with the Component Registry).
 
@@ -60,7 +60,7 @@ class ComponentExtractor:
         self._traverse(self.dashboard)
 
     def _traverse(self, node: Any) -> None:
-        """Recursively traverse layout tree and extract components."""
+        """Recursively traverse containers tree and extract components."""
 
         # Handle Dashboard (has pages, not children)
         if isinstance(node, Dashboard):

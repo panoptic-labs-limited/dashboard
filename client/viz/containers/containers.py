@@ -13,13 +13,13 @@ from pydantic import Field
 
 from viz.core.layout import BaseContainer, LeafNode
 
-# Type alias for standard layout children
+# Type alias for standard containers children
 LayoutChild = Union['Row', 'Column', LeafNode]
 
 
 class Row(BaseContainer[LayoutChild]):
     """
-    Horizontal layout container.
+    Horizontal containers container.
 
     Children are arranged left-to-right.
     Can contain: Rows, Columns, Widgets, Inputs
@@ -32,7 +32,7 @@ class Row(BaseContainer[LayoutChild]):
 
 class Column(BaseContainer[LayoutChild]):
     """
-    Vertical layout container.
+    Vertical containers container.
 
     Children are arranged top-to-bottom.
     Can contain: Rows, Columns, Widgets, Inputs

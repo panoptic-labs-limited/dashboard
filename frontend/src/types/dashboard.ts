@@ -253,7 +253,7 @@ export type InputSchema =
   | RelativeDateInputSchema;
 
 // ============================================================================
-// Layout Schemas (matching app/schemas.py layout types)
+// Layout Schemas (matching app/schemas.py containers types)
 // ============================================================================
 
 export interface LayoutNodeBase {
@@ -375,7 +375,7 @@ export interface InputLayoutSchema extends LayoutNodeBase {
   input: InputSchema;
 }
 
-// Helper type for any layout node
+// Helper type for any containers node
 export type LayoutNode =
   | DashboardStructure
   | PageSchema

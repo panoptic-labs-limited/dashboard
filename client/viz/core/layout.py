@@ -1,7 +1,7 @@
 """
-Core layout node classes.
+Core containers node classes.
 
-This module contains the foundational classes that all layout
+This module contains the foundational classes that all containers
 and input components inherit from:
 - LayoutNode: Base class for all nodes
 - LeafNode: Base class for nodes without children (Widget, Input)
@@ -20,13 +20,13 @@ from viz.core.reference import NamedReference
 
 class LayoutNode(BaseModel):
     """
-    Base class for all layout nodes.
+    Base class for all containers nodes.
 
-    Provides common fields for all layout and input components:
+    Provides common fields for all containers and input components:
     - id: Unique identifier
     - type: Discriminator for union types (used for serialization)
 
-    All layout containers (Row, Column, etc.) and input components
+    All containers containers (Row, Column, etc.) and input components
     (Select, TextInput, etc.) extend this class.
     """
 
@@ -42,7 +42,7 @@ class LayoutNode(BaseModel):
 
 class LeafNode(LayoutNode):
     """
-    Base class for leaf nodes in the layout tree.
+    Base class for leaf nodes in the containers tree.
 
     Leaf nodes do not contain children. Examples include:
     - Widget
@@ -89,7 +89,7 @@ class BaseContainer(LayoutNode, Generic[T]):
     """
     Generic container that can hold children of type T.
 
-    Base class for all layout containers (Row, Column, Section, etc.).
+    Base class for all containers containers (Row, Column, Section, etc.).
 
     Provides:
     - Type-safe children management

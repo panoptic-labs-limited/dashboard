@@ -19,11 +19,11 @@ T = TypeVar("T", bound="ColumnSchema")
 
 @_attrs_define
 class ColumnSchema:
-    """Column layout container.
+    """Column containers container.
 
     Attributes:
-        id (str): Unique ID for this layout node
-        type_ (LayoutType | Unset): Types of layout components.
+        id (str): Unique ID for this containers node
+        type_ (LayoutType | Unset): Types of containers components.
         width (ColumnWidth | Unset): Standard column widths.
         gap (None | str | Unset): Gap between children (CSS)
         children (list[ColumnSchema | RowSchema | WidgetSchema] | Unset):

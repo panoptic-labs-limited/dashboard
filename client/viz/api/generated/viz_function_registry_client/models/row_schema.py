@@ -18,11 +18,11 @@ T = TypeVar("T", bound="RowSchema")
 
 @_attrs_define
 class RowSchema:
-    """Row layout container.
+    """Row containers container.
 
     Attributes:
-        id (str): Unique ID for this layout node
-        type_ (LayoutType | Unset): Types of layout components.
+        id (str): Unique ID for this containers node
+        type_ (LayoutType | Unset): Types of containers components.
         gap (None | str | Unset): Gap between children (CSS)
         align (None | str | Unset):
         children (list[ColumnSchema | RowSchema | WidgetSchema] | Unset):

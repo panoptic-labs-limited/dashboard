@@ -22,9 +22,9 @@ class WidgetSchema:
     """Widget containing a component instance.
 
     Attributes:
-        id (str): Unique ID for this layout node
+        id (str): Unique ID for this containers node
         widget_type (WidgetType): Types of widgets available.
-        type_ (LayoutType | Unset): Types of layout components.
+        type_ (LayoutType | Unset): Types of containers components.
         component_alias (None | str | Unset):
         params (WidgetSchemaParams | Unset):
         title (None | str | Unset):

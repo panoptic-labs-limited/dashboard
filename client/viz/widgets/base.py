@@ -1,7 +1,7 @@
 """
 Base Widget class for all widget types.
 
-Widgets are leaf nodes in the layout tree that display data visualizations.
+Widgets are leaf nodes in the containers tree that display data visualizations.
 Each widget has a data source and optional parameters for querying that source.
 """
 

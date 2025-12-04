@@ -22,9 +22,9 @@ class TabSchema:
     """Individual tab within a Tabs container.
 
     Attributes:
-        id (str): Unique ID for this layout node
+        id (str): Unique ID for this containers node
         title (str):
-        type_ (LayoutType | Unset): Types of layout components.
+        type_ (LayoutType | Unset): Types of containers components.
         icon (None | str | Unset):
         disabled (bool | Unset):  Default: False.
         children (list[ColumnSchema | RowSchema | WidgetSchema] | Unset):
