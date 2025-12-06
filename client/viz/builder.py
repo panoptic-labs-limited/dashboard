@@ -240,7 +240,7 @@ class LayoutBuilder:
         Example:
             >>> from viz import Select
             >>> region = L.input(Select(
-            ...     name="region",
+            ...     id="region",
             ...     options=["North", "South"]
             ... ))
 

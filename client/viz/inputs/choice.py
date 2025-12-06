@@ -99,7 +99,7 @@ class Select(SelectConfig, BaseInput[SelectConfig]):
     Examples:
         # Static options (top-level fields)
         region = Select(
-            name="region",
+            id="region",
             label="Select Region",
             options=[
                 Option(value="north", label="North"),
@@ -110,7 +110,7 @@ class Select(SelectConfig, BaseInput[SelectConfig]):
 
         # Dynamic options (FunctionSource)
         region = Select(
-            name="region",
+            id="region",
             source=FunctionSource(
                 func=get_regions_for_country,
                 params={"country": "country"}
@@ -145,14 +145,14 @@ class MultiSelect(MultiSelectConfig, BaseInput[MultiSelectConfig]):
     Examples:
         # Static options
         categories = MultiSelect(
-            name="categories",
+            id="categories",
             options=[Option("electronics"), Option("clothing")],
             default=["electronics"]
         )
 
         # Dynamic
         tags = MultiSelect(
-            name="tags",
+            id="tags",
             source=FunctionSource(func=get_available_tags)
         )
     """
@@ -195,7 +195,7 @@ class RadioGroup(RadioGroupConfig, BaseInput[RadioGroupConfig]):
 
     Examples:
         view_mode = RadioGroup(
-            name="view_mode",
+            id="view_mode",
             options=[Option("grid"), Option("list"), Option("table")],
             default="grid"
         )
@@ -233,7 +233,7 @@ class Checkbox(CheckboxConfig, BaseInput[CheckboxConfig]):
 
     Examples:
         show_legend = Checkbox(
-            name="show_legend",
+            id="show_legend",
             label="Show Legend",
             default=True
         )
@@ -256,7 +256,7 @@ class CheckboxGroup(CheckboxGroupConfig, BaseInput[CheckboxGroupConfig]):
 
     Examples:
         features = CheckboxGroup(
-            name="features",
+            id="features",
             options=[
                 Option(value="analytics", label="Analytics Dashboard"),
                 Option(value="reports", label="Custom Reports")
@@ -306,7 +306,7 @@ class Toggle(ToggleConfig, BaseInput[ToggleConfig]):
 
     Examples:
         dark_mode = Toggle(
-            name="dark_mode",
+            id="dark_mode",
             label="Dark Mode",
             default=False,
             on_label="On",

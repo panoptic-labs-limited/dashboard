@@ -15,7 +15,7 @@ from typing import Any, TypeVar, Generic, Iterator
 
 from pydantic import BaseModel, Field, ConfigDict, field_serializer, SerializeAsAny
 
-from viz.core.reference import NamedReference
+from viz.core.reference import Referenceable
 
 
 class LayoutNode(BaseModel):
@@ -59,23 +59,23 @@ class ParameterizedNode(LeafNode):
     Base class for leaf nodes that accept parameters.
 
     Provides the params field and serialization logic for converting
-    NamedReference instances to {ref: name} format.
+    Referenceable instances (like Inputs) to {ref: id} format.
 
     Extended by Widget and Input.
     """
 
     params: dict[str, Any] = Field(
         default_factory=dict,
-        description="Parameters (can reference Inputs via NamedReference)"
+        description="Parameters (can reference Inputs via their id)"
     )
 
     @field_serializer('params')
     def serialize_params(self, params: dict[str, Any]) -> dict[str, Any]:
-        """Serialize params, converting NamedReference instances to {ref: name}."""
+        """Serialize params, converting Referenceable instances to {ref: id}."""
         serialized = {}
         for key, value in params.items():
-            if isinstance(value, NamedReference):
-                serialized[key] = {"ref": value.name}
+            if isinstance(value, Referenceable):
+                serialized[key] = {"ref": value.id}
             else:
                 serialized[key] = value
         return serialized

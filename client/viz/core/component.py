@@ -38,7 +38,7 @@ class Component(BaseModel, ABC):
 
         # Use with ComponentSource
         Select(
-            name="region",
+            id="region",
             source=ComponentSource(component=RegionOptions),
             params={"country": country_input}
         )
@@ -244,7 +244,7 @@ def component(func: Callable[..., Any] | None = None, *, name: str | None = None
 
         # Use with ComponentSource
         Select(
-            name="region",
+            id="region",
             source=ComponentSource(component=get_regions),
             params={"country": country_input}
         )

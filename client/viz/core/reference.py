@@ -1,17 +1,19 @@
-"""Named reference base class."""
+"""Referenceable base class for entities that can be referenced in params."""
 
 from __future__ import annotations
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel
 
 
-class NamedReference(BaseModel):
+class Referenceable(BaseModel):
     """
-    Reference to a named entity.
+    Marker base class for entities that can be referenced in params.
 
     Used in params to create bindings between widgets/inputs and input values.
-    Input extends this class, so any Input can be used where NamedReference is expected.
+    BaseInput extends this class, so any Input can be used in params and will
+    serialize to {"ref": "<id>"}.
 
-    When serialized in params, becomes: {"ref": "<name>"}
+    The actual `id` field is inherited from LayoutNode. This class exists
+    to provide a type marker for the params serializer.
     """
-    name: str = Field(..., description="Reference name")
+    pass

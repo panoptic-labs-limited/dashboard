@@ -9,7 +9,7 @@ from .component import (
 from .context import push_context, pop_context, current_context, add_to_context
 from .datasource import DataSource, TimeseriesSource, ComponentSource
 from .layout import LayoutNode, LeafNode, ParameterizedNode, BaseContainer
-from .reference import NamedReference
+from .reference import Referenceable
 
 __all__ = [
     # Components
@@ -27,7 +27,7 @@ __all__ = [
     "ParameterizedNode",
     "BaseContainer",
     # Reference
-    "NamedReference",
+    "Referenceable",
     # Context management
     "push_context",
     "pop_context",

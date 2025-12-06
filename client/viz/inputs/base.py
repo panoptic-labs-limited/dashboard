@@ -2,19 +2,20 @@
 
 from __future__ import annotations
 
+import uuid
 from typing import TypeVar, Generic
 
 from pydantic import BaseModel, Field, model_validator
 
 from viz.core.datasource import DataSource
 from viz.core.layout import ParameterizedNode
-from viz.core.reference import NamedReference
+from viz.core.reference import Referenceable
 
 # Generic type variable for config models
 TConfig = TypeVar('TConfig', bound=BaseModel)
 
 
-class BaseInput(NamedReference, ParameterizedNode, Generic[TConfig]):
+class BaseInput(Referenceable, ParameterizedNode, Generic[TConfig]):
     """
     Base class for all input types.
 
@@ -33,18 +34,16 @@ class BaseInput(NamedReference, ParameterizedNode, Generic[TConfig]):
     - Set type as a Literal for the specific input type (e.g., type: Literal["select"] = "select")
     - Declare config fields as top-level properties
 
-    Extends ParameterizedNode for params support and NamedReference for ref serialization.
+    Extends ParameterizedNode for params support and Referenceable for ref serialization.
     """
 
-    model_config = {
-        'extra': 'forbid',
-        'validate_assignment': True,
-    }
+    # Override id to have input-specific prefix
+    id: str = Field(default_factory=lambda: f"input_{uuid.uuid4().hex[:8]}")
 
     # Subclasses override with Literal type (e.g., type: Literal["select"] = "select")
     type: str = Field("input", description="Discriminator for union types")
 
-    # Core fields (name is inherited from NamedReference)
+    # Core fields
     label: str | None = Field(None, description="Display label")
 
     # Optional fields
@@ -64,9 +63,19 @@ class BaseInput(NamedReference, ParameterizedNode, Generic[TConfig]):
 
     @model_validator(mode='after')
     def auto_generate_label(self):
-        """Auto-generate label from name if not provided."""
+        """Auto-generate label from id if not provided."""
         if self.label is None:
-            self.label = self.name.replace('_', ' ').title()
+            # Extract the meaningful part of id (remove prefix like 'input_')
+            label_source = self.id
+            if '_' in label_source:
+                # Skip auto-generated UUIDs (input_abc123) but use semantic ids (region_select)
+                parts = label_source.split('_')
+                if len(parts) == 2 and len(parts[1]) == 8:
+                    # Looks like auto-generated (prefix_uuid), don't auto-label
+                    pass
+                else:
+                    # Semantic id like "region_select" -> "Region Select"
+                    self.label = label_source.replace('_', ' ').title()
         return self
 
     def to_dict(self) -> dict:

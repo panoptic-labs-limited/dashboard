@@ -32,13 +32,13 @@ def serialize_params(params: Dict[str, Any]) -> Dict[str, Any]:
         params: Dictionary of parameter name to value (may include Input refs)
 
     Returns:
-        Serialized params with Input references converted to {input_ref: id}
+        Serialized params with Input references converted to {ref: id}
     """
     serialized = {}
     for param_name, param_value in params.items():
         if isinstance(param_value, BaseInput):
             # Reference to an input (for reactive binding)
-            serialized[param_name] = {"input_ref": param_value.id}
+            serialized[param_name] = {"ref": param_value.id}
         else:
             # Literal value
             serialized[param_name] = param_value
